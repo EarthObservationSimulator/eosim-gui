@@ -1,0 +1,21 @@
+# untracked subdirectories
+.vscode
+.ipynb_checkpoints
+docs/_build/*
+!docs/_static/.gitkeep
+docs/_templates/*
+!docs/_templates/.gitkeep
+
+# objects, executables, core dumps
+*.o
+*.exe
+core
+
+# compiled Python
+*.pyc
+
+# Python egg metadata, regenerated from source files by setuptools.
+/*.egg-info
+
+# Setuptools distribution folder.
+/dist/
