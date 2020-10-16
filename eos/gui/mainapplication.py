@@ -3,9 +3,6 @@ from tkinter import ttk
 from eos.gui.common import TopMenuBar
 import os
 
-def donothing():
-    pass
-
 class MainApplication:
     def __init__(self, parent):
         self.parent = parent
