@@ -1,7 +1,7 @@
 from tkinter import ttk 
 import tkinter as tk
 from eos.config import GuiStyle, MissionConfig
-from orbitpy.preprocess import OrbitParameters
+from orbitpy.preprocess import OrbitParameters, PreProcess
 import random
 from tkinter import messagebox
 import json
@@ -240,7 +240,7 @@ class ConfigureFrame(ttk.Frame):
 
         # okcancel frame
         def ok_click():            
-            satellite = OrbitParameters(_id=uid_entry.get(), sma=sma_entry.get()+orbitpy.util.Constants.radiusOfEarthInKM, ecc=ecc_entry.get(), 
+            satellite = OrbitParameters(_id=uid_entry.get(), sma=float(sma_entry.get())+orbitpy.util.Constants.radiusOfEarthInKM, ecc=ecc_entry.get(), 
                             inc=inc_entry.get(), raan=raan_entry.get(), aop=aop_entry.get(), ta=ta_entry.get())
             miss_specs.add_satellite(satellite)
             
@@ -262,7 +262,7 @@ class ConfigureFrame(ttk.Frame):
                 # define the widgets inside the child frames
                 ttk.Label(hwd_specs_frame, text="Unique ID", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
                 uid_entry = ttk.Entry(hwd_specs_frame, width=10)
-                uid_entry.insert(0,"constl_A_"+str(random.randint(0,1000)))
+                uid_entry.insert(0,"G_"+str(random.randint(0,1000)))
                 uid_entry.bind("<FocusIn>", lambda args: uid_entry.delete('0', 'end'))
                 uid_entry.grid(row=0, column=1, sticky='w')
 
@@ -273,16 +273,16 @@ class ConfigureFrame(ttk.Frame):
                 nsats_entry.grid(row=1, column=1, sticky='w')
 
                 ttk.Label(hwd_specs_frame, text="# Orbital planes", wraplength=150).grid(row=2, column=0, padx=10, pady=10, sticky='w')
-                sma_entry = ttk.Entry(hwd_specs_frame, width=10)
-                sma_entry.insert(0,800)
-                sma_entry.bind("<FocusIn>", lambda args: sma_entry.delete('0', 'end'))
-                sma_entry.grid(row=2, column=1, sticky='w')
+                nplanes_entry = ttk.Entry(hwd_specs_frame, width=10)
+                nplanes_entry.insert(0,3)
+                nplanes_entry.bind("<FocusIn>", lambda args: nplanes_entry.delete('0', 'end'))
+                nplanes_entry.grid(row=2, column=1, sticky='w')
 
                 ttk.Label(hwd_specs_frame, text="Relative spacing", wraplength=150).grid(row=3, column=0, padx=10, pady=10, sticky='w')
-                ecc_entry = ttk.Entry(hwd_specs_frame, width=10)
-                ecc_entry.insert(0,1)
-                ecc_entry.bind("<FocusIn>", lambda args: ecc_entry.delete('0', 'end'))
-                ecc_entry.grid(row=3, column=1, sticky='w')
+                rspc_entry = ttk.Entry(hwd_specs_frame, width=10)
+                rspc_entry.insert(0,1)
+                rspc_entry.bind("<FocusIn>", lambda args: rspc_entry.delete('0', 'end'))
+                rspc_entry.grid(row=3, column=1, sticky='w')
 
                 ttk.Label(hwd_specs_frame, text="Inclination [deg]", wraplength=150).grid(row=4, column=0, padx=10, pady=10, sticky='w')
                 inc_entry = ttk.Entry(hwd_specs_frame, width=10)
@@ -291,22 +291,44 @@ class ConfigureFrame(ttk.Frame):
                 inc_entry.grid(row=4, column=1, sticky='w')
                 
                 ttk.Label(hwd_specs_frame, text="Altitude [km]", wraplength=150).grid(row=5, column=0, padx=10, pady=10, sticky='w')
-                raan_entry = ttk.Entry(hwd_specs_frame, width=10)
-                raan_entry.insert(0,270)
-                raan_entry.bind("<FocusIn>", lambda args: raan_entry.delete('0', 'end'))
-                raan_entry.grid(row=5, column=1, sticky='w')
+                alt_entry = ttk.Entry(hwd_specs_frame, width=10)
+                alt_entry.insert(0,350)
+                alt_entry.bind("<FocusIn>", lambda args: alt_entry.delete('0', 'end'))
+                alt_entry.grid(row=5, column=1, sticky='w')
 
                 tk.Label(hwd_specs_frame, text="Eccentricity", wraplength=150).grid(row=6, column=0, padx=10, pady=10, sticky='w')
-                aop_entry = ttk.Entry(hwd_specs_frame, width=10)
-                aop_entry.insert(0,0)
-                aop_entry.bind("<FocusIn>", lambda args: aop_entry.delete('0', 'end'))
-                aop_entry.grid(row=6, column=1, sticky='w')
+                ecc_entry = ttk.Entry(hwd_specs_frame, width=10)
+                ecc_entry.insert(0,0)
+                ecc_entry.bind("<FocusIn>", lambda args: ecc_entry.delete('0', 'end'))
+                ecc_entry.grid(row=6, column=1, sticky='w')
 
                 tk.Label(hwd_specs_frame, text="AOP [deg]", wraplength=150).grid(row=7, column=0, padx=10, pady=10, sticky='w')
-                ta_entry = ttk.Entry(hwd_specs_frame, width=10)
-                ta_entry.insert(0,20)
-                ta_entry.bind("<FocusIn>", lambda args: ta_entry.delete('0', 'end'))
-                ta_entry.grid(row=7, column=1, sticky='w')
+                aop_entry = ttk.Entry(hwd_specs_frame, width=10)
+                aop_entry.insert(0,250)
+                aop_entry.bind("<FocusIn>", lambda args: aop_entry.delete('0', 'end'))
+                aop_entry.grid(row=7, column=1, sticky='w')
+
+                # okcancel frame
+                def ok_click():                    
+
+                    data = {}
+                    data['numberSatellites'] = nsats_entry.get()
+                    data['numberPlanes'] = nplanes_entry.get()
+                    data['relativeSpacing'] = rspc_entry.get()
+                    data['alt'] = alt_entry.get()
+                    data['ecc'] = ecc_entry.get()
+                    data['inc'] = inc_entry.get()
+                    data['aop'] = aop_entry.get()
+                    data['@id'] = uid_entry.get()
+
+                    sats = PreProcess.walker_orbits(data)                        
+                    miss_specs.add_satellite(sats)
+                    
+                ok_btn = ttk.Button(hwd_specs_frame, text="Add", command=ok_click, width=ConfigureFrame.BTNWIDTH)
+                ok_btn.grid(row=8, column=0)
+
+                cancel_btn = ttk.Button(hwd_specs_frame, text="Exit", command=constl_win.destroy, width=ConfigureFrame.BTNWIDTH)
+                cancel_btn.grid(row=8, column=1)
 
         class HeterogenousWalkerFrame(ttk.Frame):
             def __init__(self, parent, controller):
@@ -343,7 +365,7 @@ class ConfigureFrame(ttk.Frame):
         # on top of each other, then the one we want visible
         # will be raised above the others
         # grid configure
-        constl_specs_container = ttk.LabelFrame(constl_win_frame, text="Specifications", width=200, height=300)
+        constl_specs_container = ttk.LabelFrame(constl_win_frame, text="Specifications", width=250, height=370)
         constl_specs_container.grid_propagate(0)
         constl_specs_container.grid(row=1, column=0, sticky='nswe', padx=20, pady=20)
         constl_specs_container.columnconfigure(0,weight=1)
@@ -355,9 +377,6 @@ class ConfigureFrame(ttk.Frame):
             frame = F(parent=constl_specs_container, controller=self)
             frames[page_name] = frame
             frame.grid(row=0, column=0, sticky="nsew")
-        
-        okcancel_frame = ttk.Frame(constl_win_frame)
-        okcancel_frame.grid(row=2, column=0)  
         
         # define the widgets inside the child frames
         
@@ -387,10 +406,7 @@ class ConfigureFrame(ttk.Frame):
             constl_type_rbtn.pack(anchor='w', padx=20, pady=20)
 
         frame = frames[self._ctype.get()]
-        frame.tkraise()
-        
-        
-
+        frame.tkraise()      
 
     def click_visualize_frame(self):
         vis_win = tk.Toplevel()

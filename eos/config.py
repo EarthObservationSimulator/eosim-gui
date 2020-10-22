@@ -29,7 +29,10 @@ class MissionConfig:
         self.duration = duration
 
     def add_satellite(self, sat):
-        self.satellite.append(sat) 
+        if isinstance(sat,list):
+            self.satellite.extend(sat) 
+        else:
+            self.satellite.append(sat) 
     
     def to_dict(self):
         
