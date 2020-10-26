@@ -6,6 +6,7 @@ import random
 from tkinter import messagebox
 import json
 import orbitpy
+import tkinter.filedialog, tkinter.messagebox
 
 miss_specs = MissionConfig() 
 class ConfigureFrame(ttk.Frame):
@@ -39,7 +40,7 @@ class ConfigureFrame(ttk.Frame):
         sat_btn.grid(row=0, column=0)
         con_btn = ttk.Button(resource_frame, text="Constellation", command=self.click_constellation_btn, width=ConfigureFrame.BTNWIDTH)
         con_btn.grid(row=0, column=1)
-        sen_btn = ttk.Button(resource_frame, text="Sensor", width=ConfigureFrame.BTNWIDTH)
+        sen_btn = ttk.Button(resource_frame, text="Sensor", command=self.click_sensor_btn, width=ConfigureFrame.BTNWIDTH)
         sen_btn.grid(row=1, column=0)
         gndstn_btn = ttk.Button(resource_frame, text="Ground Station", width=ConfigureFrame.BTNWIDTH)
         gndstn_btn.grid(row=1, column=1)
@@ -69,16 +70,20 @@ class ConfigureFrame(ttk.Frame):
         obs_syn_btn.grid(row=1, column=1)
 
         #
-        save_conf_btn = ttk.Button(self, text="Save Config", width=ConfigureFrame.BTNWIDTH)
+        save_conf_btn = ttk.Button(self, text="Save Config", command=self.click_save_config, width=ConfigureFrame.BTNWIDTH)
         save_conf_btn.grid(row=2, column=0, pady=(1,10), sticky='e')
         run_all_btn = ttk.Button(self, text="Run All", width=ConfigureFrame.BTNWIDTH)
         run_all_btn.grid(row=2, column=1, pady=(1,10), sticky='w')
+
+    def click_save_config(self):
+        with open('MissionConfig.json', 'w', encoding='utf-8') as f:
+            json.dump(miss_specs.to_dict(), f, ensure_ascii=False, indent=4)
+        tkinter.messagebox.showinfo(title=None, message="Configuration saved in working directory.")
 
     def click_mission_btn(self):      
 
         # create and configure child window, parent frame
         miss_win = tk.Toplevel()
-        #miss_win.geometry(GuiStyle.child_window_geom)
 
         miss_win.rowconfigure(0,weight=1)
         miss_win.rowconfigure(1,weight=1)
@@ -253,97 +258,6 @@ class ConfigureFrame(ttk.Frame):
 
     def click_constellation_btn(self):      
 
-        class HomogenousWalkerFrame(ttk.Frame):
-            def __init__(self, parent, controller):
-                ttk.Frame.__init__(self, parent)
-                hwd_specs_frame = ttk.Frame(self) 
-                hwd_specs_frame.grid(row=0, column=0, ipadx=20, ipady=20)
-
-                # define the widgets inside the child frames
-                ttk.Label(hwd_specs_frame, text="Unique ID", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
-                uid_entry = ttk.Entry(hwd_specs_frame, width=10)
-                uid_entry.insert(0,"G_"+str(random.randint(0,1000)))
-                uid_entry.bind("<FocusIn>", lambda args: uid_entry.delete('0', 'end'))
-                uid_entry.grid(row=0, column=1, sticky='w')
-
-                ttk.Label(hwd_specs_frame, text="# Satellites", wraplength=150).grid(row=1, column=0, padx=10, pady=10, sticky='w')
-                nsats_entry = ttk.Entry(hwd_specs_frame, width=10)
-                nsats_entry.insert(0,6)
-                nsats_entry.bind("<FocusIn>", lambda args: nsats_entry.delete('0', 'end'))
-                nsats_entry.grid(row=1, column=1, sticky='w')
-
-                ttk.Label(hwd_specs_frame, text="# Orbital planes", wraplength=150).grid(row=2, column=0, padx=10, pady=10, sticky='w')
-                nplanes_entry = ttk.Entry(hwd_specs_frame, width=10)
-                nplanes_entry.insert(0,3)
-                nplanes_entry.bind("<FocusIn>", lambda args: nplanes_entry.delete('0', 'end'))
-                nplanes_entry.grid(row=2, column=1, sticky='w')
-
-                ttk.Label(hwd_specs_frame, text="Relative spacing", wraplength=150).grid(row=3, column=0, padx=10, pady=10, sticky='w')
-                rspc_entry = ttk.Entry(hwd_specs_frame, width=10)
-                rspc_entry.insert(0,1)
-                rspc_entry.bind("<FocusIn>", lambda args: rspc_entry.delete('0', 'end'))
-                rspc_entry.grid(row=3, column=1, sticky='w')
-
-                ttk.Label(hwd_specs_frame, text="Inclination [deg]", wraplength=150).grid(row=4, column=0, padx=10, pady=10, sticky='w')
-                inc_entry = ttk.Entry(hwd_specs_frame, width=10)
-                inc_entry.insert(0,67)
-                inc_entry.bind("<FocusIn>", lambda args: inc_entry.delete('0', 'end'))
-                inc_entry.grid(row=4, column=1, sticky='w')
-                
-                ttk.Label(hwd_specs_frame, text="Altitude [km]", wraplength=150).grid(row=5, column=0, padx=10, pady=10, sticky='w')
-                alt_entry = ttk.Entry(hwd_specs_frame, width=10)
-                alt_entry.insert(0,350)
-                alt_entry.bind("<FocusIn>", lambda args: alt_entry.delete('0', 'end'))
-                alt_entry.grid(row=5, column=1, sticky='w')
-
-                tk.Label(hwd_specs_frame, text="Eccentricity", wraplength=150).grid(row=6, column=0, padx=10, pady=10, sticky='w')
-                ecc_entry = ttk.Entry(hwd_specs_frame, width=10)
-                ecc_entry.insert(0,0)
-                ecc_entry.bind("<FocusIn>", lambda args: ecc_entry.delete('0', 'end'))
-                ecc_entry.grid(row=6, column=1, sticky='w')
-
-                tk.Label(hwd_specs_frame, text="AOP [deg]", wraplength=150).grid(row=7, column=0, padx=10, pady=10, sticky='w')
-                aop_entry = ttk.Entry(hwd_specs_frame, width=10)
-                aop_entry.insert(0,250)
-                aop_entry.bind("<FocusIn>", lambda args: aop_entry.delete('0', 'end'))
-                aop_entry.grid(row=7, column=1, sticky='w')
-
-                # okcancel frame
-                def ok_click():                    
-
-                    data = {}
-                    data['numberSatellites'] = nsats_entry.get()
-                    data['numberPlanes'] = nplanes_entry.get()
-                    data['relativeSpacing'] = rspc_entry.get()
-                    data['alt'] = alt_entry.get()
-                    data['ecc'] = ecc_entry.get()
-                    data['inc'] = inc_entry.get()
-                    data['aop'] = aop_entry.get()
-                    data['@id'] = uid_entry.get()
-
-                    sats = PreProcess.walker_orbits(data)                        
-                    miss_specs.add_satellite(sats)
-                    
-                ok_btn = ttk.Button(hwd_specs_frame, text="Add", command=ok_click, width=ConfigureFrame.BTNWIDTH)
-                ok_btn.grid(row=8, column=0)
-
-                cancel_btn = ttk.Button(hwd_specs_frame, text="Exit", command=constl_win.destroy, width=ConfigureFrame.BTNWIDTH)
-                cancel_btn.grid(row=8, column=1)
-
-        class HeterogenousWalkerFrame(ttk.Frame):
-            def __init__(self, parent, controller):
-                ttk.Frame.__init__(self, parent)         
-                hetw_specs_frame = ttk.Frame(self) 
-                hetw_specs_frame.grid(row=0, column=0, ipadx=20, ipady=20)    
-                ttk.Label(hetw_specs_frame, text="Under development").pack()    
-        
-        class TrainConstlFrame(ttk.Frame):
-            def __init__(self, parent, controller):
-                ttk.Frame.__init__(self, parent)  
-                trainc_specs_frame = ttk.Frame(self) 
-                trainc_specs_frame.grid(row=0, column=0, ipadx=20, ipady=20)
-                ttk.Label(trainc_specs_frame, text="Under development").pack()  
-
         # create and configure child window, parent frame
         constl_win = tk.Toplevel()
         constl_win.rowconfigure(0,weight=1)
@@ -351,8 +265,9 @@ class ConfigureFrame(ttk.Frame):
 
         constl_win_frame =ttk.Frame(constl_win)
         constl_win_frame.grid(row=0, column=0, padx=10, pady=10)
-        constl_win_frame.rowconfigure(0,weight=1)
-        constl_win_frame.rowconfigure(1,weight=1)
+        constl_win_frame.rowconfigure(0,weight=1) # constellation type
+        constl_win_frame.rowconfigure(1,weight=1) # constellation specs
+        constl_win_frame.rowconfigure(2,weight=1) # okcancel
         constl_win_frame.columnconfigure(0,weight=1)
 
         # define all child frames
@@ -371,6 +286,85 @@ class ConfigureFrame(ttk.Frame):
         constl_specs_container.columnconfigure(0,weight=1)
         constl_specs_container.rowconfigure(0,weight=1)
 
+        # okcancel frame
+        okcancel_frame = ttk.Label(constl_win_frame)
+        okcancel_frame.grid(row=2, column=0, sticky='nswe', padx=20, pady=20)
+        okcancel_frame.columnconfigure(0,weight=1)
+        okcancel_frame.rowconfigure(0,weight=1)
+
+        class HomogenousWalkerFrame(ttk.Frame):
+            def __init__(self, parent, controller):
+                ttk.Frame.__init__(self, parent)
+                hwd_specs_frame = ttk.Frame(self) 
+                hwd_specs_frame.grid(row=0, column=0, ipadx=20, ipady=20)
+
+                # define the widgets inside the child frames
+                ttk.Label(hwd_specs_frame, text="Unique ID", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
+                self.uid_entry = ttk.Entry(hwd_specs_frame, width=10)
+                self.uid_entry.insert(0,"G_"+str(random.randint(0,1000)))
+                self.uid_entry.bind("<FocusIn>", lambda args: self.uid_entry.delete('0', 'end'))
+                self.uid_entry.grid(row=0, column=1, sticky='w')
+
+                ttk.Label(hwd_specs_frame, text="# Satellites", wraplength=150).grid(row=1, column=0, padx=10, pady=10, sticky='w')
+                self.nsats_entry = ttk.Entry(hwd_specs_frame, width=10)
+                self.nsats_entry.insert(0,6)
+                self.nsats_entry.bind("<FocusIn>", lambda args: self.nsats_entry.delete('0', 'end'))
+                self.nsats_entry.grid(row=1, column=1, sticky='w')
+
+                ttk.Label(hwd_specs_frame, text="# Orbital planes", wraplength=150).grid(row=2, column=0, padx=10, pady=10, sticky='w')
+                self.nplanes_entry = ttk.Entry(hwd_specs_frame, width=10)
+                self.nplanes_entry.insert(0,3)
+                self.nplanes_entry.bind("<FocusIn>", lambda args: self.nplanes_entry.delete('0', 'end'))
+                self.nplanes_entry.grid(row=2, column=1, sticky='w')
+
+                ttk.Label(hwd_specs_frame, text="Relative spacing", wraplength=150).grid(row=3, column=0, padx=10, pady=10, sticky='w')
+                self.rspc_entry = ttk.Entry(hwd_specs_frame, width=10)
+                self.rspc_entry.insert(0,1)
+                self.rspc_entry.bind("<FocusIn>", lambda args: self.rspc_entry.delete('0', 'end'))
+                self.rspc_entry.grid(row=3, column=1, sticky='w')
+
+                ttk.Label(hwd_specs_frame, text="Inclination [deg]", wraplength=150).grid(row=4, column=0, padx=10, pady=10, sticky='w')
+                self.inc_entry = ttk.Entry(hwd_specs_frame, width=10)
+                self.inc_entry.insert(0,67)
+                self.inc_entry.bind("<FocusIn>", lambda args: self.inc_entry.delete('0', 'end'))
+                self.inc_entry.grid(row=4, column=1, sticky='w')
+                
+                ttk.Label(hwd_specs_frame, text="Altitude [km]", wraplength=150).grid(row=5, column=0, padx=10, pady=10, sticky='w')
+                self.alt_entry = ttk.Entry(hwd_specs_frame, width=10)
+                self.alt_entry.insert(0,350)
+                self.alt_entry.bind("<FocusIn>", lambda args: self.alt_entry.delete('0', 'end'))
+                self.alt_entry.grid(row=5, column=1, sticky='w')
+
+                tk.Label(hwd_specs_frame, text="Eccentricity", wraplength=150).grid(row=6, column=0, padx=10, pady=10, sticky='w')
+                self.ecc_entry = ttk.Entry(hwd_specs_frame, width=10)
+                self.ecc_entry.insert(0,0)
+                self.ecc_entry.bind("<FocusIn>", lambda args: self.ecc_entry.delete('0', 'end'))
+                self.ecc_entry.grid(row=6, column=1, sticky='w')
+
+                tk.Label(hwd_specs_frame, text="AOP [deg]", wraplength=150).grid(row=7, column=0, padx=10, pady=10, sticky='w')
+                self.aop_entry = ttk.Entry(hwd_specs_frame, width=10)
+                self.aop_entry.insert(0,250)
+                self.aop_entry.bind("<FocusIn>", lambda args: self.aop_entry.delete('0', 'end'))
+                self.aop_entry.grid(row=7, column=1, sticky='w')
+            
+            def get_specs(self):
+                return [self.uid_entry.get(), self.nsats_entry.get(), self.nplanes_entry.get(), self.rspc_entry.get(), self.alt_entry.get(), 
+                        self.ecc_entry.get(), self.inc_entry.get(), self.aop_entry.get()]               
+
+        class HeterogenousWalkerFrame(ttk.Frame):
+            def __init__(self, parent, controller):
+                ttk.Frame.__init__(self, parent)         
+                hetw_specs_frame = ttk.Frame(self) 
+                hetw_specs_frame.grid(row=0, column=0, ipadx=20, ipady=20)    
+                ttk.Label(hetw_specs_frame, text="Under development").pack()    
+        
+        class TrainConstlFrame(ttk.Frame):
+            def __init__(self, parent, controller):
+                ttk.Frame.__init__(self, parent)  
+                trainc_specs_frame = ttk.Frame(self) 
+                trainc_specs_frame.grid(row=0, column=0, ipadx=20, ipady=20)
+                ttk.Label(trainc_specs_frame, text="Under development").pack()          
+
         frames = {}
         for F in (HomogenousWalkerFrame, HeterogenousWalkerFrame, TrainConstlFrame):
             page_name = F.__name__
@@ -387,26 +381,250 @@ class ConfigureFrame(ttk.Frame):
             ("Train", "TrainConstlFrame")
         ]
 
-        self._ctype = tk.StringVar() # using self so that the variable is retained even after exit from the function
-        self._ctype.set("HomogenousWalkerFrame") # initialize
+        self._constl_type = tk.StringVar() # using self so that the variable is retained even after exit from the function
+        self._constl_type.set("HomogenousWalkerFrame") # initialize
 
         def constl_type_rbtn_click():
-            if self._ctype.get() == "HomogenousWalkerFrame":
+            if self._constl_type.get() == "HomogenousWalkerFrame":
                 frame = frames["HomogenousWalkerFrame"]
-            elif self._ctype.get() == "HeterogenousWalkerFrame":
+            elif self._constl_type.get() == "HeterogenousWalkerFrame":
                 frame = frames["HeterogenousWalkerFrame"]
-            elif self._ctype.get() == "TrainConstlFrame":
+            elif self._constl_type.get() == "TrainConstlFrame":
                 frame = frames["TrainConstlFrame"]
 
             frame.tkraise()
 
         for text, mode in MODES:
             constl_type_rbtn = ttk.Radiobutton(constl_type_frame, text=text, command=constl_type_rbtn_click,
-                            variable=self._ctype, value=mode)
+                            variable=self._constl_type, value=mode)
             constl_type_rbtn.pack(anchor='w', padx=20, pady=20)
 
-        frame = frames[self._ctype.get()]
-        frame.tkraise()      
+        frame = frames[self._constl_type.get()]
+        frame.tkraise()    
+
+        # okcancel frame
+        def ok_click():               
+            if self._constl_type.get() == "HomogenousWalkerFrame":
+                specs = frame.get_specs()
+                data = {}
+                data['@id'] = specs[0]
+                data['numberSatellites'] = specs[1]
+                data['numberPlanes'] = specs[2]
+                data['relativeSpacing'] = specs[3]
+                data['alt'] = specs[4]
+                data['ecc'] = specs[5]
+                data['inc'] = specs[6]
+                data['aop'] = specs[7]                
+
+                sats = PreProcess.walker_orbits(data)                        
+                miss_specs.add_satellite(sats)
+            
+        ok_btn = ttk.Button(okcancel_frame, text="Add", command=ok_click, width=ConfigureFrame.BTNWIDTH)
+        ok_btn.grid(row=0, column=0)
+
+        cancel_btn = ttk.Button(okcancel_frame, text="Exit", command=constl_win.destroy, width=ConfigureFrame.BTNWIDTH)
+        cancel_btn.grid(row=0, column=1)  
+
+    def click_sensor_btn(self):      
+        
+        def basic_sensor_input_config(win, tab):
+            # parent frame
+            specs_frame = ttk.Frame(tab)
+            specs_frame.grid(row=0, column=0, padx=10, pady=10)
+            specs_frame.rowconfigure(0,weight=1)
+            specs_frame.rowconfigure(1,weight=1)
+            specs_frame.columnconfigure(0,weight=1)
+            specs_frame.columnconfigure(1,weight=1)
+            specs_frame.columnconfigure(2,weight=1)
+            specs_frame.columnconfigure(3,weight=1)
+
+            # define all child frames
+            other_specs_frame = ttk.LabelFrame(specs_frame) # specifications other then FOV, maneuver, orientation frame
+            other_specs_frame.grid(row=0, column=0, padx=10, pady=10)
+            
+            fov_specs_frame = ttk.LabelFrame(specs_frame, text="Field-Of-View") # field-of-view (FOV) specifications frame
+            fov_specs_frame.grid(row=0, column=1, padx=10, pady=10, sticky='nswe')
+            # define all child frames
+            fov_type_frame = ttk.Frame(fov_specs_frame)
+            fov_type_frame.grid(row=0, column=0, sticky='nswe')
+            fov_type_frame.columnconfigure(0,weight=1)
+            fov_type_frame.rowconfigure(0,weight=1)
+
+            fov_specs_container = ttk.Frame(fov_specs_frame)
+            fov_specs_container.grid(row=1, column=0, sticky='nswe')
+            fov_specs_container.columnconfigure(0,weight=1)
+            fov_specs_container.rowconfigure(0,weight=1)
+
+            maneuver_frame = ttk.LabelFrame(specs_frame, text="Manuever") # manuver specs frame
+            maneuver_frame.grid(row=0, column=2, padx=10, pady=10)
+
+            orien_frame = ttk.LabelFrame(specs_frame, text="Orientation") # sensor orientation frame
+            orien_frame.grid(row=0, column=3, padx=10, pady=10)
+
+            okcancel_frame = ttk.Frame(specs_frame)
+            okcancel_frame.grid(row=1, column=0, columnspan=4, padx=10, pady=10) 
+
+            # define the widgets in other_specs_frame
+            ttk.Label(other_specs_frame, text="Unique ID", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
+            uid_entry = ttk.Entry(other_specs_frame, width=10)
+            uid_entry.insert(0,'sen'+str(random.randint(0,100)))
+            uid_entry.bind("<FocusIn>", lambda args: uid_entry.delete('0', 'end'))
+            uid_entry.grid(row=0, column=1, sticky='w')
+
+            ttk.Label(other_specs_frame, text="Mass [kg]", wraplength=150).grid(row=1, column=0, padx=10, pady=10, sticky='w')
+            mass_entry = ttk.Entry(other_specs_frame, width=10)
+            mass_entry.insert(0,28)
+            mass_entry.bind("<FocusIn>", lambda args: mass_entry.delete('0', 'end'))
+            mass_entry.grid(row=1, column=1, sticky='w')
+
+            ttk.Label(other_specs_frame, text="Volume [m3]", wraplength=150).grid(row=2, column=0, padx=10, pady=10, sticky='w')
+            vol_entry = ttk.Entry(other_specs_frame, width=10)
+            vol_entry.insert(0,0.12)
+            vol_entry.bind("<FocusIn>", lambda args: vol_entry.delete('0', 'end'))
+            vol_entry.grid(row=2, column=1, sticky='w')
+
+            ttk.Label(other_specs_frame, text="Power [W]", wraplength=150).grid(row=3, column=0, padx=10, pady=10, sticky='w')
+            pow_entry = ttk.Entry(other_specs_frame, width=10)
+            pow_entry.insert(0,32)
+            pow_entry.bind("<FocusIn>", lambda args: pow_entry.delete('0', 'end'))
+            pow_entry.grid(row=3, column=1, sticky='w')
+
+            ttk.Label(other_specs_frame, text="Bits per pixel", wraplength=150).grid(row=4, column=0, padx=10, pady=10, sticky='w')
+            bpp_entry = ttk.Entry(other_specs_frame, width=10)
+            bpp_entry.insert(0,8)
+            bpp_entry.bind("<FocusIn>", lambda args: bpp_entry.delete('0', 'end'))
+            bpp_entry.grid(row=4, column=1, sticky='w')
+
+            # define the widgets in fov_specs_frame
+            class ConicalFOV(ttk.Frame):
+                def __init__(self, parent, controller):
+                    ttk.Frame.__init__(self, parent)
+                    fov_specs_frame = ttk.Frame(self) 
+                    fov_specs_frame.grid(row=0, column=0)
+
+                    # define the widgets 
+                    ttk.Label(fov_specs_frame, text="Full Cone Angle [deg]", wraplength=150).grid(row=0, column=0, padx=5, pady=5, sticky='w')
+                    self.fca_entry = ttk.Entry(fov_specs_frame, width=10)
+                    self.fca_entry.insert(0,25)
+                    self.fca_entry.bind("<FocusIn>", lambda args: self.fca_entry.delete('0', 'end'))
+                    self.fca_entry.grid(row=0, column=1, sticky='w')
+
+                def get_specs(self):
+                    return (self.fca_entry.get())
+
+            class RectangularFOV(ttk.Frame):
+                def __init__(self, parent, controller):
+                    ttk.Frame.__init__(self, parent)
+                    fov_specs_frame = ttk.Frame(self) 
+                    fov_specs_frame.grid(row=0, column=0)
+
+                    # define the widgets
+                    ttk.Label(fov_specs_frame, text="Along track FOV [deg]", wraplength=150).grid(row=0, column=0, padx=5, pady=5, sticky='w')
+                    self.atfov_entry = ttk.Entry(fov_specs_frame, width=10)
+                    self.atfov_entry.insert(0,25)
+                    self.atfov_entry.bind("<FocusIn>", lambda args: self.atfov_entry.delete('0', 'end'))
+                    self.atfov_entry.grid(row=0, column=1, sticky='w')
+                    
+                    ttk.Label(fov_specs_frame, text="Cross track FOV [deg]", wraplength=150).grid(row=1, column=0, padx=5, pady=5, sticky='w')
+                    self.ctfov_entry = ttk.Entry(fov_specs_frame, width=10)
+                    self.ctfov_entry.insert(0,25)
+                    self.ctfov_entry.bind("<FocusIn>", lambda args: self.ctfov_entry.delete('0', 'end'))
+                    self.ctfov_entry.grid(row=1, column=1, sticky='w')
+                
+                def get_specs(self):
+                    return [self.atfov_entry.get(), self.ctfov_entry.get()]
+
+            frames = {}
+            for F in (ConicalFOV, RectangularFOV):
+                page_name = F.__name__
+                frame = F(parent=fov_specs_container, controller=self)
+                frames[page_name] = frame
+                frame.grid(row=0, column=0, sticky="nsew")
+                
+            # define the widgets inside the child frames
+            
+            # constellation types child frame
+            MODES = [
+                ("Conical FOV", "ConicalFOV"),
+                ("Rectangular FOV", "RectangularFOV")
+            ]
+
+            self._sen_type = tk.StringVar() # using self so that the variable is retained even after exit from the function
+            self._sen_type.set("ConicalFOV") # initialize
+
+            def senfov_type_rbtn_click():
+                if self._sen_type.get() == "ConicalFOV":
+                    frame = frames["ConicalFOV"]
+                elif self._sen_type.get() == "RectangularFOV":
+                    frame = frames["RectangularFOV"]
+                frame.tkraise()
+
+            for text, mode in MODES:
+                fov_type_rbtn = ttk.Radiobutton(fov_type_frame, text=text, command=senfov_type_rbtn_click,
+                                variable=self._sen_type, value=mode)
+                fov_type_rbtn.pack(anchor='w')
+
+            frame = frames[self._sen_type.get()]
+            frame.tkraise()      
+
+
+            # define the widgets in maneuver_frame
+
+
+            # define the widgets in orien_frame
+
+
+            # define the widgets in okcancel_frame
+            # okcancel frame
+            def ok_click():               
+                if self._sen_type.get() == "ConicalFOV":
+                    specs = frame.get_specs()
+                    data = {}
+                    data['sensorGeometry'] = 'Conical'
+                    data['fullConeAngle'] = specs             
+                    print(data)  
+                    #sats = PreProcess.walker_orbits(data)                        
+                    #miss_specs.add_satellite(sats)
+                elif self._sen_type.get() == 'RectangularFOV':
+                    specs = frame.get_specs()
+                    data = {}
+                    data['sensorGeometry'] = 'Rectangular'
+                    data['alongTrackFieldOfView'] = specs[0] 
+                    data['crossTrackFieldOfView'] = specs[1]
+                    print(data)  
+
+            ok_btn = ttk.Button(okcancel_frame, text="Add", command=ok_click, width=ConfigureFrame.BTNWIDTH)
+            ok_btn.grid(row=0, column=0)
+
+            cancel_btn = ttk.Button(okcancel_frame, text="Exit", command=sensor_win.destroy, width=ConfigureFrame.BTNWIDTH)
+            cancel_btn.grid(row=0, column=1) 
+
+        def passive_opt_sen_input_config(win, tab):
+            ttk.Label(tab,  text ="Under dev").grid(column = 0, row = 0, padx = 30, pady = 30)   
+
+        def synthetic_aperture_radar_input_config(win, tab):
+            ttk.Label(tab,  text ="Under dev").grid(column = 0, row = 0, padx = 30, pady = 30)   
+
+        # create and configure child window, parent frame
+        sensor_win = tk.Toplevel()
+        sensor_win.rowconfigure(0,weight=1)
+        sensor_win.columnconfigure(0,weight=1)
+
+        tabControl = ttk.Notebook(sensor_win)
+        tab1 = ttk.Frame(tabControl)
+        tab2 = ttk.Frame(tabControl)
+        tab3 = ttk.Frame(tabControl)
+
+        tabControl.add(tab1, text='Basic Sensor')
+        tabControl.add(tab2, text='Passive Optical Sensor')
+        tabControl.add(tab3, text='Synthetic Aperture Radar')
+
+        tabControl.pack(expand = 1, fill ="both")   
+
+        basic_sensor_input_config(sensor_win, tab1)
+        passive_opt_sen_input_config(sensor_win, tab2)
+        synthetic_aperture_radar_input_config(sensor_win, tab3)
+
 
     def click_visualize_frame(self):
         vis_win = tk.Toplevel()
