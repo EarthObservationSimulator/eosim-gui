@@ -7,8 +7,10 @@ from tkinter import messagebox
 import json
 import orbitpy
 import tkinter.filedialog, tkinter.messagebox
+from instrupy.basic_sensor import BasicSensor
 
-miss_specs = MissionConfig() 
+miss_specs = MissionConfig()     
+
 class ConfigureFrame(ttk.Frame):
 
     BTNWIDTH = 15
@@ -301,7 +303,7 @@ class ConfigureFrame(ttk.Frame):
                 # define the widgets inside the child frames
                 ttk.Label(hwd_specs_frame, text="Unique ID", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
                 self.uid_entry = ttk.Entry(hwd_specs_frame, width=10)
-                self.uid_entry.insert(0,"G_"+str(random.randint(0,1000)))
+                self.uid_entry.insert(0,"G_"+str(random.randint(0,1000))+"_")
                 self.uid_entry.bind("<FocusIn>", lambda args: self.uid_entry.delete('0', 'end'))
                 self.uid_entry.grid(row=0, column=1, sticky='w')
 
@@ -443,15 +445,15 @@ class ConfigureFrame(ttk.Frame):
             other_specs_frame.grid(row=0, column=0, padx=10, pady=10)
             
             fov_specs_frame = ttk.LabelFrame(specs_frame, text="Field-Of-View") # field-of-view (FOV) specifications frame
-            fov_specs_frame.grid(row=0, column=1, padx=10, pady=10, sticky='nswe')
+            fov_specs_frame.grid(row=0, column=1, padx=10, pady=10, sticky='n')
             # define all child frames
             fov_type_frame = ttk.Frame(fov_specs_frame)
-            fov_type_frame.grid(row=0, column=0, sticky='nswe')
+            fov_type_frame.grid(row=0, column=0, sticky='nswe', padx=10, pady=10)
             fov_type_frame.columnconfigure(0,weight=1)
             fov_type_frame.rowconfigure(0,weight=1)
 
             fov_specs_container = ttk.Frame(fov_specs_frame)
-            fov_specs_container.grid(row=1, column=0, sticky='nswe')
+            fov_specs_container.grid(row=1, column=0, sticky='nswe', padx=10, pady=10)
             fov_specs_container.columnconfigure(0,weight=1)
             fov_specs_container.rowconfigure(0,weight=1)
 
@@ -469,70 +471,82 @@ class ConfigureFrame(ttk.Frame):
             uid_entry = ttk.Entry(other_specs_frame, width=10)
             uid_entry.insert(0,'sen'+str(random.randint(0,100)))
             uid_entry.bind("<FocusIn>", lambda args: uid_entry.delete('0', 'end'))
-            uid_entry.grid(row=0, column=1, sticky='w')
+            uid_entry.grid(row=0, column=1, sticky='w', padx=10, pady=10)
 
-            ttk.Label(other_specs_frame, text="Mass [kg]", wraplength=150).grid(row=1, column=0, padx=10, pady=10, sticky='w')
+            ttk.Label(other_specs_frame, text="Name", wraplength=150).grid(row=1, column=0, padx=10, pady=10, sticky='w')
+            name_entry = ttk.Entry(other_specs_frame, width=10)
+            name_entry.insert(0,"Atom")
+            name_entry.bind("<FocusIn>", lambda args: name_entry.delete('0', 'end'))
+            name_entry.grid(row=1, column=1, sticky='w', padx=10, pady=10)
+
+            ttk.Label(other_specs_frame, text="Mass [kg]", wraplength=150).grid(row=2, column=0, padx=10, pady=10, sticky='w')
             mass_entry = ttk.Entry(other_specs_frame, width=10)
             mass_entry.insert(0,28)
             mass_entry.bind("<FocusIn>", lambda args: mass_entry.delete('0', 'end'))
-            mass_entry.grid(row=1, column=1, sticky='w')
+            mass_entry.grid(row=2, column=1, sticky='w', padx=10, pady=10)
 
-            ttk.Label(other_specs_frame, text="Volume [m3]", wraplength=150).grid(row=2, column=0, padx=10, pady=10, sticky='w')
+            ttk.Label(other_specs_frame, text="Volume [m3]", wraplength=150).grid(row=3, column=0, padx=10, pady=10, sticky='w')
             vol_entry = ttk.Entry(other_specs_frame, width=10)
             vol_entry.insert(0,0.12)
             vol_entry.bind("<FocusIn>", lambda args: vol_entry.delete('0', 'end'))
-            vol_entry.grid(row=2, column=1, sticky='w')
+            vol_entry.grid(row=3, column=1, sticky='w', padx=10, pady=10)
 
-            ttk.Label(other_specs_frame, text="Power [W]", wraplength=150).grid(row=3, column=0, padx=10, pady=10, sticky='w')
+            ttk.Label(other_specs_frame, text="Power [W]", wraplength=150).grid(row=4, column=0, padx=10, pady=10, sticky='w')
             pow_entry = ttk.Entry(other_specs_frame, width=10)
             pow_entry.insert(0,32)
             pow_entry.bind("<FocusIn>", lambda args: pow_entry.delete('0', 'end'))
-            pow_entry.grid(row=3, column=1, sticky='w')
+            pow_entry.grid(row=4, column=1, sticky='w', padx=10, pady=10)
 
-            ttk.Label(other_specs_frame, text="Bits per pixel", wraplength=150).grid(row=4, column=0, padx=10, pady=10, sticky='w')
+            ttk.Label(other_specs_frame, text="Bits per pixel", wraplength=150).grid(row=5, column=0, padx=10, pady=10, sticky='w')
             bpp_entry = ttk.Entry(other_specs_frame, width=10)
             bpp_entry.insert(0,8)
             bpp_entry.bind("<FocusIn>", lambda args: bpp_entry.delete('0', 'end'))
-            bpp_entry.grid(row=4, column=1, sticky='w')
+            bpp_entry.grid(row=5, column=1, sticky='w', padx=10, pady=10)
+
+            ttk.Label(other_specs_frame, text="Data Rate [Megabits-per-sec]", wraplength=150).grid(row=6, column=0, padx=10, pady=10, sticky='w')
+            dr_entry = ttk.Entry(other_specs_frame, width=10)
+            dr_entry.insert(0,250)
+            dr_entry.bind("<FocusIn>", lambda args: dr_entry.delete('0', 'end'))
+            dr_entry.grid(row=6, column=1, sticky='w', padx=10, pady=10)
 
             # define the widgets in fov_specs_frame
             class ConicalFOV(ttk.Frame):
                 def __init__(self, parent, controller):
                     ttk.Frame.__init__(self, parent)
-                    fov_specs_frame = ttk.Frame(self) 
-                    fov_specs_frame.grid(row=0, column=0)
+                    confov_specs_frame = ttk.Frame(self) 
+                    confov_specs_frame.grid(row=0, column=0)
 
                     # define the widgets 
-                    ttk.Label(fov_specs_frame, text="Full Cone Angle [deg]", wraplength=150).grid(row=0, column=0, padx=5, pady=5, sticky='w')
-                    self.fca_entry = ttk.Entry(fov_specs_frame, width=10)
-                    self.fca_entry.insert(0,25)
+                    ttk.Label(confov_specs_frame, text="Full Cone Angle [deg]", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
+                    self.fca_entry = ttk.Entry(confov_specs_frame, width=10)
+                    self.fca_entry.insert(0,35)
                     self.fca_entry.bind("<FocusIn>", lambda args: self.fca_entry.delete('0', 'end'))
-                    self.fca_entry.grid(row=0, column=1, sticky='w')
+                    self.fca_entry.grid(row=0, column=1, sticky='w', padx=10, pady=10)
 
                 def get_specs(self):
-                    return (self.fca_entry.get())
+                    return (float(self.fca_entry.get()))
 
             class RectangularFOV(ttk.Frame):
                 def __init__(self, parent, controller):
                     ttk.Frame.__init__(self, parent)
-                    fov_specs_frame = ttk.Frame(self) 
-                    fov_specs_frame.grid(row=0, column=0)
+                    rectfov_specs_frame = ttk.Frame(self) 
+                    rectfov_specs_frame.grid(row=0, column=0)
 
                     # define the widgets
-                    ttk.Label(fov_specs_frame, text="Along track FOV [deg]", wraplength=150).grid(row=0, column=0, padx=5, pady=5, sticky='w')
-                    self.atfov_entry = ttk.Entry(fov_specs_frame, width=10)
-                    self.atfov_entry.insert(0,25)
+                    ttk.Label(rectfov_specs_frame, text="Along track FOV [deg]", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
+                    self.atfov_entry = ttk.Entry(rectfov_specs_frame, width=10)
+                    self.atfov_entry.insert(0,10)
                     self.atfov_entry.bind("<FocusIn>", lambda args: self.atfov_entry.delete('0', 'end'))
-                    self.atfov_entry.grid(row=0, column=1, sticky='w')
+                    self.atfov_entry.grid(row=0, column=1, sticky='w', padx=10, pady=10)
                     
-                    ttk.Label(fov_specs_frame, text="Cross track FOV [deg]", wraplength=150).grid(row=1, column=0, padx=5, pady=5, sticky='w')
-                    self.ctfov_entry = ttk.Entry(fov_specs_frame, width=10)
-                    self.ctfov_entry.insert(0,25)
+                    ttk.Label(rectfov_specs_frame, text="Cross track FOV [deg]", wraplength=150).grid(row=1, column=0, padx=10, pady=10, sticky='w')
+                    self.ctfov_entry = ttk.Entry(rectfov_specs_frame, width=10)
+                    self.ctfov_entry.insert(0,20)
                     self.ctfov_entry.bind("<FocusIn>", lambda args: self.ctfov_entry.delete('0', 'end'))
-                    self.ctfov_entry.grid(row=1, column=1, sticky='w')
+                    self.ctfov_entry.grid(row=1, column=1, sticky='w', padx=10, pady=10)
                 
                 def get_specs(self):
-                    return [self.atfov_entry.get(), self.ctfov_entry.get()]
+                    return [float(self.atfov_entry.get()), float(self.ctfov_entry.get())]
 
             frames = {}
             for F in (ConicalFOV, RectangularFOV):
@@ -554,9 +568,9 @@ class ConfigureFrame(ttk.Frame):
 
             def senfov_type_rbtn_click():
                 if self._sen_type.get() == "ConicalFOV":
-                    frame = frames["ConicalFOV"]
+                    self.sen_fov_frame = frames["ConicalFOV"]
                 elif self._sen_type.get() == "RectangularFOV":
-                    frame = frames["RectangularFOV"]
+                    self.sen_fov_frame = frames["RectangularFOV"]
                 frame.tkraise()
 
             for text, mode in MODES:
@@ -564,8 +578,8 @@ class ConfigureFrame(ttk.Frame):
                                 variable=self._sen_type, value=mode)
                 fov_type_rbtn.pack(anchor='w')
 
-            frame = frames[self._sen_type.get()]
-            frame.tkraise()      
+            self.sen_fov_frame = frames[self._sen_type.get()]
+            self.sen_fov_frame.tkraise()      
 
 
             # define the widgets in maneuver_frame
@@ -576,22 +590,32 @@ class ConfigureFrame(ttk.Frame):
 
             # define the widgets in okcancel_frame
             # okcancel frame
-            def ok_click():               
+            def ok_click():  
+                data = {} 
+                data['name'] = name_entry.get() 
+                data['@id'] = uid_entry.get()
+                data['volume'] = vol_entry.get()
+                data['mass'] = mass_entry.get()
+                data['power'] = pow_entry.get()
+                data['bitsPerPixel'] = bpp_entry.get()                    
+                data['dataRate'] = dr_entry.get()   
+
+                data['fieldOfView'] = {}
                 if self._sen_type.get() == "ConicalFOV":
-                    specs = frame.get_specs()
-                    data = {}
-                    data['sensorGeometry'] = 'Conical'
-                    data['fullConeAngle'] = specs             
-                    print(data)  
-                    #sats = PreProcess.walker_orbits(data)                        
-                    #miss_specs.add_satellite(sats)
+                    specs = self.sen_fov_frame.get_specs()                    
+                    data['fieldOfView']['sensorGeometry'] = 'Conical'
+                    data['fieldOfView']['fullConeAngle'] = specs     
                 elif self._sen_type.get() == 'RectangularFOV':
-                    specs = frame.get_specs()
-                    data = {}
-                    data['sensorGeometry'] = 'Rectangular'
-                    data['alongTrackFieldOfView'] = specs[0] 
-                    data['crossTrackFieldOfView'] = specs[1]
-                    print(data)  
+                    specs = self.sen_fov_frame.get_specs()                    
+                    data['fieldOfView']['sensorGeometry'] = 'Rectangular'
+                    data['fieldOfView']['alongTrackFieldOfView'] = specs[0] 
+                    data['fieldOfView']['crossTrackFieldOfView'] = specs[1]
+                      
+                print(data)
+                basic_sen = BasicSensor.from_dict(data)
+                miss_specs.add_sensor(basic_sen)
+            
+            #miss_config.get_satellite_ids
 
             ok_btn = ttk.Button(okcancel_frame, text="Add", command=ok_click, width=ConfigureFrame.BTNWIDTH)
             ok_btn.grid(row=0, column=0)
