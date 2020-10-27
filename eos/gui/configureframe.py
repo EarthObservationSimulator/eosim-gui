@@ -462,6 +462,16 @@ class ConfigureFrame(ttk.Frame):
 
             orien_frame = ttk.LabelFrame(specs_frame, text="Orientation") # sensor orientation frame
             orien_frame.grid(row=0, column=3, padx=10, pady=10)
+            # define all child frames
+            orien_type_frame = ttk.Frame(orien_frame)
+            orien_type_frame.grid(row=0, column=0, sticky='nswe', padx=10, pady=10)
+            orien_type_frame.columnconfigure(0,weight=1)
+            orien_type_frame.rowconfigure(0,weight=1)
+
+            orien_specs_container = ttk.Frame(orien_frame)
+            orien_specs_container.grid(row=1, column=0, sticky='nswe', padx=10, pady=10)
+            orien_specs_container.columnconfigure(0,weight=1)
+            orien_specs_container.rowconfigure(0,weight=1)
 
             okcancel_frame = ttk.Frame(specs_frame)
             okcancel_frame.grid(row=1, column=0, columnspan=4, padx=10, pady=10) 
@@ -548,45 +558,132 @@ class ConfigureFrame(ttk.Frame):
                 def get_specs(self):
                     return [float(self.atfov_entry.get()), float(self.ctfov_entry.get())]
 
-            frames = {}
+            fov_specs_container_frames = {}
             for F in (ConicalFOV, RectangularFOV):
                 page_name = F.__name__
-                frame = F(parent=fov_specs_container, controller=self)
-                frames[page_name] = frame
-                frame.grid(row=0, column=0, sticky="nsew")
+                fov_sc_frame = F(parent=fov_specs_container, controller=self)
+                fov_specs_container_frames[page_name] = fov_sc_frame
+                fov_sc_frame.grid(row=0, column=0, sticky="nsew")
                 
             # define the widgets inside the child frames
             
             # constellation types child frame
-            MODES = [
+            FOV_MODES = [
                 ("Conical FOV", "ConicalFOV"),
                 ("Rectangular FOV", "RectangularFOV")
             ]
 
-            self._sen_type = tk.StringVar() # using self so that the variable is retained even after exit from the function
-            self._sen_type.set("ConicalFOV") # initialize
+            self._sen_fov_type = tk.StringVar() # using self so that the variable is retained even after exit from the function
+            self._sen_fov_type.set("ConicalFOV") # initialize
 
             def senfov_type_rbtn_click():
-                if self._sen_type.get() == "ConicalFOV":
-                    self.sen_fov_frame = frames["ConicalFOV"]
-                elif self._sen_type.get() == "RectangularFOV":
-                    self.sen_fov_frame = frames["RectangularFOV"]
-                frame.tkraise()
+                if self._sen_fov_type.get() == "ConicalFOV":
+                    self.fov_sc_frame = fov_specs_container_frames["ConicalFOV"]
+                elif self._sen_fov_type.get() == "RectangularFOV":
+                    self.fov_sc_frame = fov_specs_container_frames["RectangularFOV"]
+                self.fov_sc_frame.tkraise()
 
-            for text, mode in MODES:
+            for text, mode in FOV_MODES:
                 fov_type_rbtn = ttk.Radiobutton(fov_type_frame, text=text, command=senfov_type_rbtn_click,
-                                variable=self._sen_type, value=mode)
+                                variable=self._sen_fov_type, value=mode)
                 fov_type_rbtn.pack(anchor='w')
 
-            self.sen_fov_frame = frames[self._sen_type.get()]
-            self.sen_fov_frame.tkraise()      
+            self.fov_sc_frame = fov_specs_container_frames[self._sen_fov_type.get()]
+            self.fov_sc_frame.tkraise()      
 
 
             # define the widgets in maneuver_frame
-
+            
 
             # define the widgets in orien_frame
+            class NadirOrientation(ttk.Frame):
+                def __init__(self, parent, controller):
+                    ttk.Frame.__init__(self, parent)
+                    nadirorien_specs_frame = ttk.Frame(self) 
+                    nadirorien_specs_frame.grid(row=0, column=0)
 
+                def get_specs(self):
+                    return 0
+
+            class SideLookOrientation(ttk.Frame):
+                def __init__(self, parent, controller):
+                    ttk.Frame.__init__(self, parent)
+                    sidelookorien_specs_frame = ttk.Frame(self) 
+                    sidelookorien_specs_frame.grid(row=0, column=0)
+
+                    # define the widgets
+                    ttk.Label(sidelookorien_specs_frame, text="Side Look Angle [deg]", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
+                    self.sla_entry = ttk.Entry(sidelookorien_specs_frame, width=10)
+                    self.sla_entry.insert(0,10)
+                    self.sla_entry.bind("<FocusIn>", lambda args: self.sla_entry.delete('0', 'end'))
+                    self.sla_entry.grid(row=0, column=1, sticky='w', padx=10, pady=10)                   
+                
+                def get_specs(self):
+                    return float(self.sla_entry.get())
+            
+            class XYZOrientation(ttk.Frame):
+                def __init__(self, parent, controller):
+                    ttk.Frame.__init__(self, parent)
+                    xyzorien_specs_frame = ttk.Frame(self) 
+                    xyzorien_specs_frame.grid(row=0, column=0)
+
+                    # define the widgets
+                    ttk.Label(xyzorien_specs_frame, text="X rotation [deg]", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
+                    self.xorien_entry = ttk.Entry(xyzorien_specs_frame, width=10)
+                    self.xorien_entry.insert(0,10)
+                    self.xorien_entry.bind("<FocusIn>", lambda args: self.xorien_entry.delete('0', 'end'))
+                    self.xorien_entry.grid(row=0, column=1, sticky='w', padx=10, pady=10)
+                    
+                    ttk.Label(xyzorien_specs_frame, text="Y rotation [deg]", wraplength=150).grid(row=1, column=0, padx=10, pady=10, sticky='w')
+                    self.yorien_entry = ttk.Entry(xyzorien_specs_frame, width=10)
+                    self.yorien_entry.insert(0,20)
+                    self.yorien_entry.bind("<FocusIn>", lambda args: self.yorien_entry.delete('0', 'end'))
+                    self.yorien_entry.grid(row=1, column=1, sticky='w', padx=10, pady=10)
+
+                    ttk.Label(xyzorien_specs_frame, text="Z rotation [deg]", wraplength=150).grid(row=2, column=0, padx=10, pady=10, sticky='w')
+                    self.zorien_entry = ttk.Entry(xyzorien_specs_frame, width=10)
+                    self.zorien_entry.insert(0,20)
+                    self.zorien_entry.bind("<FocusIn>", lambda args: self.zorien_entry.delete('0', 'end'))
+                    self.zorien_entry.grid(row=1, column=1, sticky='w', padx=10, pady=10)
+                
+                def get_specs(self):
+                    return [float(self.xorien_entry.get()), float(self.yorien_entry.get()), float(self.zorien_entry.get())]
+
+            orien_specs_container_frames = {}
+            for F in (NadirOrientation, SideLookOrientation, XYZOrientation):
+                page_name = F.__name__
+                orien_sc_frame = F(parent=orien_specs_container, controller=self)
+                orien_specs_container_frames[page_name] = orien_sc_frame
+                orien_sc_frame.grid(row=0, column=0, sticky="nsew")
+                
+            # define the widgets inside the child frames
+            
+            # constellation types child frame
+            ORIEN_MODES = [
+                ("Nadir", "NadirOrientation"),
+                ("Side-look", "SideLookOrientation"),
+                ("X->Y->Z rotations", "XYZOrientation")
+            ]
+
+            self._sen_orien_type = tk.StringVar() # using self so that the variable is retained even after exit from the function
+            self._sen_orien_type.set("NadirOrientation") # initialize
+
+            def senorien_type_rbtn_click():
+                if self._sen_orien_type.get() == "NadirOrientation":
+                    self.orien_sc_frame = orien_specs_container_frames["NadirOrientation"]
+                elif self._sen_orien_type.get() == "SideLookOrientation":
+                    self.orien_sc_frame = orien_specs_container_frames["SideLookOrientation"]
+                elif self._sen_orien_type.get() == "XYZOrientation":
+                    self.orien_sc_frame = orien_specs_container_frames["XYZOrientation"]
+                self.orien_sc_frame.tkraise()
+
+            for text, mode in ORIEN_MODES:
+                senorien_type_rbtn = ttk.Radiobutton(orien_type_frame, text=text, command=senorien_type_rbtn_click,
+                                variable=self._sen_orien_type, value=mode)
+                senorien_type_rbtn.pack(anchor='w')
+
+            self.orien_sc_frame = orien_specs_container_frames[self._sen_orien_type.get()]
+            self.orien_sc_frame.tkraise()      
 
             # define the widgets in okcancel_frame
             # okcancel frame
@@ -601,16 +698,28 @@ class ConfigureFrame(ttk.Frame):
                 data['dataRate'] = dr_entry.get()   
 
                 data['fieldOfView'] = {}
-                if self._sen_type.get() == "ConicalFOV":
-                    specs = self.sen_fov_frame.get_specs()                    
+                specs = self.fov_sc_frame.get_specs() 
+                print(specs)
+                if self._sen_fov_type.get() == "ConicalFOV":                                       
                     data['fieldOfView']['sensorGeometry'] = 'Conical'
                     data['fieldOfView']['fullConeAngle'] = specs     
-                elif self._sen_type.get() == 'RectangularFOV':
-                    specs = self.sen_fov_frame.get_specs()                    
+                elif self._sen_fov_type.get() == 'RectangularFOV':
                     data['fieldOfView']['sensorGeometry'] = 'Rectangular'
                     data['fieldOfView']['alongTrackFieldOfView'] = specs[0] 
                     data['fieldOfView']['crossTrackFieldOfView'] = specs[1]
                       
+                data['orientation'] = {}
+                specs = self.orien_sc_frame.get_specs()
+                if self._sen_orien_type.get() == "NadirOrientation":                                        
+                    data['orientation']['convention'] = 'NADIR'
+                elif self._sen_orien_type.get() == 'SideLookOrientation':
+                    data['orientation']['convention'] = 'SIDE_LOOK'
+                    data['orientation']['sideLookAngle'] = specs
+                elif self._sen_orien_type.get() == 'XYZOrientation':
+                    data['orientation']['convention'] = 'XYZ'
+                    data['orientation']['xRotation'] = specs[0] 
+                    data['orientation']['yRotation'] = specs[1]
+                    data['orientation']['zRotation'] = specs[1]
                 print(data)
                 basic_sen = BasicSensor.from_dict(data)
                 miss_specs.add_sensor(basic_sen)
