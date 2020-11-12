@@ -19,12 +19,13 @@ class GuiStyle():
 
 class MissionConfig:
     """ Class which holds all the mission configuration parameters """
-    def __init__(self, epoch=None, duration=None, satellite=None, sensor=None, sat_to_sensor_map=None):
+    def __init__(self, epoch=None, duration=None, satellite=None, sensor=None, sat_to_sensor_map=None, prop=None):
         self.epoch = epoch if epoch is not None else None
         self.duration = duration if duration is not None else None
         self.satellite = list(satellite) if satellite is not None else list() # satellite is the same as orbit
         self.sensor = list(sensor) if sensor is not None else list()
         self.sat_to_sensor_map = list(sat_to_sensor_map) if sat_to_sensor_map is not None else list()
+        self.prop = prop if prop is not None else None
     
     def update_epoch(self, epoch):
         self.epoch = epoch
@@ -38,11 +39,14 @@ class MissionConfig:
         else:
             self.satellite.append(sat) 
     
+    def add_propagator(self, prop):
+        self.prop = prop
+
     def add_sensor(self, sensor, sensor_to_sat):
         """ Add sensor to the given list of satellites.
 
             :param sensor: Sensor 
-            :paramtype sensor: :class:`instrupy.BasicSensor`
+            :paramtype sensor: :class:`instrupy.`
 
             :param sensor_to_sat: Unique IDs of satellites to which the sensor is to be attached. 
             :paramtype sensor_to_sat: list
@@ -80,6 +84,7 @@ class MissionConfig:
 
         miss_specs_dict = dict({"epoch":self.epoch,
                                 "duration": self.duration,
-                                "satellite": sat_dict
+                                "satellite": sat_dict,
+                                "propagator": self.prop
                                }) 
         return miss_specs_dict

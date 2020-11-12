@@ -5,6 +5,7 @@ docs/_build/*
 !docs/_static/.gitkeep
 docs/_templates/*
 !docs/_templates/.gitkeep
+test_sim/*
 
 # objects, executables, core dumps
 *.o

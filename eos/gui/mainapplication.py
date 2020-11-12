@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk 
 from .startframe import StartFrame
 from .configureframe import ConfigureFrame
+from .propagateframe import PropagateFrame
 import os
 from eos.config import GuiStyle
 class MainApplication:   
@@ -10,7 +11,7 @@ class MainApplication:
         self.parent = parent
         self.parent.title("Earth Observation Simulator")
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        self.parent.iconbitmap(True, dir_path+"/../../icon.ico")
+        #self.parent.iconbitmap(True, dir_path+"/../../icon.ico")
         self.parent.geometry(GuiStyle.main_window_geom)            
         MainApplication.build_main_window(self)      
         GuiStyle()
@@ -49,7 +50,7 @@ class MainApplication:
         welcome_btn.grid(row=0, column=0, sticky='nswe')
         configure_btn = ttk.Button(lsidebar, text='CONFIGURE',command=lambda: self.show_frame("ConfigureFrame"))
         configure_btn.grid(row=1, column=0, sticky='nswe')
-        propagate_btn = ttk.Button(lsidebar, text='PROPAGATE',command=lambda: self.show_frame("PropogateFrame")) 
+        propagate_btn = ttk.Button(lsidebar, text='PROPAGATE',command=lambda: self.show_frame("PropagateFrame")) 
         propagate_btn.grid(row=2, column=0, sticky='nswe')
         power_btn = ttk.Button(lsidebar, text='POWER',command=lambda: self.show_frame("PowerFrame")) 
         power_btn.grid(row=3, column=0, sticky='nswe')
@@ -87,7 +88,7 @@ class MainApplication:
         # put all of the pages in the same location;
         # the one on the top of the stacking order
         # will be the one that is visible.
-        for F in (StartFrame, ConfigureFrame):
+        for F in (StartFrame, ConfigureFrame, PropagateFrame):
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
