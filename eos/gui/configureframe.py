@@ -9,6 +9,10 @@ import orbitpy
 import tkinter.filedialog, tkinter.messagebox
 from instrupy.public_library import Instrument
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 miss_specs = MissionConfig()     
 
 class ConfigureFrame(ttk.Frame):
@@ -84,6 +88,7 @@ class ConfigureFrame(ttk.Frame):
 
     def click_mission_btn(self):      
 
+        logger.info("clckied mission button")
         # create and configure child window, parent frame
         miss_win = tk.Toplevel()
 

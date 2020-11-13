@@ -1,13 +1,39 @@
 import tkinter as tk
 from eos.gui.mainapplication import MainApplication
 import os
+import sys
+import argparse
+import shutil
+import logging
 
-def main(): 
+def main(loglevel): 
     root = tk.Tk()
     root.resizable(False, False)
-    MainApplication(root)
+    MainApplication(root, loglevel)
     root.mainloop()
     
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description='Earth Observation Simulator'
+    )
+    parser.add_argument(
+        '-loglevel',
+        default="INFO",
+        type=str,
+        help="Logging level: Specifiy CRITICAL or ERROR or WARNING or INFO or DEBUG."
+    )   
+
+    args = parser.parse_args()
+    if(args.loglevel=='CRITICAL'):
+        loglevel = logging.CRITICAL
+    elif(args.loglevel=='ERROR'):
+        loglevel = logging.ERROR
+    elif(args.loglevel=='WARNING'):
+        loglevel = logging.WARNING
+    elif(args.loglevel=='INFO'):
+        loglevel = logging.INFO
+    elif(args.loglevel=='DEBUG'):
+        loglevel = logging.DEBUG
+
+    main(loglevel)

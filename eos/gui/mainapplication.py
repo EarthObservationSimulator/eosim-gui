@@ -3,20 +3,24 @@ from tkinter import ttk
 from .startframe import StartFrame
 from .configureframe import ConfigureFrame
 from .propagateframe import PropagateFrame
+import tkinter.scrolledtext
 import os
 from eos.config import GuiStyle
+import sys
+import logging
+import time
 class MainApplication:   
 
-    def __init__(self, parent):
+    def __init__(self, parent, loglevel=logging.INFO):
         self.parent = parent
         self.parent.title("Earth Observation Simulator")
         dir_path = os.path.dirname(os.path.realpath(__file__))
         #self.parent.iconbitmap(True, dir_path+"/../../icon.ico")
         self.parent.geometry(GuiStyle.main_window_geom)            
-        MainApplication.build_main_window(self)      
+        MainApplication.build_main_window(self, loglevel)      
         GuiStyle()
         
-    def build_main_window(self):
+    def build_main_window(self, loglevel):
 
         TopMenuBar(self.parent)
         
@@ -72,6 +76,21 @@ class MainApplication:
         messagearea.grid(row=1, column=1, columnspan=1, sticky='nswe')
         messagearea.columnconfigure(0,weight=1)
         messagearea.rowconfigure(0,weight=1)     
+        messages = tk.scrolledtext.ScrolledText(messagearea)
+        messages.grid(row=0, column=0, sticky='nsew')        
+        messages.configure(state ='disabled') # Making the text read only 
+
+        # redirect stdout, logging messages to messages ScrolledText widget
+        sys.stdout = TextRedirector(messages, "stdout")
+        sys.stderr = TextRedirector(messages, "stderr")
+
+        # root logger configuration is set here becasue it has to appear after the stdout stream has been redirected to the tk sCrolledText widget
+        # TBD logger does not differentiate between INFO and DEBUG levels, debug.
+        logging.basicConfig(level=loglevel, handlers=[
+                    logging.FileHandler("debug.log", 'w'),
+                    logging.StreamHandler(stream=sys.stdout)
+                    ])     
+        logging.info("Application started at: "+ str(time.asctime()))
 
         # main content area
         # the container is where we'll stack a bunch of frames
@@ -142,3 +161,12 @@ class TopMenuBar:
 
         self.parent.config(menu=menubar)
 
+class TextRedirector(object):
+    def __init__(self, widget, tag="stdout"):
+        self.widget = widget
+        self.tag = tag
+
+    def write(self, str):
+        self.widget.configure(state="normal")
+        self.widget.insert("end", str, (self.tag,))
+        self.widget.configure(state="disabled")
