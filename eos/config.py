@@ -19,13 +19,14 @@ class GuiStyle():
 
 class MissionConfig:
     """ Class which holds all the mission configuration parameters """
-    def __init__(self, epoch=None, duration=None, satellite=None, sensor=None, sat_to_sensor_map=None, prop=None):
+    def __init__(self, epoch=None, duration=None, satellite=None, sensor=None, sat_to_sensor_map=None, prop=None, cov_grid=None):
         self.epoch = epoch if epoch is not None else None
         self.duration = duration if duration is not None else None
         self.satellite = list(satellite) if satellite is not None else list() # satellite is the same as orbit
         self.sensor = list(sensor) if sensor is not None else list()
         self.sat_to_sensor_map = list(sat_to_sensor_map) if sat_to_sensor_map is not None else list()
         self.prop = prop if prop is not None else None
+        self.cov_grid =  cov_grid if cov_grid is not None else None
     
     def update_epoch(self, epoch):
         self.epoch = epoch
@@ -69,6 +70,8 @@ class MissionConfig:
             orb_specs.append([_sat._id, _sat.sma, _sat.ecc, _sat.inc, _sat.raan, _sat.aop, _sat.ta])        
         return orb_specs 
 
+    def add_coverage_grid(self, data):
+        self.cov_grid = data
 
     def to_dict(self):
         """ Format the MissionConfig object into a dictionary (so it may later be exported as JSON file)."""
@@ -85,6 +88,7 @@ class MissionConfig:
         miss_specs_dict = dict({"epoch":self.epoch,
                                 "duration": self.duration,
                                 "satellite": sat_dict,
-                                "propagator": self.prop
+                                "propagator": self.prop,
+                                "grid": self.cov_grid
                                }) 
         return miss_specs_dict

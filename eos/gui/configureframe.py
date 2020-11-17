@@ -8,7 +8,7 @@ import json
 import orbitpy
 import tkinter.filedialog, tkinter.messagebox
 from instrupy.public_library import Instrument
-
+import os
 import logging
 
 logger = logging.getLogger(__name__)
@@ -70,9 +70,9 @@ class ConfigureFrame(ttk.Frame):
         prp_set_btn.grid(row=0, column=0)
         com_set_btn = ttk.Button(settings_frame, text="Comm", width=ConfigureFrame.BTNWIDTH)
         com_set_btn.grid(row=0, column=1)
-        cov_set_btn = ttk.Button(settings_frame, text="Coverage", width=ConfigureFrame.BTNWIDTH)
+        cov_set_btn = ttk.Button(settings_frame, text="Coverage", command=self.click_coverage_settings_btn, width=ConfigureFrame.BTNWIDTH)
         cov_set_btn.grid(row=1, column=0)
-        obs_syn_btn = ttk.Button(settings_frame, text="Obs Synthesis", width=ConfigureFrame.BTNWIDTH)
+        obs_syn_btn = ttk.Button(settings_frame, text="TBD", width=ConfigureFrame.BTNWIDTH)
         obs_syn_btn.grid(row=1, column=1)
 
         #
@@ -967,13 +967,15 @@ class ConfigureFrame(ttk.Frame):
                 orbitpy_specs_frame.grid(row=0, column=0, ipadx=20, ipady=20)
 
                 # define the widgets inside the child frames
-                ttk.Label(orbitpy_specs_frame, text="Custom Time Step [s]", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
-                self.cus_time_step_entry = ttk.Entry(orbitpy_specs_frame, width=10)
-                self.cus_time_step_entry.grid(row=0, column=1, sticky='w')
+                ttk.Label(orbitpy_specs_frame, text="All entries are optional", wraplength=150).grid(row=0, column=0, padx=10, pady=10)
 
-                ttk.Label(orbitpy_specs_frame, text="Custom Time Resolution Factor", wraplength=150).grid(row=1, column=0, padx=10, pady=10, sticky='w')
+                ttk.Label(orbitpy_specs_frame, text="Custom Time Step [s]", wraplength=150).grid(row=1, column=0, padx=10, pady=10, sticky='w')
+                self.cus_time_step_entry = ttk.Entry(orbitpy_specs_frame, width=10)
+                self.cus_time_step_entry.grid(row=1, column=1, sticky='w')
+
+                ttk.Label(orbitpy_specs_frame, text="Custom Time Resolution Factor", wraplength=150).grid(row=2, column=0, padx=10, pady=10, sticky='w')
                 self.cus_time_resf_entry = ttk.Entry(orbitpy_specs_frame, width=10)
-                self.cus_time_resf_entry.grid(row=1, column=1, sticky='w')               
+                self.cus_time_resf_entry.grid(row=2, column=1, sticky='w')               
             
             def get_specs(self):
                 return [self.cus_time_step_entry.get(), self.cus_time_resf_entry.get()]               
@@ -1040,6 +1042,7 @@ class ConfigureFrame(ttk.Frame):
                 prop['customTimeResFactor'] = float(specs[1]) if specs[1] != "" else None          
  
                 miss_specs.add_propagator(prop)
+                prop_win.destroy()
             
         ok_btn = ttk.Button(okcancel_frame, text="Ok", command=ok_click, width=ConfigureFrame.BTNWIDTH)
         ok_btn.grid(row=0, column=0)
@@ -1047,8 +1050,211 @@ class ConfigureFrame(ttk.Frame):
         cancel_btn = ttk.Button(okcancel_frame, text="Exit", command=prop_win.destroy, width=ConfigureFrame.BTNWIDTH)
         cancel_btn.grid(row=0, column=1)  
 
+    def click_coverage_settings_btn(self):      
+
+        # create and configure child window, parent frame
+        cov_win = tk.Toplevel()
+        cov_win.rowconfigure(0,weight=1)
+        cov_win.rowconfigure(1,weight=1)
+        cov_win.rowconfigure(2,weight=1)
+        cov_win.columnconfigure(0,weight=1)
+
+        cov_win_frame = ttk.Frame(cov_win)
+        cov_win_frame.grid(row=0, column=0, padx=5, pady=5)
+
+        # define all child frames
+        cov_type_frame = ttk.LabelFrame(cov_win_frame, text="Coverage Calculator Type")
+        cov_type_frame.grid(row=0, column=0, sticky='nswe', padx=5, pady=5)
+
+        # the container is where we'll stack a bunch of frames
+        # on top of each other, then the one we want visible
+        # will be raised above the others
+        # grid configure
+        cov_specs_container = ttk.LabelFrame(cov_win_frame, text="Specifications")
+        cov_specs_container.grid(row=1, column=0, sticky='nswe', padx=5, pady=5)
+        cov_specs_container.columnconfigure(0,weight=1)
+        cov_specs_container.rowconfigure(0,weight=1)
+
+        # okcancel frame
+        okcancel_frame = ttk.Label(cov_win_frame)
+        okcancel_frame.grid(row=2, column=0, sticky='nswe', padx=5, pady=5)
+        okcancel_frame.columnconfigure(0,weight=1)
+        okcancel_frame.rowconfigure(0,weight=1)
+
+        class GridPointsCoverageCalculator(ttk.Frame):
+            def __init__(self, parent, controller):
+                ttk.Frame.__init__(self, parent)
+                gridpnts_specs_frame = ttk.Frame(self) 
+                gridpnts_specs_frame.grid(row=0, column=0, ipadx=5, ipady=5)
+
+                gripnts_add_by_region_frame = ttk.Frame(gridpnts_specs_frame)
+                gripnts_add_by_region_frame.grid(row=0, column=0)
+
+                gripnts_add_by_datafile_frame = ttk.Frame(gridpnts_specs_frame)
+                gripnts_add_by_datafile_frame.grid(row=1, column=0)
+
+                # define the widgets inside the child frames
+                self._gridpnts_specs_type = tk.StringVar() # using self so that the variable is retained even after exit from the function
+                self._gridpnts_specs_type.set("LatLonBounds") # initialize
+                def gridpnts_specs_rbtn_click():
+                    if self._gridpnts_specs_type.get() == "LatLonBounds":
+                        # disable the frame containing the other option, except for the radio-button
+                        for child in gripnts_add_by_datafile_frame.winfo_children():
+                            child.configure(state='disable')
+                        gridpnts_specs_type_rbtn_2.configure(state='normal')
+                        # enable the frame containing the current option
+                        for child in gripnts_add_by_region_frame.winfo_children():
+                            child.configure(state='normal')
+                        
+                    elif self._gridpnts_specs_type.get() == "DataFile":
+                        # disable the frame containing the other option, except for the radio-button
+                        for child in gripnts_add_by_region_frame.winfo_children():
+                            child.configure(state='disable')   
+                        gridpnts_specs_type_rbtn_1.configure(state='normal')
+                        # enable the frame containing the current option
+                        for child in gripnts_add_by_datafile_frame.winfo_children():
+                            child.configure(state='normal')             
+
+                gridpnts_specs_type_rbtn_1 = ttk.Radiobutton(gripnts_add_by_region_frame, text="Lat/Lon bounds", command=gridpnts_specs_rbtn_click,
+                                                             variable=self._gridpnts_specs_type, value="LatLonBounds")
+                gridpnts_specs_type_rbtn_1.grid(row=0, column=0, padx=10, pady=10)
+
+                self.region_info = []
+                def add_region():
+                    self.region_info.append({'@id': gridpnts_specs_regid_entry.get(), 
+                                             'latLower': gridpnts_specs_latlow_entry.get(), 
+                                             'latUpper': gridpnts_specs_latup_entry.get(),                                              
+                                             'lonLower': gridpnts_specs_lonlow_entry.get(),
+                                             'lonUpper': gridpnts_specs_lonup_entry.get()})
+
+
+                ttk.Button(gripnts_add_by_region_frame, text="Add region", command=add_region).grid(row=0, column=1, padx=10, pady=10)
+                
+                ttk.Label(gripnts_add_by_region_frame, text="Region ID").grid(row=1, column=0, sticky='w', padx=10, pady=10)
+                gridpnts_specs_regid_entry = ttk.Entry(gripnts_add_by_region_frame, width=10)
+                gridpnts_specs_regid_entry.insert(0,random.randint(0,100))
+                gridpnts_specs_regid_entry.bind("<FocusIn>", lambda args: gridpnts_specs_regid_entry.delete('0', 'end'))
+                gridpnts_specs_regid_entry.grid(row=1, column=1, sticky='w')
+
+                ttk.Label(gripnts_add_by_region_frame, text="Lat lower [deg]").grid(row=2, column=0, sticky='w', padx=10, pady=10)
+                gridpnts_specs_latlow_entry = ttk.Entry(gripnts_add_by_region_frame, width=10)
+                gridpnts_specs_latlow_entry.insert(0,-10)
+                gridpnts_specs_latlow_entry.bind("<FocusIn>", lambda args: gridpnts_specs_latlow_entry.delete('0', 'end'))
+                gridpnts_specs_latlow_entry.grid(row=2, column=1, sticky='w')
+
+                ttk.Label(gripnts_add_by_region_frame, text="Lat upper [deg]").grid(row=3, column=0, sticky='w', padx=10, pady=10)
+                gridpnts_specs_latup_entry = ttk.Entry(gripnts_add_by_region_frame, width=10)
+                gridpnts_specs_latup_entry.insert(0,20)
+                gridpnts_specs_latup_entry.bind("<FocusIn>", lambda args: gridpnts_specs_latup_entry.delete('0', 'end'))
+                gridpnts_specs_latup_entry.grid(row=3, column=1, sticky='w')
+
+                ttk.Label(gripnts_add_by_region_frame, text="Lon lower [deg]").grid(row=4, column=0, sticky='w', padx=10, pady=10)
+                gridpnts_specs_lonlow_entry = ttk.Entry(gripnts_add_by_region_frame, width=10)
+                gridpnts_specs_lonlow_entry.insert(0,-110)
+                gridpnts_specs_lonlow_entry.bind("<FocusIn>", lambda args: gridpnts_specs_lonlow_entry.delete('0', 'end'))
+                gridpnts_specs_lonlow_entry.grid(row=4, column=1, sticky='w')
+
+                ttk.Label(gripnts_add_by_region_frame, text="Lon upper [deg]").grid(row=5, column=0, sticky='w', padx=10, pady=10)
+                gridpnts_specs_lonup_entry = ttk.Entry(gripnts_add_by_region_frame, width=10)
+                gridpnts_specs_lonup_entry.insert(0,-10)
+                gridpnts_specs_lonup_entry.bind("<FocusIn>", lambda args: gridpnts_specs_lonup_entry.delete('0', 'end'))
+                gridpnts_specs_lonup_entry.grid(row=5, column=1, sticky='w')
+
+                ttk.Label(gripnts_add_by_region_frame, text="(Optional) Common grid-resolution [deg]", wraplength=150).grid(row=6, column=0, sticky='w', padx=10, pady=10)
+                self.gridpnts_specs_gridres_entry = ttk.Entry(gripnts_add_by_region_frame, width=10)
+                self.gridpnts_specs_gridres_entry.grid(row=6, column=1, sticky='w')
+
+                ttk.Label(gripnts_add_by_region_frame, text="(Optional) Common grid-resolution factor", wraplength=150).grid(row=7, column=0, sticky='w', padx=10, pady=10)
+                self.gridpnts_specs_gridresfac_entry = ttk.Entry(gripnts_add_by_region_frame, width=10)
+                self.gridpnts_specs_gridresfac_entry.grid(row=7, column=1, sticky='w')
+
+                gridpnts_specs_type_rbtn_2 = ttk.Radiobutton(gripnts_add_by_datafile_frame, text="Data file", command=gridpnts_specs_rbtn_click,
+                                    variable=self._gridpnts_specs_type, value="DataFile")
+                gridpnts_specs_type_rbtn_2.grid(row=0, column=0, padx=10, pady=5)
+
+                def click_grid_data_file_path_btn():
+                    self.grid_data_fp = tkinter.filedialog.askopenfilename(initialdir=os.getcwd(), title="Please select the grid-point data file:", filetypes=(("csv files","*.csv"),("All files","*.*")))  
+                    grid_data_fp_entry.configure(state='normal')
+                    grid_data_fp_entry.delete(0,'end')
+                    grid_data_fp_entry.insert(0,self.grid_data_fp)
+                    grid_data_fp_entry.configure(state='disabled')                    
+
+                ttk.Button(gripnts_add_by_datafile_frame, text="Select Path", command=click_grid_data_file_path_btn, state='disabled').grid(row=0, column=1, sticky='w', padx=10, pady=10)
+                grid_data_fp_entry=tk.Entry(gripnts_add_by_datafile_frame, state='disabled')
+                grid_data_fp_entry.grid(row=1,column=0, padx=10, pady=10, columnspan=2, sticky='ew')             
+            
+            def get_specs(self):            
+                # see the state of the radio-button and then return the appropriate data    
+                if(self._gridpnts_specs_type.get() == "LatLonBounds"):
+                    return {"@type": "autoGrid", "regions":self.region_info, "customGridRes": self.gridpnts_specs_gridres_entry.get(), "customGridResFactor":self.gridpnts_specs_gridresfac_entry.get()}
+                elif(self._gridpnts_specs_type.get() == "DataFile"):
+                    return {"@type": "customGrid", "covGridFilePath": self.grid_data_fp}     
+
+        class PointingOptionsCoverageCalculator(ttk.Frame):
+            def __init__(self, parent, controller):
+                ttk.Frame.__init__(self, parent)         
+                popts_specs_frame = ttk.Frame(self) 
+                popts_specs_frame.grid(row=0, column=0, ipadx=5, ipady=5)    
+                ttk.Label(popts_specs_frame, text="Under development").pack()
+        
+        class PointingOptionsWithGridPointsCoverageCalculator(ttk.Frame):
+            def __init__(self, parent, controller):
+                ttk.Frame.__init__(self, parent)  
+                popts_with_grid_specs_frame = ttk.Frame(self) 
+                popts_with_grid_specs_frame.grid(row=0, column=0, ipadx=5, ipady=5)
+                ttk.Label(popts_with_grid_specs_frame, text="Under development").pack()          
+
+        frames = {}
+        for F in (GridPointsCoverageCalculator, PointingOptionsCoverageCalculator, PointingOptionsWithGridPointsCoverageCalculator):
+            page_name = F.__name__
+            frame = F(parent=cov_specs_container, controller=self)
+            frames[page_name] = frame
+            frame.grid(row=0, column=0, sticky="nsew")
+        
+        # define the widgets inside the child frames
+        
+        # coverage types child frame
+        COV_CALC_TYPES = [
+            ("Grid Points", "GridPointsCoverageCalculator"),
+            ("Pointing Options", "PointingOptionsCoverageCalculator"),
+            ("Pointing Options With Grid Points", "PointingOptionsWithGridPointsCoverageCalculator")
+        ]
+
+        self._cov_type = tk.StringVar() # using self so that the variable is retained even after exit from the function
+        self._cov_type.set("GridPointsCoverageCalculator") # initialize
+
+        def cov_type_rbtn_click():
+            if self._cov_type.get() == "GridPointsCoverageCalculator":
+                frame = frames["GridPointsCoverageCalculator"]
+            elif self._cov_type.get() == "PointingOptionsCoverageCalculator":
+                frame = frames["PointingOptionsCoverageCalculator"]
+            elif self._cov_type.get() == "PointingOptionsWithGridPointsCoverageCalculator":
+                frame = frames["PointingOptionsWithGridPointsCoverageCalculator"]
+            frame.tkraise()
+
+        for text, mode in COV_CALC_TYPES:
+            cov_type_rbtn = ttk.Radiobutton(cov_type_frame, text=text, command=cov_type_rbtn_click,
+                            variable=self._cov_type, value=mode)
+            cov_type_rbtn.pack(anchor='w', padx=5, pady=5)
+
+        frame = frames[self._cov_type.get()]
+        frame.tkraise()    
+
+        # okcancel frame
+        def ok_click():               
+            if self._cov_type.get() == "GridPointsCoverageCalculator":
+                specs = frame.get_specs()
+                miss_specs.add_coverage_grid(specs)
+                cov_win.destroy()
+            
+        ok_btn = ttk.Button(okcancel_frame, text="Ok", command=ok_click, width=ConfigureFrame.BTNWIDTH)
+        ok_btn.grid(row=0, column=0)
+
+        cancel_btn = ttk.Button(okcancel_frame, text="Exit", command=cov_win.destroy, width=ConfigureFrame.BTNWIDTH)
+        cancel_btn.grid(row=0, column=1)  
+        
     def click_visualize_btn(self):
         vis_win = tk.Toplevel()
-        ttk.Label(vis_win, text=(miss_specs.to_dict()), wraplength=150).pack(padx=20, pady=20)
+        ttk.Label(vis_win, text=(miss_specs.to_dict()), wraplength=150).pack(padx=5, pady=5)
 
     
