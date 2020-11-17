@@ -9,17 +9,30 @@ from eos.config import GuiStyle
 import sys
 import logging
 import time
+import traceback
+
 class MainApplication:   
 
     def __init__(self, parent, loglevel=logging.INFO):
+        parent.report_callback_exception = self.report_callback_exception
         self.parent = parent
+        
         self.parent.title("Earth Observation Simulator")
         dir_path = os.path.dirname(os.path.realpath(__file__))
         #self.parent.iconbitmap(True, dir_path+"/../../icon.ico")
-        self.parent.geometry(GuiStyle.main_window_geom)            
+        self.parent.geometry(GuiStyle.main_window_geom)    
+               
         MainApplication.build_main_window(self, loglevel)      
+        
         GuiStyle()
         
+        
+    def report_callback_exception(self, exc_type, exc_value, exc_traceback):
+        logging.error(
+                "Uncaught exception",
+                exc_info=(exc_type, exc_value, exc_traceback)
+            )
+
     def build_main_window(self, loglevel):
 
         TopMenuBar(self.parent)
@@ -66,7 +79,7 @@ class MainApplication:
         cov_btn.grid(row=6, column=0, sticky='nswe')
         dataq_btn = ttk.Button(lsidebar, text='DATA QUALITY',command=lambda: self.show_frame("DataQFrame")) 
         dataq_btn.grid(row=7, column=0, sticky='nswe')
-        synobs_btn = ttk.Button(lsidebar, text='SYNTHETIC OBSERVATIONS',command=lambda: self.show_frame("SynObsFrame")) 
+        synobs_btn = ttk.Button(lsidebar, text='TBD',command=lambda: self.show_frame("SynObsFrame")) 
         synobs_btn.grid(row=8, column=0, sticky='nswe')            
 
         # message area frame
@@ -83,13 +96,12 @@ class MainApplication:
         # redirect stdout, logging messages to messages ScrolledText widget
         sys.stdout = TextRedirector(messages, "stdout")
         sys.stderr = TextRedirector(messages, "stderr")
-
-        # root logger configuration is set here becasue it has to appear after the stdout stream has been redirected to the tk sCrolledText widget
-        # TBD logger does not differentiate between INFO and DEBUG levels, debug.
         logging.basicConfig(level=loglevel, handlers=[
                     logging.FileHandler("debug.log", 'w'),
                     logging.StreamHandler(stream=sys.stdout)
-                    ])     
+                    ])         
+
+        
         logging.info("Application started at: "+ str(time.asctime()))
 
         # main content area
@@ -170,3 +182,4 @@ class TextRedirector(object):
         self.widget.configure(state="normal")
         self.widget.insert("end", str, (self.tag,))
         self.widget.configure(state="disabled")
+

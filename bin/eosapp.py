@@ -5,13 +5,14 @@ import sys
 import argparse
 import shutil
 import logging
+import time
 
 def main(loglevel): 
     root = tk.Tk()
     root.resizable(False, False)
     MainApplication(root, loglevel)
+    os.chdir('output') # set to default working directory
     root.mainloop()
-    
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
