@@ -81,8 +81,9 @@ class PropagateFrame(ttk.Frame):
             # Run orbit propagation and coverage for each of the satellties (orbits) in the constellation
             for orb_indx in range(0,len(prop_cov_param)):
                 pcp = prop_cov_param[orb_indx]
+                pcp.cov_calcs_app = util.CoverageCalculationsApproach.SKIP # force skip of coverage calculations
                 opc = orbitpropcov.OrbitPropCov(pcp)
-                print(".......Running Orbit Propagation and Coverage for satellite.......", pcp.sat_id)
+                print(".......Running Orbit Propagation for satellite.......", pcp.sat_id)
                 opc.run()        
                 print(".......Done.......")
 

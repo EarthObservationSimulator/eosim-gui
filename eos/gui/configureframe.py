@@ -88,7 +88,6 @@ class ConfigureFrame(ttk.Frame):
 
     def click_mission_btn(self):      
 
-        logger.info("clckied mission button")
         # create and configure child window, parent frame
         miss_win = tk.Toplevel()
 
@@ -412,7 +411,7 @@ class ConfigureFrame(ttk.Frame):
         # okcancel frame
         def ok_click():               
             if self._constl_type.get() == "HomogenousWalkerFrame":
-                specs = frame.get_specs()
+                specs = frames[self._constl_type.get()].get_specs()
                 data = {}
                 data['@id'] = specs[0]
                 data['numberSatellites'] = specs[1]
@@ -1006,7 +1005,7 @@ class ConfigureFrame(ttk.Frame):
         
         # propagator types child frame
         MODES = [
-            ("OrbitPy J2 Analytical Propagator", "OrbitPyJ2AnalyticalPropagator"),
+            ("J2 Analytical Propagator", "OrbitPyJ2AnalyticalPropagator"),
             ("GMAT Pre-computed Satellite States", "GMATPreComputedSatelliteStates"),
             ("STK Pre-computed Satellite States", "STKPreComputedSatelliteStates")
         ]
@@ -1035,7 +1034,7 @@ class ConfigureFrame(ttk.Frame):
         # okcancel frame
         def ok_click():               
             if self._prop_type.get() == "OrbitPyJ2AnalyticalPropagator":
-                specs = frame.get_specs()
+                specs = frames[self._prop_type.get()].get_specs()
                 prop = {}
                 prop['@type'] = 'OrbitPyJ2Analytical'
                 prop['customTimeStep'] = float(specs[0]) if specs[0] != "" else None
@@ -1121,11 +1120,11 @@ class ConfigureFrame(ttk.Frame):
 
                 self.region_info = []
                 def add_region():
-                    self.region_info.append({'@id': gridpnts_specs_regid_entry.get(), 
-                                             'latLower': gridpnts_specs_latlow_entry.get(), 
-                                             'latUpper': gridpnts_specs_latup_entry.get(),                                              
-                                             'lonLower': gridpnts_specs_lonlow_entry.get(),
-                                             'lonUpper': gridpnts_specs_lonup_entry.get()})
+                    self.region_info.append({'@id': float(gridpnts_specs_regid_entry.get()), 
+                                             'latLower': float(gridpnts_specs_latlow_entry.get()), 
+                                             'latUpper': float(gridpnts_specs_latup_entry.get()),                                              
+                                             'lonLower': float(gridpnts_specs_lonlow_entry.get()),
+                                             'lonUpper': float(gridpnts_specs_lonup_entry.get())})
 
 
                 ttk.Button(gripnts_add_by_region_frame, text="Add region", command=add_region).grid(row=0, column=1, padx=10, pady=10)
@@ -1173,7 +1172,7 @@ class ConfigureFrame(ttk.Frame):
                 gridpnts_specs_type_rbtn_2.grid(row=0, column=0, padx=10, pady=5)
 
                 def click_grid_data_file_path_btn():
-                    self.grid_data_fp = tkinter.filedialog.askopenfilename(initialdir=os.getcwd(), title="Please select the grid-point data file:", filetypes=(("csv files","*.csv"),("All files","*.*")))  
+                    self.grid_data_fp = tkinter.filedialog.askopenfilename(initialdir=os.getcwd(), title="Please select the grid-point data file:", filetypes=(("All files","*.*"), ("csv files","*.csv")))  
                     grid_data_fp_entry.configure(state='normal')
                     grid_data_fp_entry.delete(0,'end')
                     grid_data_fp_entry.insert(0,self.grid_data_fp)
@@ -1186,7 +1185,11 @@ class ConfigureFrame(ttk.Frame):
             def get_specs(self):            
                 # see the state of the radio-button and then return the appropriate data    
                 if(self._gridpnts_specs_type.get() == "LatLonBounds"):
-                    return {"@type": "autoGrid", "regions":self.region_info, "customGridRes": self.gridpnts_specs_gridres_entry.get(), "customGridResFactor":self.gridpnts_specs_gridresfac_entry.get()}
+                    customGridRes = self.gridpnts_specs_gridres_entry.get()
+                    customGridRes = float(customGridRes) if customGridRes != "" else None                    
+                    customGridResFactor = self.gridpnts_specs_gridresfac_entry.get()
+                    customGridResFactor = float(customGridResFactor) if customGridResFactor != "" else None
+                    return {"@type": "autoGrid", "regions":self.region_info, "customGridRes": customGridRes, "customGridResFactor":customGridResFactor}
                 elif(self._gridpnts_specs_type.get() == "DataFile"):
                     return {"@type": "customGrid", "covGridFilePath": self.grid_data_fp}     
 
@@ -1195,8 +1198,44 @@ class ConfigureFrame(ttk.Frame):
                 ttk.Frame.__init__(self, parent)         
                 popts_specs_frame = ttk.Frame(self) 
                 popts_specs_frame.grid(row=0, column=0, ipadx=5, ipady=5)    
-                ttk.Label(popts_specs_frame, text="Under development").pack()
-        
+
+                def click_popts_data_file_path_btn():
+                    self.popts_data_fp = tkinter.filedialog.askopenfilename(initialdir=os.getcwd(), title="Please select the pointing-options data file:", filetypes=(("All files","*.*"), ("csv files","*.csv")))  
+                    popts_data_fp_entry.configure(state='normal')
+                    popts_data_fp_entry.delete(0,'end')
+                    popts_data_fp_entry.insert(0,self.popts_data_fp)
+                    popts_data_fp_entry.configure(state='disabled')
+
+                ttk.Button(popts_specs_frame, text="Select Path", command=click_popts_data_file_path_btn).grid(row=0, column=0, padx=10, pady=5, columnspan=2)
+                popts_data_fp_entry=tk.Entry(popts_specs_frame, state='disabled')
+                popts_data_fp_entry.grid(row=1,column=0, padx=10, pady=5, sticky='ew', columnspan=2)
+
+                # display available sensors
+                ttk.Label(popts_specs_frame, text="Select the sensors associated with this pointing-data file", wraplength=200).grid(row=2, column=0, columnspan=2, sticky='w',  padx=10, pady=(20, 5))
+                sensor_tree_scroll = ttk.Scrollbar(popts_specs_frame)
+                sensor_tree_scroll.grid(row=3, column=1, sticky='nsw', pady=10)
+                self.sensor_tree = ttk.Treeview(popts_specs_frame, yscrollcommand=sensor_tree_scroll.set)
+                self.sensor_tree.grid(row=3, column=0, sticky='e', padx=10, pady=10)
+                sensor_tree_scroll.config(command=self.sensor_tree.yview)
+
+                self.sensor_tree['columns'] = ("ID", "Type", "Sats")
+                self.sensor_tree.column('#0', width=0, stretch="no")
+                self.sensor_tree.column("ID", width = 50)  
+                self.sensor_tree.column("Type", width = 50)            
+                self.sensor_tree.column("Sats", width = 100)             
+
+                self.sensor_tree.heading("#0", text="", anchor="w")
+                self.sensor_tree.heading("ID", text="ID", anchor="w")
+                self.sensor_tree.heading("Type", text="Type", anchor="w")
+                self.sensor_tree.heading("Sats", text="Satellite(s)", anchor="w")
+
+                sen_specs = miss_specs.get_sensor_specs()  # get all available sensors in the configuration                 
+                for k in range(0,len(sen_specs)):
+                    self.sensor_tree.insert(parent='', index='end', iid=sen_specs[k][0], text="", values=(sen_specs[k][0], sen_specs[k][1], sen_specs[k][2][1]))
+
+            def get_specs(self):            
+                return {"instrumentID": ','.join(map(str, self.sensor_tree.selection())), "referenceFrame": "NadirRefFrame", "pntOptsFileName":self.popts_data_fp}
+
         class PointingOptionsWithGridPointsCoverageCalculator(ttk.Frame):
             def __init__(self, parent, controller):
                 ttk.Frame.__init__(self, parent)  
@@ -1243,8 +1282,12 @@ class ConfigureFrame(ttk.Frame):
         # okcancel frame
         def ok_click():               
             if self._cov_type.get() == "GridPointsCoverageCalculator":
-                specs = frame.get_specs()
+                specs = frames[self._cov_type.get()].get_specs()
                 miss_specs.add_coverage_grid(specs)
+                cov_win.destroy()
+            if self._cov_type.get() == "PointingOptionsCoverageCalculator":
+                specs = frames[self._cov_type.get()].get_specs()
+                miss_specs.add_pointing_options(specs) 
                 cov_win.destroy()
             
         ok_btn = ttk.Button(okcancel_frame, text="Ok", command=ok_click, width=ConfigureFrame.BTNWIDTH)
