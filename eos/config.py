@@ -19,7 +19,8 @@ class GuiStyle():
 
 class MissionConfig:
     """ Class which holds all the mission configuration parameters """
-    def __init__(self, epoch=None, duration=None, satellite=None, sensor=None, sat_to_sensor_map=None, prop=None, cov_grid=None, pnt_opts=None):
+    def __init__(self, epoch=None, duration=None, satellite=None, sensor=None, sat_to_sensor_map=None, prop=None, 
+                 cov_grid=None, pnt_opts=None, gnd_stns = None):
         self.epoch = epoch if epoch is not None else None
         self.duration = duration if duration is not None else None
         self.satellite = list(satellite) if satellite is not None else list() # satellite is the same as orbit
@@ -28,6 +29,7 @@ class MissionConfig:
         self.prop = prop if prop is not None else None
         self.cov_grid =  cov_grid if cov_grid is not None else None
         self.pnt_opts =  pnt_opts if pnt_opts is not None else None
+        self.gnd_stns =  gnd_stns if gnd_stns is not None else None
     
     def update_epoch(self, epoch):
         self.epoch = epoch
@@ -68,6 +70,9 @@ class MissionConfig:
 
     def add_pointing_options(self, data):
         self.pnt_opts = data
+    
+    def add_ground_stations(self, data):
+        self.gnd_stns = data
 
     def get_satellite_kepl_specs(self):
         # parse out the satellite ids (orbit ids)
@@ -106,6 +111,7 @@ class MissionConfig:
                                 "satellite": sat_dict,
                                 "propagator": self.prop,
                                 "grid": self.cov_grid,
-                                "pointingOptions": self.pnt_opts
+                                "pointingOptions": self.pnt_opts,
+                                "groundStations": self.gnd_stns
                                }) 
         return miss_specs_dict

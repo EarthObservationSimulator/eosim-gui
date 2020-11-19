@@ -48,7 +48,7 @@ class ConfigureFrame(ttk.Frame):
         con_btn.grid(row=0, column=1)
         sen_btn = ttk.Button(resource_frame, text="Sensor", command=self.click_sensor_btn, width=ConfigureFrame.BTNWIDTH)
         sen_btn.grid(row=1, column=0)
-        gndstn_btn = ttk.Button(resource_frame, text="Ground Station", width=ConfigureFrame.BTNWIDTH)
+        gndstn_btn = ttk.Button(resource_frame, text="Ground Station", command=self.click_gs_btn, width=ConfigureFrame.BTNWIDTH)
         gndstn_btn.grid(row=1, column=1)
 
         #
@@ -1086,11 +1086,11 @@ class ConfigureFrame(ttk.Frame):
                 gridpnts_specs_frame = ttk.Frame(self) 
                 gridpnts_specs_frame.grid(row=0, column=0, ipadx=5, ipady=5)
 
-                gripnts_add_by_region_frame = ttk.Frame(gridpnts_specs_frame)
-                gripnts_add_by_region_frame.grid(row=0, column=0)
+                gridpnts_add_by_region_frame = ttk.Frame(gridpnts_specs_frame)
+                gridpnts_add_by_region_frame.grid(row=0, column=0)
 
-                gripnts_add_by_datafile_frame = ttk.Frame(gridpnts_specs_frame)
-                gripnts_add_by_datafile_frame.grid(row=1, column=0)
+                gridpnts_add_by_datafile_frame = ttk.Frame(gridpnts_specs_frame)
+                gridpnts_add_by_datafile_frame.grid(row=1, column=0)
 
                 # define the widgets inside the child frames
                 self._gridpnts_specs_type = tk.StringVar() # using self so that the variable is retained even after exit from the function
@@ -1098,23 +1098,23 @@ class ConfigureFrame(ttk.Frame):
                 def gridpnts_specs_rbtn_click():
                     if self._gridpnts_specs_type.get() == "LatLonBounds":
                         # disable the frame containing the other option, except for the radio-button
-                        for child in gripnts_add_by_datafile_frame.winfo_children():
+                        for child in gridpnts_add_by_datafile_frame.winfo_children():
                             child.configure(state='disable')
                         gridpnts_specs_type_rbtn_2.configure(state='normal')
                         # enable the frame containing the current option
-                        for child in gripnts_add_by_region_frame.winfo_children():
+                        for child in gridpnts_add_by_region_frame.winfo_children():
                             child.configure(state='normal')
                         
                     elif self._gridpnts_specs_type.get() == "DataFile":
                         # disable the frame containing the other option, except for the radio-button
-                        for child in gripnts_add_by_region_frame.winfo_children():
+                        for child in gridpnts_add_by_region_frame.winfo_children():
                             child.configure(state='disable')   
                         gridpnts_specs_type_rbtn_1.configure(state='normal')
                         # enable the frame containing the current option
-                        for child in gripnts_add_by_datafile_frame.winfo_children():
+                        for child in gridpnts_add_by_datafile_frame.winfo_children():
                             child.configure(state='normal')             
 
-                gridpnts_specs_type_rbtn_1 = ttk.Radiobutton(gripnts_add_by_region_frame, text="Lat/Lon bounds", command=gridpnts_specs_rbtn_click,
+                gridpnts_specs_type_rbtn_1 = ttk.Radiobutton(gridpnts_add_by_region_frame, text="Lat/Lon bounds", command=gridpnts_specs_rbtn_click,
                                                              variable=self._gridpnts_specs_type, value="LatLonBounds")
                 gridpnts_specs_type_rbtn_1.grid(row=0, column=0, padx=10, pady=10)
 
@@ -1127,47 +1127,47 @@ class ConfigureFrame(ttk.Frame):
                                              'lonUpper': float(gridpnts_specs_lonup_entry.get())})
 
 
-                ttk.Button(gripnts_add_by_region_frame, text="Add region", command=add_region).grid(row=0, column=1, padx=10, pady=10)
+                ttk.Button(gridpnts_add_by_region_frame, text="Add region", command=add_region).grid(row=0, column=1, padx=10, pady=10)
                 
-                ttk.Label(gripnts_add_by_region_frame, text="Region ID").grid(row=1, column=0, sticky='w', padx=10, pady=10)
-                gridpnts_specs_regid_entry = ttk.Entry(gripnts_add_by_region_frame, width=10)
+                ttk.Label(gridpnts_add_by_region_frame, text="Region ID").grid(row=1, column=0, sticky='w', padx=10, pady=10)
+                gridpnts_specs_regid_entry = ttk.Entry(gridpnts_add_by_region_frame, width=10)
                 gridpnts_specs_regid_entry.insert(0,random.randint(0,100))
                 gridpnts_specs_regid_entry.bind("<FocusIn>", lambda args: gridpnts_specs_regid_entry.delete('0', 'end'))
                 gridpnts_specs_regid_entry.grid(row=1, column=1, sticky='w')
 
-                ttk.Label(gripnts_add_by_region_frame, text="Lat lower [deg]").grid(row=2, column=0, sticky='w', padx=10, pady=10)
-                gridpnts_specs_latlow_entry = ttk.Entry(gripnts_add_by_region_frame, width=10)
+                ttk.Label(gridpnts_add_by_region_frame, text="Lat lower [deg]").grid(row=2, column=0, sticky='w', padx=10, pady=10)
+                gridpnts_specs_latlow_entry = ttk.Entry(gridpnts_add_by_region_frame, width=10)
                 gridpnts_specs_latlow_entry.insert(0,-10)
                 gridpnts_specs_latlow_entry.bind("<FocusIn>", lambda args: gridpnts_specs_latlow_entry.delete('0', 'end'))
                 gridpnts_specs_latlow_entry.grid(row=2, column=1, sticky='w')
 
-                ttk.Label(gripnts_add_by_region_frame, text="Lat upper [deg]").grid(row=3, column=0, sticky='w', padx=10, pady=10)
-                gridpnts_specs_latup_entry = ttk.Entry(gripnts_add_by_region_frame, width=10)
+                ttk.Label(gridpnts_add_by_region_frame, text="Lat upper [deg]").grid(row=3, column=0, sticky='w', padx=10, pady=10)
+                gridpnts_specs_latup_entry = ttk.Entry(gridpnts_add_by_region_frame, width=10)
                 gridpnts_specs_latup_entry.insert(0,20)
                 gridpnts_specs_latup_entry.bind("<FocusIn>", lambda args: gridpnts_specs_latup_entry.delete('0', 'end'))
                 gridpnts_specs_latup_entry.grid(row=3, column=1, sticky='w')
 
-                ttk.Label(gripnts_add_by_region_frame, text="Lon lower [deg]").grid(row=4, column=0, sticky='w', padx=10, pady=10)
-                gridpnts_specs_lonlow_entry = ttk.Entry(gripnts_add_by_region_frame, width=10)
+                ttk.Label(gridpnts_add_by_region_frame, text="Lon lower [deg]").grid(row=4, column=0, sticky='w', padx=10, pady=10)
+                gridpnts_specs_lonlow_entry = ttk.Entry(gridpnts_add_by_region_frame, width=10)
                 gridpnts_specs_lonlow_entry.insert(0,-110)
                 gridpnts_specs_lonlow_entry.bind("<FocusIn>", lambda args: gridpnts_specs_lonlow_entry.delete('0', 'end'))
                 gridpnts_specs_lonlow_entry.grid(row=4, column=1, sticky='w')
 
-                ttk.Label(gripnts_add_by_region_frame, text="Lon upper [deg]").grid(row=5, column=0, sticky='w', padx=10, pady=10)
-                gridpnts_specs_lonup_entry = ttk.Entry(gripnts_add_by_region_frame, width=10)
+                ttk.Label(gridpnts_add_by_region_frame, text="Lon upper [deg]").grid(row=5, column=0, sticky='w', padx=10, pady=10)
+                gridpnts_specs_lonup_entry = ttk.Entry(gridpnts_add_by_region_frame, width=10)
                 gridpnts_specs_lonup_entry.insert(0,-10)
                 gridpnts_specs_lonup_entry.bind("<FocusIn>", lambda args: gridpnts_specs_lonup_entry.delete('0', 'end'))
                 gridpnts_specs_lonup_entry.grid(row=5, column=1, sticky='w')
 
-                ttk.Label(gripnts_add_by_region_frame, text="(Optional) Common grid-resolution [deg]", wraplength=150).grid(row=6, column=0, sticky='w', padx=10, pady=10)
-                self.gridpnts_specs_gridres_entry = ttk.Entry(gripnts_add_by_region_frame, width=10)
+                ttk.Label(gridpnts_add_by_region_frame, text="(Optional) Common grid-resolution [deg]", wraplength=150).grid(row=6, column=0, sticky='w', padx=10, pady=10)
+                self.gridpnts_specs_gridres_entry = ttk.Entry(gridpnts_add_by_region_frame, width=10)
                 self.gridpnts_specs_gridres_entry.grid(row=6, column=1, sticky='w')
 
-                ttk.Label(gripnts_add_by_region_frame, text="(Optional) Common grid-resolution factor", wraplength=150).grid(row=7, column=0, sticky='w', padx=10, pady=10)
-                self.gridpnts_specs_gridresfac_entry = ttk.Entry(gripnts_add_by_region_frame, width=10)
+                ttk.Label(gridpnts_add_by_region_frame, text="(Optional) Common grid-resolution factor", wraplength=150).grid(row=7, column=0, sticky='w', padx=10, pady=10)
+                self.gridpnts_specs_gridresfac_entry = ttk.Entry(gridpnts_add_by_region_frame, width=10)
                 self.gridpnts_specs_gridresfac_entry.grid(row=7, column=1, sticky='w')
 
-                gridpnts_specs_type_rbtn_2 = ttk.Radiobutton(gripnts_add_by_datafile_frame, text="Data file", command=gridpnts_specs_rbtn_click,
+                gridpnts_specs_type_rbtn_2 = ttk.Radiobutton(gridpnts_add_by_datafile_frame, text="Data file", command=gridpnts_specs_rbtn_click,
                                     variable=self._gridpnts_specs_type, value="DataFile")
                 gridpnts_specs_type_rbtn_2.grid(row=0, column=0, padx=10, pady=5)
 
@@ -1178,8 +1178,8 @@ class ConfigureFrame(ttk.Frame):
                     grid_data_fp_entry.insert(0,self.grid_data_fp)
                     grid_data_fp_entry.configure(state='disabled')                    
 
-                ttk.Button(gripnts_add_by_datafile_frame, text="Select Path", command=click_grid_data_file_path_btn, state='disabled').grid(row=0, column=1, sticky='w', padx=10, pady=10)
-                grid_data_fp_entry=tk.Entry(gripnts_add_by_datafile_frame, state='disabled')
+                ttk.Button(gridpnts_add_by_datafile_frame, text="Select Path", command=click_grid_data_file_path_btn, state='disabled').grid(row=0, column=1, sticky='w', padx=10, pady=10)
+                grid_data_fp_entry=tk.Entry(gridpnts_add_by_datafile_frame, state='disabled')
                 grid_data_fp_entry.grid(row=1,column=0, padx=10, pady=10, columnspan=2, sticky='ew')             
             
             def get_specs(self):            
@@ -1206,7 +1206,7 @@ class ConfigureFrame(ttk.Frame):
                     popts_data_fp_entry.insert(0,self.popts_data_fp)
                     popts_data_fp_entry.configure(state='disabled')
 
-                ttk.Button(popts_specs_frame, text="Select Path", command=click_popts_data_file_path_btn).grid(row=0, column=0, padx=10, pady=5, columnspan=2)
+                ttk.Button(popts_specs_frame, text="Select Data File", command=click_popts_data_file_path_btn).grid(row=0, column=0, padx=10, pady=5, columnspan=2)
                 popts_data_fp_entry=tk.Entry(popts_specs_frame, state='disabled')
                 popts_data_fp_entry.grid(row=1,column=0, padx=10, pady=5, sticky='ew', columnspan=2)
 
@@ -1230,11 +1230,12 @@ class ConfigureFrame(ttk.Frame):
                 self.sensor_tree.heading("Sats", text="Satellite(s)", anchor="w")
 
                 sen_specs = miss_specs.get_sensor_specs()  # get all available sensors in the configuration                 
-                for k in range(0,len(sen_specs)):
-                    self.sensor_tree.insert(parent='', index='end', iid=sen_specs[k][0], text="", values=(sen_specs[k][0], sen_specs[k][1], sen_specs[k][2][1]))
+                if sen_specs is not False:
+                    for k in range(0,len(sen_specs)):
+                        self.sensor_tree.insert(parent='', index='end', iid=sen_specs[k][0], text="", values=(sen_specs[k][0], sen_specs[k][1], sen_specs[k][2][1]))
 
             def get_specs(self):            
-                return {"instrumentID": ','.join(map(str, self.sensor_tree.selection())), "referenceFrame": "NadirRefFrame", "pntOptsFileName":self.popts_data_fp}
+                return {"instrumentID": ','.join(map(str, self.sensor_tree.selection())), "referenceFrame": "NadirRefFrame", "pntOptsFilePath":self.popts_data_fp}
 
         class PointingOptionsWithGridPointsCoverageCalculator(ttk.Frame):
             def __init__(self, parent, controller):
@@ -1296,6 +1297,129 @@ class ConfigureFrame(ttk.Frame):
         cancel_btn = ttk.Button(okcancel_frame, text="Exit", command=cov_win.destroy, width=ConfigureFrame.BTNWIDTH)
         cancel_btn.grid(row=0, column=1)  
         
+    def click_gs_btn(self):
+         # create and configure child window, parent frame
+        gs_win = tk.Toplevel()
+
+        gs_win_frame = ttk.Frame(gs_win)
+        gs_win_frame.grid(row=0, column=0, padx=5, pady=5)
+
+        gs_add_by_entry_frame = ttk.Frame(gs_win_frame)
+        gs_add_by_entry_frame.grid(row=0, column=0)
+
+        gs_add_by_datafile_frame = ttk.Frame(gs_win_frame)
+        gs_add_by_datafile_frame.grid(row=1, column=0)
+
+        # okcancel frame
+        okcancel_frame = ttk.Label(gs_win_frame)
+        okcancel_frame.grid(row=2, column=0, sticky='nswe', padx=5, pady=5)
+        okcancel_frame.columnconfigure(0,weight=1)
+        okcancel_frame.rowconfigure(0,weight=1)
+
+        # define the widgets inside the child frames
+        self._gs_specs_type = tk.StringVar() # using self so that the variable is retained even after exit from the function
+        self._gs_specs_type.set("ManualEntry") # initialize
+        def gs_specs_rbtn_click():
+            if self._gs_specs_type.get() == "ManualEntry":
+                # disable the frame containing the other option, except for the radio-button
+                for child in gs_add_by_datafile_frame.winfo_children():
+                    child.configure(state='disable')
+                gs_specs_type_rbtn_2.configure(state='normal')
+                # enable the frame containing the current option
+                for child in gs_add_by_entry_frame.winfo_children():
+                    child.configure(state='normal')
+                
+            elif self._gs_specs_type.get() == "DataFile":
+                # disable the frame containing the other option, except for the radio-button
+                for child in gs_add_by_entry_frame.winfo_children():
+                    child.configure(state='disable')   
+                gs_specs_type_rbtn_1.configure(state='normal')
+                # enable the frame containing the current option
+                for child in gs_add_by_datafile_frame.winfo_children():
+                    child.configure(state='normal')             
+
+        gs_specs_type_rbtn_1 = ttk.Radiobutton(gs_add_by_entry_frame, text="Manual Entry", command=gs_specs_rbtn_click,
+                                                        variable=self._gs_specs_type, value="ManualEntry")
+        gs_specs_type_rbtn_1.grid(row=0, column=0, padx=10, pady=10)
+
+        self.gs_info = []
+        def add_gs():
+            self.gs_info.append({'@id': float(gs_specs_gsid_entry.get()), 
+                                 'name': float(gs_specs_name_entry.get()), 
+                                 'lat': float(gs_specs_lat_entry.get()), 
+                                 'lon': float(gs_specs_lon_entry.get()),                                              
+                                 'alt': float(gs_specs_alt_entry.get()),
+                                 'minElevation': float(gs_specs_minelv_entry.get())})
+
+        ttk.Button(gs_add_by_entry_frame, text="Add GS", command=add_gs).grid(row=0, column=1, padx=10, pady=10)
+        
+        ttk.Label(gs_add_by_entry_frame, text="ID").grid(row=1, column=0, sticky='w', padx=10, pady=10)
+        gs_specs_gsid_entry = ttk.Entry(gs_add_by_entry_frame, width=10)
+        gs_specs_gsid_entry.insert(0,random.randint(0,100))
+        gs_specs_gsid_entry.bind("<FocusIn>", lambda args: gs_specs_gsid_entry.delete('0', 'end'))
+        gs_specs_gsid_entry.grid(row=1, column=1, sticky='w')
+
+        ttk.Label(gs_add_by_entry_frame, text="Name").grid(row=2, column=0, sticky='w', padx=10, pady=10)
+        gs_specs_name_entry = ttk.Entry(gs_add_by_entry_frame, width=10)
+        gs_specs_name_entry.insert(0,-10)
+        gs_specs_name_entry.bind("<FocusIn>", lambda args: gs_specs_name_entry.delete('0', 'end'))
+        gs_specs_name_entry.grid(row=2, column=1, sticky='w')
+
+        ttk.Label(gs_add_by_entry_frame, text="Lat [deg]").grid(row=3, column=0, sticky='w', padx=10, pady=10)
+        gs_specs_lat_entry = ttk.Entry(gs_add_by_entry_frame, width=10)
+        gs_specs_lat_entry.insert(0,-10)
+        gs_specs_lat_entry.bind("<FocusIn>", lambda args: gs_specs_lat_entry.delete('0', 'end'))
+        gs_specs_lat_entry.grid(row=3, column=1, sticky='w')
+
+        ttk.Label(gs_add_by_entry_frame, text="Lon [deg]").grid(row=4, column=0, sticky='w', padx=10, pady=10)
+        gs_specs_lon_entry = ttk.Entry(gs_add_by_entry_frame, width=10)
+        gs_specs_lon_entry.insert(0,20)
+        gs_specs_lon_entry.bind("<FocusIn>", lambda args: gs_specs_lon_entry.delete('0', 'end'))
+        gs_specs_lon_entry.grid(row=4, column=1, sticky='w')
+
+        ttk.Label(gs_add_by_entry_frame, text="Alt [km]").grid(row=5, column=0, sticky='w', padx=10, pady=10)
+        gs_specs_alt_entry = ttk.Entry(gs_add_by_entry_frame, width=10)
+        gs_specs_alt_entry.insert(0,-110)
+        gs_specs_alt_entry.bind("<FocusIn>", lambda args: gs_specs_alt_entry.delete('0', 'end'))
+        gs_specs_alt_entry.grid(row=5, column=1, sticky='w')
+
+        ttk.Label(gs_add_by_entry_frame, text="Min Elevation [deg]").grid(row=6, column=0, sticky='w', padx=10, pady=10)
+        gs_specs_minelv_entry = ttk.Entry(gs_add_by_entry_frame, width=10)
+        gs_specs_minelv_entry.insert(0,-10)
+        gs_specs_minelv_entry.bind("<FocusIn>", lambda args: gs_specs_minelv_entry.delete('0', 'end'))
+        gs_specs_minelv_entry.grid(row=6, column=1, sticky='w')
+
+        gs_specs_type_rbtn_2 = ttk.Radiobutton(gs_add_by_datafile_frame, text="Data file", command=gs_specs_rbtn_click,
+                            variable=self._gs_specs_type, value="DataFile")
+        gs_specs_type_rbtn_2.grid(row=0, column=0, padx=10, pady=5)
+
+        def click_gs_data_file_path_btn():
+            self.gs_data_fp = tkinter.filedialog.askopenfilename(initialdir=os.getcwd(), title="Please select the ground-station data file:", filetypes=(("All files","*.*"), ("csv files","*.csv")))  
+            gs_data_fp_entry.configure(state='normal')
+            gs_data_fp_entry.delete(0,'end')
+            gs_data_fp_entry.insert(0,self.gs_data_fp)
+            gs_data_fp_entry.configure(state='disabled')                    
+
+        ttk.Button(gs_add_by_datafile_frame, text="Select Path", command=click_gs_data_file_path_btn, state='disabled').grid(row=0, column=1, sticky='w', padx=10, pady=10)
+        gs_data_fp_entry=tk.Entry(gs_add_by_datafile_frame, state='disabled')
+        gs_data_fp_entry.grid(row=1,column=0, padx=10, pady=10, columnspan=2, sticky='ew')
+
+        # okcancel frame
+        def ok_click():               
+            if self._gs_specs_type.get() == "ManualEntry":
+                specs = {"stationInfo": self.gs_info}                
+            if self._gs_specs_type.get() == "DataFile":
+                specs = {"gndStnFilePath": self.gs_data_fp  }              
+            miss_specs.add_ground_stations(specs)
+            gs_win.destroy()  
+                
+            
+        ok_btn = ttk.Button(okcancel_frame, text="Ok", command=ok_click, width=ConfigureFrame.BTNWIDTH)
+        ok_btn.grid(row=0, column=0)
+
+        cancel_btn = ttk.Button(okcancel_frame, text="Exit", command=gs_win.destroy, width=ConfigureFrame.BTNWIDTH)
+        cancel_btn.grid(row=0, column=1)  
+
     def click_visualize_btn(self):
         vis_win = tk.Toplevel()
         ttk.Label(vis_win, text=(miss_specs.to_dict()), wraplength=150).pack(padx=5, pady=5)
