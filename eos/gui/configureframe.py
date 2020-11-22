@@ -14,7 +14,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 miss_specs = MissionConfig()     
-
 class ConfigureFrame(ttk.Frame):
 
     BTNWIDTH = 15
@@ -23,10 +22,10 @@ class ConfigureFrame(ttk.Frame):
         ttk.Frame.__init__(self, parent)
         self.controller = controller
         
-        self.rowconfigure(0,weight=2)
-        self.rowconfigure(1,weight=2)
+        self.rowconfigure(0,weight=4)
+        self.rowconfigure(1,weight=4)
         self.rowconfigure(2,weight=1)
-        self.columnconfigure(0,weight=2)
+        self.columnconfigure(0,weight=1)
         self.columnconfigure(1,weight=1)
 
         # "Define Mission Frame" 
@@ -76,15 +75,29 @@ class ConfigureFrame(ttk.Frame):
         obs_syn_btn.grid(row=1, column=1)
 
         #
-        save_conf_btn = ttk.Button(self, text="Save Config", command=self.click_save_config, width=ConfigureFrame.BTNWIDTH)
-        save_conf_btn.grid(row=2, column=0, pady=(1,10), sticky='e')
-        run_all_btn = ttk.Button(self, text="Run All", width=ConfigureFrame.BTNWIDTH)
-        run_all_btn.grid(row=2, column=1, pady=(1,10), sticky='w')
+        clr_sv_run_frame = ttk.Frame(self) 
+        clr_sv_run_frame.grid(row=2, column=0, columnspan=2, ipadx=10, sticky = 'nsew')
+        clr_sv_run_frame.columnconfigure(0,weight=1)
+        clr_sv_run_frame.columnconfigure(1,weight=1)
+        clr_sv_run_frame.columnconfigure(2,weight=1)
+        clear_conf_btn = ttk.Button(clr_sv_run_frame, text="Clear Config", command=self.click_clear_config, width=ConfigureFrame.BTNWIDTH)
+        clear_conf_btn.grid(row=0, column=0, ipadx=20, sticky='s')
+        save_conf_btn = ttk.Button(clr_sv_run_frame, text="Save Config", command=self.click_save_config, width=ConfigureFrame.BTNWIDTH)
+        save_conf_btn.grid(row=0, column=1, ipadx=20, sticky='s')
+        run_all_btn = ttk.Button(clr_sv_run_frame, text="Run All", width=ConfigureFrame.BTNWIDTH)
+        run_all_btn.grid(row=0, column=2,ipadx=20, sticky='s')
 
     def click_save_config(self):
         with open('MissionSpecs.json', 'w', encoding='utf-8') as f:
             json.dump(miss_specs.to_dict(), f, ensure_ascii=False, indent=4)
-        tkinter.messagebox.showinfo(title=None, message="Configuration saved in working directory.")
+        logger.info("Configuration Saved.")
+    
+    def click_clear_config(self):
+        ''' Clear the configuration (both in the local variable and in the MissionSpecs file) '''
+        miss_specs.clear()
+        with open('MissionSpecs.json', 'w', encoding='utf-8') as f:
+            json.dump(miss_specs.to_dict(), f, ensure_ascii=False, indent=4)
+        logger.info("Configuration cleared.")
 
     def click_mission_btn(self):      
 

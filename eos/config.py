@@ -6,8 +6,8 @@ import json
 
 class GuiStyle():
     main_win_width = 900
-    main_win_height = int(900*9/21)
-    main_window_geom = "900x386" # 900 width, 21:9 aspect ratio
+    main_win_height = int(main_win_width*9/21) # 21:9 aspect ratio
+    main_window_geom = str(main_win_width)+"x"+str(main_win_height) 
     child_window_geom = "500x500"
     
     def __init__(self):     
@@ -30,6 +30,17 @@ class MissionConfig:
         self.cov_grid =  cov_grid if cov_grid is not None else None
         self.pnt_opts =  pnt_opts if pnt_opts is not None else None
         self.gnd_stns =  gnd_stns if gnd_stns is not None else None
+    
+    def clear(self):
+        self.epoch = None
+        self.duration = None
+        self.satellite = list()
+        self.sensor = list()
+        self.sat_to_sensor_map = list()
+        self.prop = None
+        self.cov_grid = None
+        self.pnt_opts = None
+        self.gnd_stns = None
     
     def update_epoch(self, epoch):
         self.epoch = epoch
@@ -115,3 +126,39 @@ class MissionConfig:
                                 "groundStations": self.gnd_stns
                                }) 
         return miss_specs_dict
+
+class OutputConfig:
+    """ A class to allow handling of the produced results of the various functionalities of EOS (propagation, coverage, etc).
+        The class is updated with pointers to the resultant data files as and when a new result is produced. 
+        This class would be referenced by the various plotting functions in EOS to gather the available results. 
+        Using this class, a JSON file called 'output.json' would be written in the user directory.    
+    """
+    def __init__(self, prop_done=None, cov_done=None, sat_out=None):
+        self.prop_done = prop_done if prop_done is not None else bool(False)
+        self.cov_done = cov_done if cov_done is not None else bool(False)
+        self.sat_out = list(sat_out) if sat_out is not None else list()
+
+    @staticmethod
+    def from_dict(d):
+        return OutputConfig(prop_done=d.get('propDone', None),
+                            cov_done=d.get('covDone', None),
+                            sat_out=d.get('satOut', None)
+                           )
+
+    def update_prop_out(self, prop_done, sat_id, sat_eci_state_fp, sat_kep_state_fp):
+        self.prop_done = True
+        self.sat_out = list() # erase any previous entries
+        for k in range(0,len(sat_id)):
+            self.sat_out.append({"@id":sat_id[k], "StateFilePath":sat_eci_state_fp[k], "KepStateFilePath":sat_kep_state_fp[k]})
+
+    def get_satellites(self):
+        return [x["@id"] for x in self.sat_out]
+
+    def to_dict(self):
+        """ Format the OutputConfig object into a dictionary (so it may later be exported as JSON file)."""
+
+        output_config_dict = dict({"propDone":self.prop_done,
+                                   "covDone": self.cov_done,
+                                   "satOut": self.sat_out
+                                  }) 
+        return output_config_dict
