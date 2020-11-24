@@ -1425,8 +1425,7 @@ class ConfigureFrame(ttk.Frame):
                 specs = {"gndStnFilePath": self.gs_data_fp  }              
             miss_specs.add_ground_stations(specs)
             gs_win.destroy()  
-                
-            
+                            
         ok_btn = ttk.Button(okcancel_frame, text="Ok", command=ok_click, width=ConfigureFrame.BTNWIDTH)
         ok_btn.grid(row=0, column=0)
 

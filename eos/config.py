@@ -151,8 +151,14 @@ class OutputConfig:
         for k in range(0,len(sat_id)):
             self.sat_out.append({"@id":sat_id[k], "StateFilePath":sat_eci_state_fp[k], "KepStateFilePath":sat_kep_state_fp[k]})
 
-    def get_satellites(self):
+    def get_satellite_ids(self):
         return [x["@id"] for x in self.sat_out]
+
+    def get_satellite_state_fp(self):
+        return [x["StateFilePath"] for x in self.sat_out]
+
+    def get_satellite_kepstate_fp(self):
+        return [x["KepStateFilePath"] for x in self.sat_out]
 
     def to_dict(self):
         """ Format the OutputConfig object into a dictionary (so it may later be exported as JSON file)."""
