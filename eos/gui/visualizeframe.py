@@ -131,7 +131,7 @@ class TwoDimVisPlotAttibutes():
 
 two_dim_vis_plt_attr = TwoDimVisPlotAttibutes()
 
-class PropagateFrame(ttk.Frame):
+class VisualizeFrame(ttk.Frame):
 
     BTNWIDTH = 15
 
@@ -140,35 +140,45 @@ class PropagateFrame(ttk.Frame):
         self.controller = controller
         
         self.rowconfigure(0,weight=1)
-        self.rowconfigure(1,weight=10)
         self.columnconfigure(0,weight=1)        
-
-        # define propagation execution frame 
-        pexec_frame = ttk.LabelFrame(self, text="Execute Propagation", labelanchor='n') 
-        pexec_frame.grid(row=0, column=0, ipadx=10, sticky='nswe')
-        pexec_frame.columnconfigure(0,weight=1)
-        pexec_frame.columnconfigure(1,weight=4)
 
         # define the visualization frame
         pvis_frame = ttk.Frame(self) 
-        pvis_frame.grid(row=1, column=0, sticky='nswe')
+        pvis_frame.grid(row=0, column=0, sticky='nswe')
         pvis_frame.rowconfigure(0,weight=1)
         pvis_frame.columnconfigure(0,weight=1)
-        pvis_frame.columnconfigure(1,weight=1)
-        pvis_frame.columnconfigure(2,weight=1)
 
+        tabControl = ttk.Notebook(pvis_frame)
+        tab1 = ttk.Frame(tabControl)
+        tab2 = ttk.Frame(tabControl)
+        tab3 = ttk.Frame(tabControl)
+
+        tabControl.add(tab1, text='2D Plot visualization')
+        tabControl.add(tab2, text='Map visualization')
+        tabControl.add(tab3, text='Globe visualization')
+
+        tabControl.pack(expand = True, fill ="both")   
+
+        Vis2DFrame(pvis_frame, tab1)
+
+        
+class Vis2DFrame(ttk.Frame):
+
+    def __init__(self, win, tab):
+        
         # define the visualization child frames
         # 2d plots frame
-        pvis_2d_frame = ttk.LabelFrame(pvis_frame, text="2D Plot visualization", labelanchor='n')
-        pvis_2d_frame.grid(row=0, column=0, sticky='nswe')        
+        pvis_2d_frame = ttk.LabelFrame(tab)
+        pvis_2d_frame.pack(expand = True, fill ="both")
         pvis_2d_frame.rowconfigure(0,weight=4)
         pvis_2d_frame.rowconfigure(1,weight=8)
         pvis_2d_frame.rowconfigure(2,weight=1)
         pvis_2d_frame.columnconfigure(0,weight=1)
-        pvis_2d_frame.columnconfigure(1,weight=1)       
+        pvis_2d_frame.columnconfigure(1,weight=1)  
+           
 
         pvis_2d_time_frame = ttk.Frame(pvis_2d_frame)
-        pvis_2d_time_frame.grid(row=0, column=0, sticky='nswe', padx=(10,2), rowspan=2)
+        pvis_2d_time_frame.grid(row=0, column=0, sticky='nswe', rowspan=2)
         pvis_2d_time_frame.rowconfigure(0,weight=1)
         pvis_2d_time_frame.rowconfigure(1,weight=1)
         pvis_2d_time_frame.rowconfigure(2,weight=1)
@@ -190,22 +200,6 @@ class PropagateFrame(ttk.Frame):
         pvis_2d_plot_frame.columnconfigure(0,weight=1)
         pvis_2d_plot_frame.columnconfigure(1,weight=1) 
 
-        # map frame
-        pvis_map_frame = ttk.LabelFrame(pvis_frame, text="Map visualization", labelanchor='n')
-        pvis_map_frame.grid(row=0, column=1, sticky='nswe')
-        
-        # globe frame
-        pvis_globe_frame = ttk.LabelFrame(pvis_frame, text="Globe visualization", labelanchor='n')
-        pvis_globe_frame.grid(row=0, column=2, sticky='nswe')
-
-        # define the widgets inside the frames        
-        # exec frame
-        pexec_btn = ttk.Button(pexec_frame, text="Propagate", command=lambda:self.click_pexec_btn(prop_progress_bar))
-        pexec_btn.grid(row=0, column=0, sticky='w', padx=20)
-
-        prop_progress_bar = ttk.Progressbar(pexec_frame, orient='horizontal', length=300, mode='indeterminate')
-        prop_progress_bar.grid(row=0, column=1, padx=20, sticky='w')
-        
         # 2D vis frame
         ttk.Label(pvis_2d_time_frame, text="Time (hh:mm:ss)", wraplength="75", justify='center').grid(row=0, column=0,ipady=5)
         ttk.Label(pvis_2d_time_frame, text="From").grid(row=1, column=0, sticky='s')
@@ -236,15 +230,6 @@ class PropagateFrame(ttk.Frame):
 
         export_btn = ttk.Button(pvis_2d_plot_frame, text="Export", command=lambda: self.click_2dvis_plot2d_btn(export=True))
         export_btn.grid(row=0, column=1)
-
-        # map vis frame
-        ttk.Label(pvis_map_frame, text="TBD").grid(row=0, column=0)
-        ttk.Label(pvis_map_frame, text="Time Interval (from mission epoch)", wraplength=100).grid(row=0, column=0)
-
-        # globe vis frame
-        ttk.Label(pvis_globe_frame, text="TBD").grid(row=0, column=0)
-        ttk.Label(pvis_globe_frame, text="Time Interval (from mission epoch)", wraplength=100).grid(row=0, column=0)        
-
 
     def click_2dvis_select_xvar_btn(self):
         # create window to ask which satellite 
@@ -296,9 +281,9 @@ class PropagateFrame(ttk.Frame):
             self.pvis_2d_x_sel_var_disp.configure(state='disabled')
             select_xvar_win.destroy()
 
-        ok_btn = ttk.Button(okcancel_frame, text="Ok", command=click_ok_btn, width=PropagateFrame.BTNWIDTH)
+        ok_btn = ttk.Button(okcancel_frame, text="Ok", command=click_ok_btn, width=VisualizeFrame.BTNWIDTH)
         ok_btn.grid(row=0, column=0, sticky ='e')
-        cancel_btn = ttk.Button(okcancel_frame, text="Exit", command=select_xvar_win.destroy, width=PropagateFrame.BTNWIDTH)
+        cancel_btn = ttk.Button(okcancel_frame, text="Exit", command=select_xvar_win.destroy, width=VisualizeFrame.BTNWIDTH)
         cancel_btn.grid(row=0, column=1, sticky ='w') 
 
     def click_2dvis_select_yvar_btn(self):
@@ -357,9 +342,9 @@ class PropagateFrame(ttk.Frame):
             self.pvis_2d_y_sel_var_disp.configure(state='disabled')
             select_yvar_win.destroy()
 
-        ok_btn = ttk.Button(okcancel_frame, text="Add", command=click_ok_btn, width=PropagateFrame.BTNWIDTH)
+        ok_btn = ttk.Button(okcancel_frame, text="Add", command=click_ok_btn, width=VisualizeFrame.BTNWIDTH)
         ok_btn.grid(row=0, column=0, sticky ='e')
-        cancel_btn = ttk.Button(okcancel_frame, text="Exit", command=click_exit_btn, width=PropagateFrame.BTNWIDTH)
+        cancel_btn = ttk.Button(okcancel_frame, text="Exit", command=click_exit_btn, width=VisualizeFrame.BTNWIDTH)
         cancel_btn.grid(row=0, column=1, sticky ='w') 
 
     def click_2dvis_plot2d_btn(self, export=False, plot=False):
@@ -471,55 +456,4 @@ class PropagateFrame(ttk.Frame):
             plt.legend(_lgnd)
             plt.show()
               
-    def click_pexec_btn(self, prop_progress_bar):
-
-        def real_click_pexec_btn():
-            # Execute propagation
-            user_dir = os.getcwd() + '/'
-            usf = user_dir + 'MissionSpecs.json'
-            try:
-                with open(usf, 'r') as mission_specs_file:
-                        miss_specs = util.FileUtilityFunctions.from_json(mission_specs_file)      
-            except:
-                raise Exception("Configuration not found.")
-
-            prop_progress_bar.start(10)
-            # Preprocess
-            logger.info(".......Preprocessing configuration .......")
-            pi = preprocess.PreProcess(miss_specs, user_dir) # generates grid if-needed, calculates propagation 
-                                                             # and coverage parameters, enumerates orbits, etc.
-            prop_cov_param = pi.generate_prop_cov_param()   
-            print(".......Done.......")
-
-            # Run orbit propagation for each of the satellties (orbits) in the constellation
-            sat_id = [] # list of propagated satellites (ids)
-            sat_eci_state_fp = [] # list of the eci-state files
-            sat_kep_state_fp = [] # list of the Keplerian-state files
-            for orb_indx in range(0,len(prop_cov_param)):
-                pcp = prop_cov_param[orb_indx]
-                pcp.cov_calcs_app = util.CoverageCalculationsApproach.SKIP # force skip of coverage calculations
-                opc = orbitpropcov.OrbitPropCov(pcp)
-                print(".......Running Orbit Propagation for satellite.......", pcp.sat_id)
-                opc.run()
-                sat_id.append(pcp.sat_id)
-                sat_eci_state_fp.append(pcp.sat_state_fl)
-                sat_kep_state_fp.append(pcp.sat_state_fl + '_Keplerian')
-                print(".......Done.......")
-
-            # save output configuration file (any previous configuration is re-written since propagation is the first step 
-            # to any of the future calculations such as coverage or communications, etc)
-
-            out_config.update_prop_out(prop_done=True, sat_id=sat_id, sat_eci_state_fp=sat_eci_state_fp, sat_kep_state_fp=sat_kep_state_fp) 
-            with open('output.json', 'w', encoding='utf-8') as f:
-                json.dump(out_config.to_dict(), f, ensure_ascii=False, indent=4)
-
-            prop_progress_bar.stop()            
-
-        # execute propagation
-        threading.Thread(target=real_click_pexec_btn).start()
-
-        
-
-      
-        
-
+ 

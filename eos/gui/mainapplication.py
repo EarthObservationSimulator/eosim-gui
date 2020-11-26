@@ -2,7 +2,8 @@ import tkinter as tk
 from tkinter import ttk 
 from .startframe import StartFrame
 from .configureframe import ConfigureFrame
-from .propagateframe import PropagateFrame
+from .executeframe import ExecuteFrame 
+from .visualizeframe import VisualizeFrame
 import tkinter.scrolledtext
 import os
 from eos.config import GuiStyle
@@ -58,29 +59,18 @@ class MainApplication:
         lsidebar.rowconfigure(2,weight=1)
         lsidebar.rowconfigure(3,weight=1)
         lsidebar.rowconfigure(4,weight=1)
-        lsidebar.rowconfigure(5,weight=1)
-        lsidebar.rowconfigure(6,weight=1)
-        lsidebar.rowconfigure(7,weight=1)
-        lsidebar.rowconfigure(8,weight=1)
+        lsidebar.rowconfigure(5,weight=8)
         
         welcome_btn = ttk.Button(lsidebar, text='WELCOME',command=lambda: self.show_frame("StartFrame"))
         welcome_btn.grid(row=0, column=0, sticky='nswe')
         configure_btn = ttk.Button(lsidebar, text='CONFIGURE',command=lambda: self.show_frame("ConfigureFrame"))
         configure_btn.grid(row=1, column=0, sticky='nswe')
-        propagate_btn = ttk.Button(lsidebar, text='PROPAGATE',command=lambda: self.show_frame("PropagateFrame")) 
+        propagate_btn = ttk.Button(lsidebar, text='EXECUTE',command=lambda: self.show_frame("ExecuteFrame")) 
         propagate_btn.grid(row=2, column=0, sticky='nswe')
-        power_btn = ttk.Button(lsidebar, text='POWER',command=lambda: self.show_frame("PowerFrame")) 
+        power_btn = ttk.Button(lsidebar, text='VISUALIZE',command=lambda: self.show_frame("VisualizeFrame")) 
         power_btn.grid(row=3, column=0, sticky='nswe')
-        gndstncon_btn = ttk.Button(lsidebar, text='GROUND STATION CONTACTS',command=lambda: self.show_frame("GndStnConFrame")) 
-        gndstncon_btn.grid(row=4, column=0, sticky='nswe')
-        isatcon_btn = ttk.Button(lsidebar, text='INTER-SATELLITE CONTACTS',command=lambda: self.show_frame("InterSatConFrame")) 
-        isatcon_btn.grid(row=5, column=0, sticky='nswe')
-        cov_btn = ttk.Button(lsidebar, text='COVERAGE',command=lambda: self.show_frame("CoverageFrame")) 
-        cov_btn.grid(row=6, column=0, sticky='nswe')
-        dataq_btn = ttk.Button(lsidebar, text='DATA QUALITY',command=lambda: self.show_frame("DataQFrame")) 
-        dataq_btn.grid(row=7, column=0, sticky='nswe')
         synobs_btn = ttk.Button(lsidebar, text='TBD',command=lambda: self.show_frame("SynObsFrame")) 
-        synobs_btn.grid(row=8, column=0, sticky='nswe')            
+        synobs_btn.grid(row=4, column=0, sticky='nswe')            
 
         # message area frame
         # grid configure
@@ -119,7 +109,7 @@ class MainApplication:
         # put all of the pages in the same location;
         # the one on the top of the stacking order
         # will be the one that is visible.
-        for F in (StartFrame, ConfigureFrame, PropagateFrame):
+        for F in (StartFrame, ConfigureFrame, ExecuteFrame, VisualizeFrame):
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
