@@ -462,8 +462,6 @@ class VisMapFrame(ttk.Frame):
 
         # get the variable data
         [sat_id, var] = self.vis_map_attr.get_variables()
-        print(sat_id)
-        print(var)
 
         # get the epoch and time-step from the file belonging to the first vraible (common among all variables)
         sat_state_fp = config.out_config.get_satellite_state_fp()[config.out_config.get_satellite_ids().index(sat_id[0])]
@@ -496,7 +494,7 @@ class VisMapFrame(ttk.Frame):
         plt_data = pd.DataFrame(index=sat_state_df.index)
         # iterate over the list of vars 
         num_vars = len(var)
-        print(num_vars)
+        varname = []
         for k in range(0,num_vars): 
             # extract the y-variable data from of the particular satellite
             # cartesian eci state file
@@ -513,28 +511,32 @@ class VisMapFrame(ttk.Frame):
             _sat_df = pd.concat([_sat_state_df, _sat_kepstate_df], axis=1)
 
             # get the (lat, lon) coords 
-            lat = np.zeros((len(_sat_df["X[km]"]), 1))
-            lon = np.zeros((len(_sat_df["X[km]"]), 1))
+            _lat = np.zeros((len(_sat_df["X[km]"]), 1))
+            _lon = np.zeros((len(_sat_df["X[km]"]), 1))
             for m in range(0,len(_sat_df["X[km]"])):
-                [lat[m], lon[m], _y] = instrupy.util.MathUtilityFunctions.eci2geo([_sat_df["X[km]"][m], _sat_df["Y[km]"][m], _sat_df["Z[km]"][m]], epoch_JDUT1)
-
-            plt_data['lat[deg]'] = lat
-            plt_data['lon[deg]'] = lon
+                [_lat[m], _lon[m], _y] = instrupy.util.MathUtilityFunctions.eci2geo([_sat_df["X[km]"][m], _sat_df["Y[km]"][m], _sat_df["Z[km]"][m]], epoch_JDUT1)
+          
             # add new column with the data
             [_varname, _data] = PlotMapVars.get_data_from_orbitpy_file(sat_df=_sat_df, sat_id=sat_id[k], var=var[k], step_size=step_size, epoch_JDUT1=epoch_JDUT1)
+            varname.append(_varname)
+            plt_data[_varname+'lat[deg]'] = _lat
+            plt_data[_varname+'lon[deg]'] = _lon
             plt_data[_varname] = _data
         
         # make the plot
         fig_win = tk.Toplevel()
         fig = Figure(figsize=(5, 4), dpi=100)
         ax = fig.add_subplot(1,1,1,projection=proj) 
-        #ax = plt.axes(projection=proj) 
         ax.stock_img()        
         for k in range(0,num_vars):            
-            ax.scatter(plt_data['lon[deg]'] , plt_data['lat[deg]'], transform=ccrs.PlateCarree()) # TODO: Verify the use of the 'transform' parameter https://scitools.org.uk/cartopy/docs/latest/tutorials/understanding_transform.html,
+            s = ax.scatter(plt_data.loc[:,varname[k]+'lon[deg]'] , plt_data.loc[:,varname[k]+'lat[deg]'], c=plt_data.loc[:,varname[k]], transform=ccrs.PlateCarree()) # TODO: Verify the use of the 'transform' parameter https://scitools.org.uk/cartopy/docs/latest/tutorials/understanding_transform.html,
                                                                                                    #       https://stackoverflow.com/questions/42237802/plotting-projected-data-in-other-projectons-using-cartopy
+            cb = fig.colorbar(s)
+            cb.set_label(varname[k])
         ax.coastlines()
         
+        #cbar.set_clim(-.5, .5) # set limits of color map
+                
         canvas = FigureCanvasTkAgg(fig, master=fig_win)  # A tk.DrawingArea.
         canvas.draw()
         canvas.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
