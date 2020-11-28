@@ -20,7 +20,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         '-loglevel',
-        default="DEBUG",
+        default="INFO",
         type=str,
         help="Logging level: Specifiy CRITICAL or ERROR or WARNING or INFO or DEBUG."
     )   

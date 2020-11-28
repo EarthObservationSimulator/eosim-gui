@@ -1,37 +1,22 @@
 from tkinter import ttk 
 import tkinter as tk
-from eos.config import GuiStyle, MissionConfig, OutputConfig
-import random
-from tkinter import messagebox
-import json
-import orbitpy
 import tkinter.filedialog, tkinter.messagebox
-from instrupy.public_library import Instrument
-from instrupy.util import *
-import os
-import shutil
-import sys
-import csv
-import glob
+from eos import config
 from orbitpy import preprocess, orbitpropcov, communications, obsdatametrics, util
-import threading
-import time
+import instrupy
 import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib
+import numpy as np
 
-matplotlib.rc('font', family='sans-serif') 
-matplotlib.rc('font', serif='Times New Roman') 
-matplotlib.rc('text', usetex='false') 
-matplotlib.rcParams.update({'font.size': 12})
+from matplotlib.backends.backend_tkagg import (
+    FigureCanvasTkAgg, NavigationToolbar2Tk)
+# Implement the default Matplotlib key bindings.
+from matplotlib.backend_bases import key_press_handler
+from matplotlib.figure import Figure
 
 import logging
-
 logger = logging.getLogger(__name__)
 
-out_config = OutputConfig()  
-
-class Plot2DVisVars(EnumEntity):
+class Plot2DVisVars(instrupy.util.EnumEntity):
     TIME = "Time"
     ALT = "Altitude [km]"
     INC = "Inclination [deg]"
@@ -39,13 +24,15 @@ class Plot2DVisVars(EnumEntity):
     RAAN = "RAAN [deg]"
     AOP = "AOP [deg]"
     ECC = "ECC"
-    SPD = "Speed [km/s]"
+    SPD = "ECI Speed [km/s]"
     ECIX = "ECI X-position [km]"
     ECIY = "ECI Y-position [km]"
     ECIZ = "ECI Z-position [km]"
-    VX = "ECI VX Velocity [km/s]"
-    VY = "ECI VY Velocity [km/s]"
-    VZ = "ECI VZ Velocity [km/s]"
+    VX = "ECI X Velocity [km/s]"
+    VY = "ECI Y Velocity [km/s]"
+    VZ = "ECI Z Velocity [km/s]"
+    LAT = "Latitude [deg]"
+    LON = "Longitude [deg]"
 
     @classmethod
     def get_orbitpy_file_column_header(cls, var):
@@ -89,11 +76,26 @@ class Plot2DVisVars(EnumEntity):
                 data = np.array(sat_df.index) * step_size # index = "TimeIndex"
                 _header = 'Time[s]'
             elif(var == cls.ALT):
-                data = np.array(sat_df["SMA[km]"]) - Constants.radiusOfEarthInKM
+                data = np.array(sat_df["SMA[km]"]) - instrupy.util.Constants.radiusOfEarthInKM
                 _header = 'Alt[km]'
-
+            elif(var==cls.SPD):
+                data = np.array(sat_df["VX[km/s]"])*np.array(sat_df["VX[km/s]"]) + np.array(sat_df["VY[km/s]"])*np.array(sat_df["VY[km/s]"]) + np.array(sat_df["VZ[km/s]"])*np.array(sat_df["VZ[km/s]"])
+                data = np.sqrt(data)
+                _header = 'Speed[km/s]'
+            elif(var==cls.LAT):
+                lat = np.zeros((len(sat_df["X[km]"]), 1))
+                for k in range(0,len(sat_df["X[km]"])):
+                    [lat[k], _x, _y] = instrupy.util.MathUtilityFunctions.eci2geo([sat_df["X[km]"][k], sat_df["Y[km]"][k], sat_df["Z[km]"][k]], epoch_JDUT1)
+                data = lat
+                _header = 'Latitude[deg]'
+            elif(var==cls.LON):
+                lon = np.zeros((len(sat_df["X[km]"]), 1))
+                for k in range(0,len(sat_df["X[km]"])):
+                    [_x, lon[k], _y] = instrupy.util.MathUtilityFunctions.eci2geo([sat_df["X[km]"][k], sat_df["Y[km]"][k], sat_df["Z[km]"][k]], epoch_JDUT1)
+                data = lon
+                _header = 'Longitude[deg]'
+            
         return [str(sat_id)+'.'+_header, data]
-
 
 class TwoDimVisPlotAttibutes():
     def __init__(self, x_sat_id=None, x_var=None, y_sat_id=None, y_var=None, time_start=None, time_end=None):
@@ -129,109 +131,78 @@ class TwoDimVisPlotAttibutes():
     def get_time_interval(self):
         return [self.time_start, self.time_end]
 
-two_dim_vis_plt_attr = TwoDimVisPlotAttibutes()
-
-class VisualizeFrame(ttk.Frame):
-
-    BTNWIDTH = 15
-
-    def __init__(self, parent, controller):
-        ttk.Frame.__init__(self, parent)
-        self.controller = controller
-        
-        self.rowconfigure(0,weight=1)
-        self.columnconfigure(0,weight=1)        
-
-        # define the visualization frame
-        pvis_frame = ttk.Frame(self) 
-        pvis_frame.grid(row=0, column=0, sticky='nswe')
-        pvis_frame.rowconfigure(0,weight=1)
-        pvis_frame.columnconfigure(0,weight=1)
-
-        tabControl = ttk.Notebook(pvis_frame)
-        tab1 = ttk.Frame(tabControl)
-        tab2 = ttk.Frame(tabControl)
-        tab3 = ttk.Frame(tabControl)
-
-        tabControl.add(tab1, text='2D Plot visualization')
-        tabControl.add(tab2, text='Map visualization')
-        tabControl.add(tab3, text='Globe visualization')
-
-        tabControl.pack(expand = True, fill ="both")   
-
-        Vis2DFrame(pvis_frame, tab1)
-
-        
 class Vis2DFrame(ttk.Frame):
 
     def __init__(self, win, tab):
         
-        # define the visualization child frames
+        self.two_dim_vis_plt_attr = TwoDimVisPlotAttibutes() # data structure storing the 2D plot attributes
+
         # 2d plots frame
-        pvis_2d_frame = ttk.LabelFrame(tab)
-        pvis_2d_frame.pack(expand = True, fill ="both")
-        pvis_2d_frame.rowconfigure(0,weight=4)
-        pvis_2d_frame.rowconfigure(1,weight=8)
-        pvis_2d_frame.rowconfigure(2,weight=1)
-        pvis_2d_frame.columnconfigure(0,weight=1)
-        pvis_2d_frame.columnconfigure(1,weight=1)  
-           
+        vis_2d_frame = ttk.Frame(tab)
+        vis_2d_frame.pack(expand = True, fill ="both", padx=10, pady=10)
+        vis_2d_frame.rowconfigure(0,weight=1)
+        vis_2d_frame.rowconfigure(1,weight=1)
+        vis_2d_frame.columnconfigure(0,weight=1)
+        vis_2d_frame.columnconfigure(1,weight=1)             
 
-        pvis_2d_time_frame = ttk.Frame(pvis_2d_frame)
-        pvis_2d_time_frame.grid(row=0, column=0, sticky='nswe', rowspan=2)
-        pvis_2d_time_frame.rowconfigure(0,weight=1)
-        pvis_2d_time_frame.rowconfigure(1,weight=1)
-        pvis_2d_time_frame.rowconfigure(2,weight=1)
-        pvis_2d_time_frame.rowconfigure(3,weight=1)
-        pvis_2d_time_frame.rowconfigure(4,weight=1)
+        vis_2d_time_frame = ttk.LabelFrame(vis_2d_frame, text='Set Time Interval', labelanchor='n')
+        vis_2d_time_frame.grid(row=0, column=0, sticky='nswe', rowspan=2, padx=(40,0))
+        vis_2d_time_frame.rowconfigure(0,weight=1)
+        vis_2d_time_frame.rowconfigure(1,weight=1)
+        vis_2d_time_frame.rowconfigure(2,weight=1)
+        vis_2d_time_frame.columnconfigure(0,weight=1)
+        vis_2d_time_frame.columnconfigure(1,weight=1)
 
-        pvis_2d_xaxis_frame = ttk.Frame(pvis_2d_frame)
-        pvis_2d_xaxis_frame.grid(row=0, column=1, sticky='nswe')
-        pvis_2d_xaxis_frame.rowconfigure(0,weight=1)
-        pvis_2d_xaxis_frame.rowconfigure(1,weight=1)
+        vis_2d_xaxis_frame = ttk.LabelFrame(vis_2d_frame, text='Set X-variable', labelanchor='n')
+        vis_2d_xaxis_frame.grid(row=0, column=1, sticky='nswe')
+        vis_2d_xaxis_frame.columnconfigure(0,weight=1)
+        vis_2d_xaxis_frame.columnconfigure(1,weight=1)
+        vis_2d_xaxis_frame.rowconfigure(0,weight=1)
 
-        pvis_2d_yaxis_frame = ttk.Frame(pvis_2d_frame)
-        pvis_2d_yaxis_frame.grid(row=1, column=1, sticky='nswe')
-        pvis_2d_yaxis_frame.rowconfigure(0,weight=1)
-        pvis_2d_yaxis_frame.rowconfigure(1,weight=1)
+        vis_2d_yaxis_frame = ttk.LabelFrame(vis_2d_frame, text='Set Y-variable(s)', labelanchor='n')
+        vis_2d_yaxis_frame.grid(row=1, column=1, sticky='nswe')
+        vis_2d_yaxis_frame.columnconfigure(0,weight=1)
+        vis_2d_yaxis_frame.columnconfigure(1,weight=1)
+        vis_2d_yaxis_frame.rowconfigure(0,weight=1)
 
-        pvis_2d_plot_frame = ttk.Frame(pvis_2d_frame)
-        pvis_2d_plot_frame.grid(row=2, column=0, columnspan=2, sticky='nswe', pady=(10,2)) 
-        pvis_2d_plot_frame.columnconfigure(0,weight=1)
-        pvis_2d_plot_frame.columnconfigure(1,weight=1) 
+        vis_2d_plot_frame = ttk.Frame(vis_2d_frame)
+        vis_2d_plot_frame.grid(row=2, column=0, columnspan=2, sticky='nswe', pady=(10,2)) 
+        vis_2d_plot_frame.columnconfigure(0,weight=1)
+        vis_2d_plot_frame.columnconfigure(1,weight=1) 
+        vis_2d_plot_frame.rowconfigure(0,weight=1)
 
         # 2D vis frame
-        ttk.Label(pvis_2d_time_frame, text="Time (hh:mm:ss)", wraplength="75", justify='center').grid(row=0, column=0,ipady=5)
-        ttk.Label(pvis_2d_time_frame, text="From").grid(row=1, column=0, sticky='s')
-
-        self.pvis_2d_time_from_entry = ttk.Entry(pvis_2d_time_frame, width=10)
-        self.pvis_2d_time_from_entry.grid(row=2, column=0, sticky='n')
-        self.pvis_2d_time_from_entry.insert(0,'00:00:00')
-        self.pvis_2d_time_from_entry.bind("<FocusIn>", lambda args: self.pvis_2d_time_from_entry.delete('0', 'end'))
+        ttk.Label(vis_2d_time_frame, text="Time (hh:mm:ss) from mission-epoch", wraplength="110", justify='center').grid(row=0, column=0,columnspan=2,ipady=5)
         
-        ttk.Label(pvis_2d_time_frame, text="To").grid(row=3, column=0, sticky='s')
-        self.pvis_2d_time_to_entry = ttk.Entry(pvis_2d_time_frame, width=10)
-        self.pvis_2d_time_to_entry.grid(row=4, column=0, sticky='n')
-        self.pvis_2d_time_to_entry.insert(0,'10:00:00')
-        self.pvis_2d_time_to_entry.bind("<FocusIn>", lambda args: self.pvis_2d_time_to_entry.delete('0', 'end'))
-
-        pvis_2d_x_sel_var_btn = ttk.Button(pvis_2d_xaxis_frame, text="X.Var", command=self.click_2dvis_select_xvar_btn)
-        pvis_2d_x_sel_var_btn.grid(row=0, column=0)
-        self.pvis_2d_x_sel_var_disp = tk.Text(pvis_2d_xaxis_frame, state='disabled',height = 1, width = 3, background="light grey")
-        self.pvis_2d_x_sel_var_disp.grid(row=1, column=0, sticky='nsew', padx=10)    
-
-        pvis_2d_y_sel_var_btn = ttk.Button(pvis_2d_yaxis_frame, text="Y.Var(s)", command=self.click_2dvis_select_yvar_btn)
-        pvis_2d_y_sel_var_btn.grid(row=0, column=0)
-        self.pvis_2d_y_sel_var_disp = tk.Text(pvis_2d_yaxis_frame, state='disabled',height = 2, width = 3, background="light grey")
-        self.pvis_2d_y_sel_var_disp.grid(row=1, column=0, sticky='nsew', padx=10) 
+        ttk.Label(vis_2d_time_frame, text="From").grid(row=1, column=0, sticky='ne')
+        self.vis_2d_time_from_entry = ttk.Entry(vis_2d_time_frame, width=10, takefocus = False)
+        self.vis_2d_time_from_entry.grid(row=1, column=1, sticky='nw', padx=10)
+        self.vis_2d_time_from_entry.insert(0,'00:00:00')
+        self.vis_2d_time_from_entry.bind("<FocusIn>", lambda args: self.vis_2d_time_from_entry.delete('0', 'end'))
         
-        plot_btn = ttk.Button(pvis_2d_plot_frame, text="Plot", command=lambda: self.click_2dvis_plot2d_btn(plot=True))
-        plot_btn.grid(row=0, column=0)
+        ttk.Label(vis_2d_time_frame, text="To").grid(row=2, column=0, sticky='ne')
+        self.vis_2d_time_to_entry = ttk.Entry(vis_2d_time_frame, width=10, takefocus = False)
+        self.vis_2d_time_to_entry.grid(row=2, column=1, sticky='nw', padx=10)
+        self.vis_2d_time_to_entry.insert(0,'10:00:00')
+        self.vis_2d_time_to_entry.bind("<FocusIn>", lambda args: self.vis_2d_time_to_entry.delete('0', 'end'))
 
-        export_btn = ttk.Button(pvis_2d_plot_frame, text="Export", command=lambda: self.click_2dvis_plot2d_btn(export=True))
-        export_btn.grid(row=0, column=1)
+        vis_2d_x_sel_var_btn = ttk.Button(vis_2d_xaxis_frame, text="X.Var", command=self.click_select_xvar_btn)
+        vis_2d_x_sel_var_btn.grid(row=0, column=0)
+        self.vis_2d_x_sel_var_disp = tk.Text(vis_2d_xaxis_frame, state='disabled',height = 1, width = 3, background="light grey")
+        self.vis_2d_x_sel_var_disp.grid(row=0, column=1, sticky='nsew', padx=20, pady=20)    
 
-    def click_2dvis_select_xvar_btn(self):
+        vis_2d_y_sel_var_btn = ttk.Button(vis_2d_yaxis_frame, text="Y.Var(s)", command=self.click_select_yvar_btn)
+        vis_2d_y_sel_var_btn.grid(row=0, column=0)
+        self.vis_2d_y_sel_var_disp = tk.Text(vis_2d_yaxis_frame, state='disabled',height = 2, width = 3, background="light grey")
+        self.vis_2d_y_sel_var_disp.grid(row=0, column=1, sticky='nsew', padx=20, pady=20) 
+        
+        plot_btn = ttk.Button(vis_2d_plot_frame, text="Plot", command=lambda: self.click_plot_btn(plot=True))
+        plot_btn.grid(row=0, column=0, sticky='e', padx=20)
+
+        export_btn = ttk.Button(vis_2d_plot_frame, text="Export", command=lambda: self.click_plot_btn(export=True))
+        export_btn.grid(row=0, column=1, sticky='w', padx=20)
+
+    def click_select_xvar_btn(self):
         # create window to ask which satellite 
         select_xvar_win = tk.Toplevel()
         select_xvar_win.rowconfigure(0,weight=1)
@@ -249,7 +220,7 @@ class Vis2DFrame(ttk.Frame):
         okcancel_frame.grid(row=1, column=0, columnspan=2, padx=10, pady=10) 
 
         # place the widgets in the frame
-        available_sats = out_config.get_satellite_ids()  # get all available sats for which outputs are available
+        available_sats = config.out_config.get_satellite_ids()  # get all available sats for which outputs are available
  
         sats_combo_box = ttk.Combobox(select_sat_win_frame, 
                                         values=available_sats)
@@ -272,24 +243,24 @@ class Vis2DFrame(ttk.Frame):
                 k=k+1
 
         def click_ok_btn():
-            two_dim_vis_plt_attr.update_x_variables(sats_combo_box.get(), self._2dvis_xvar.get())
-            [sats, xvars] = two_dim_vis_plt_attr.get_x_variables()
+            self.two_dim_vis_plt_attr.update_x_variables(sats_combo_box.get(), self._2dvis_xvar.get())
+            [sats, xvars] = self.two_dim_vis_plt_attr.get_x_variables()
             xvars_str = str(sats+'.'+xvars)
-            self.pvis_2d_x_sel_var_disp.configure(state='normal')
-            self.pvis_2d_x_sel_var_disp.delete(1.0,'end')
-            self.pvis_2d_x_sel_var_disp.insert(1.0, xvars_str)
-            self.pvis_2d_x_sel_var_disp.configure(state='disabled')
+            self.vis_2d_x_sel_var_disp.configure(state='normal')
+            self.vis_2d_x_sel_var_disp.delete(1.0,'end')
+            self.vis_2d_x_sel_var_disp.insert(1.0, xvars_str)
+            self.vis_2d_x_sel_var_disp.configure(state='disabled')
             select_xvar_win.destroy()
 
-        ok_btn = ttk.Button(okcancel_frame, text="Ok", command=click_ok_btn, width=VisualizeFrame.BTNWIDTH)
+        ok_btn = ttk.Button(okcancel_frame, text="Ok", command=click_ok_btn, width=15)
         ok_btn.grid(row=0, column=0, sticky ='e')
-        cancel_btn = ttk.Button(okcancel_frame, text="Exit", command=select_xvar_win.destroy, width=VisualizeFrame.BTNWIDTH)
+        cancel_btn = ttk.Button(okcancel_frame, text="Exit", command=select_xvar_win.destroy, width=15)
         cancel_btn.grid(row=0, column=1, sticky ='w') 
 
-    def click_2dvis_select_yvar_btn(self):
+    def click_select_yvar_btn(self):
 
         # reset any previously configured y-variables
-        two_dim_vis_plt_attr.reset_y_variables()
+        self.two_dim_vis_plt_attr.reset_y_variables()
         
         # create window to ask which satellite 
         select_yvar_win = tk.Toplevel()
@@ -308,12 +279,8 @@ class Vis2DFrame(ttk.Frame):
         okcancel_frame.grid(row=1, column=0, columnspan=2, padx=10, pady=10) 
 
         # place the widgets in the frame
-        available_sats = out_config.get_satellite_ids()  # get all available sats for which outputs are available
+        available_sats = config.out_config.get_satellite_ids()  # get all available sats for which outputs are available
  
-        sats_combo_box = ttk.Combobox(select_sat_win_frame, 
-                                        values=available_sats)
-        sats_combo_box.grid(row=0, column=0)
-
         sats_combo_box = ttk.Combobox(select_sat_win_frame, 
                                         values=available_sats)
         sats_combo_box.current(0)
@@ -331,27 +298,25 @@ class Vis2DFrame(ttk.Frame):
                 k=k+1
 
         def click_ok_btn():
-            two_dim_vis_plt_attr.update_y_variables(sats_combo_box.get(), self._2dvis_yvar.get())
+            self.two_dim_vis_plt_attr.update_y_variables(sats_combo_box.get(), self._2dvis_yvar.get())
             
         def click_exit_btn():
-            self.pvis_2d_y_sel_var_disp.configure(state='normal')
-            self.pvis_2d_y_sel_var_disp.delete(1.0,'end')
-            [sats, yvars] = two_dim_vis_plt_attr.get_y_variables()
+            self.vis_2d_y_sel_var_disp.configure(state='normal')
+            self.vis_2d_y_sel_var_disp.delete(1.0,'end')
+            [sats, yvars] = self.two_dim_vis_plt_attr.get_y_variables()
             yvars_str = [str(sats[k]+'.'+yvars[k]) for k in range(0,len(sats))]
-            self.pvis_2d_y_sel_var_disp.insert(1.0,' '.join(yvars_str))
-            self.pvis_2d_y_sel_var_disp.configure(state='disabled')
+            self.vis_2d_y_sel_var_disp.insert(1.0,' '.join(yvars_str))
+            self.vis_2d_y_sel_var_disp.configure(state='disabled')
             select_yvar_win.destroy()
 
-        ok_btn = ttk.Button(okcancel_frame, text="Add", command=click_ok_btn, width=VisualizeFrame.BTNWIDTH)
+        ok_btn = ttk.Button(okcancel_frame, text="Add", command=click_ok_btn, width=15)
         ok_btn.grid(row=0, column=0, sticky ='e')
-        cancel_btn = ttk.Button(okcancel_frame, text="Exit", command=click_exit_btn, width=VisualizeFrame.BTNWIDTH)
+        cancel_btn = ttk.Button(okcancel_frame, text="Exit", command=click_exit_btn, width=15)
         cancel_btn.grid(row=0, column=1, sticky ='w') 
 
-    def click_2dvis_plot2d_btn(self, export=False, plot=False):
-        """ Make X-Y scatter plots of the variables indicated in :code:`two_dim_vis_plt_attr` global variable. 
-        """
+    def update_time_interval_in_attributes_variable(self):
         # read the plotting time interval 
-        time_start = str(self.pvis_2d_time_from_entry.get()).split(":") # split and reverse list
+        time_start = str(self.vis_2d_time_from_entry.get()).split(":") # split and reverse list
         time_start.reverse()
         # convert to seconds
         x = 0
@@ -359,7 +324,7 @@ class Vis2DFrame(ttk.Frame):
             x = x + float(time_start[k]) * (60**k)
         time_start_s = x
 
-        time_end = str(self.pvis_2d_time_to_entry.get()).split(":") # split and reverse list
+        time_end = str(self.vis_2d_time_to_entry.get()).split(":") # split and reverse list
         time_end.reverse()
         # convert to seconds
         x = 0
@@ -367,12 +332,20 @@ class Vis2DFrame(ttk.Frame):
             x = x + float(time_end[k]) * (60**k)
         time_end_s = x
 
-        two_dim_vis_plt_attr.update_time_interval(time_start_s, time_end_s)
+        self.two_dim_vis_plt_attr.update_time_interval(time_start_s, time_end_s)
+        
+    def click_plot_btn(self, export=False, plot=False):
+        """ Make X-Y scatter plots of the variables indicated in :code:`self.two_dim_vis_plt_attr` instance variable. 
+        """
+        
+        self.update_time_interval_in_attributes_variable()
+
+        [time_start_s, time_end_s] = self.two_dim_vis_plt_attr.get_time_interval()
 
         # get the x-axis data
-        [x_sat_id, x_var] = two_dim_vis_plt_attr.get_x_variables()
-        x_sat_state_fp = out_config.get_satellite_state_fp()[out_config.get_satellite_ids().index(x_sat_id)]
-        x_sat_kepstate_fp = out_config.get_satellite_kepstate_fp()[out_config.get_satellite_ids().index(x_sat_id)]
+        [x_sat_id, x_var] = self.two_dim_vis_plt_attr.get_x_variables()
+        x_sat_state_fp = config.out_config.get_satellite_state_fp()[config.out_config.get_satellite_ids().index(x_sat_id)]
+        x_sat_kepstate_fp = config.out_config.get_satellite_kepstate_fp()[config.out_config.get_satellite_ids().index(x_sat_id)]
         
         # read the epoch and time-step size and fix the start and stop indices
         epoch_JDUT1 = pd.read_csv(x_sat_state_fp, skiprows = [0], nrows=1, header=None).astype(str) # 2nd row contains the epoch
@@ -403,7 +376,7 @@ class Vis2DFrame(ttk.Frame):
             logger.info("Please enter valid time-interval.")
             return
 
-        # get data only inthe relevant time-interval
+        # get data only in the relevant time-interval
         x_sat_state_df = x_sat_state_df.iloc[time_start_index:time_end_index]
         x_sat_kepstate_df = x_sat_kepstate_df.iloc[time_start_index:time_end_index]
         x_sat_df = pd.concat([x_sat_state_df, x_sat_kepstate_df], axis=1)
@@ -416,17 +389,17 @@ class Vis2DFrame(ttk.Frame):
         plt_data[_xvarname] = _xdata  
 
         # iterate over the list of y-vars 
-        [y_sat_id, y_var] = two_dim_vis_plt_attr.get_y_variables()
+        [y_sat_id, y_var] = self.two_dim_vis_plt_attr.get_y_variables()
         num_y_vars = len(y_var)
         for k in range(0,num_y_vars): 
             # extract the y-variable data from of the particular satellite
             # cartesian eci state file
-            y_sat_state_fp = out_config.get_satellite_state_fp()[out_config.get_satellite_ids().index(y_sat_id[k])]
+            y_sat_state_fp = config.out_config.get_satellite_state_fp()[config.out_config.get_satellite_ids().index(y_sat_id[k])]
             y_sat_state_df = pd.read_csv(y_sat_state_fp,skiprows = [0,1,2,3]) 
             y_sat_state_df.set_index('TimeIndex', inplace=True)
             y_sat_state_df = y_sat_state_df.iloc[time_start_index:time_end_index]
             # keplerian state file
-            y_sat_kepstate_fp = out_config.get_satellite_kepstate_fp()[out_config.get_satellite_ids().index(y_sat_id[k])]
+            y_sat_kepstate_fp = config.out_config.get_satellite_kepstate_fp()[config.out_config.get_satellite_ids().index(y_sat_id[k])]
             y_sat_kepstate_df = pd.read_csv(y_sat_kepstate_fp,skiprows = [0,1,2,3]) 
             y_sat_kepstate_df.set_index('TimeIndex', inplace=True)
             y_sat_kepstate_df = y_sat_kepstate_df.iloc[time_start_index:time_end_index]
@@ -442,18 +415,23 @@ class Vis2DFrame(ttk.Frame):
             plt_data.to_csv(vis2d_data_fp)
             
         if(plot is True):
-            plt.figure()
+            fig_win = tk.Toplevel()
+            fig = Figure(figsize=(5, 4), dpi=100)
+            ax = fig.add_subplot(111)
             _lgnd=[]
             for k in range(0,num_y_vars):
-                plt.scatter(plt_data.iloc[:,0],plt_data.iloc[:,k+1])
+                ax.scatter(plt_data.iloc[:,0],plt_data.iloc[:,k+1])
                 _lgnd.append(plt_data.columns[k+1])  # pylint: disable=E1136  # pylint/issues/3139
-                '''plt_data.plot.scatter(x=0,
-                        y=1+k,
-                        c='DarkBlue')
-                '''
-            plt.xlabel(plt_data.columns[0])  # pylint: disable=E1136  # pylint/issues/3139
-            plt.ylabel('Y-axis')
-            plt.legend(_lgnd)
-            plt.show()
-              
+            ax.set_xlabel(plt_data.columns[0])  # pylint: disable=E1136  # pylint/issues/3139
+            ax.set_ylabel('Y-axis')
+            ax.legend(_lgnd)
+            
+            canvas = FigureCanvasTkAgg(fig, master=fig_win)  # A tk.DrawingArea.
+            canvas.draw()
+            canvas.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
+
+            toolbar = NavigationToolbar2Tk(canvas, fig_win)
+            toolbar.update()
+            canvas.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
+            
  

@@ -3,7 +3,7 @@ from tkinter import ttk
 from .startframe import StartFrame
 from .configureframe import ConfigureFrame
 from .executeframe import ExecuteFrame 
-from .visualizeframe import VisualizeFrame
+from .visualizeframe.visualizeframe import VisualizeFrame
 import tkinter.scrolledtext
 import os
 from eos.config import GuiStyle

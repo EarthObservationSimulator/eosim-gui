@@ -168,3 +168,5 @@ class OutputConfig:
                                    "satOut": self.sat_out
                                   }) 
         return output_config_dict
+
+out_config = OutputConfig()  

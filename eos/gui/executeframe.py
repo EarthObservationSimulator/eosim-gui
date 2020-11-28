@@ -1,6 +1,7 @@
 from tkinter import ttk 
 import tkinter as tk
-from eos.config import GuiStyle, MissionConfig, OutputConfig
+from eos.config import GuiStyle, MissionConfig
+from eos import config
 import random
 from tkinter import messagebox
 import json
@@ -29,7 +30,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-out_config = OutputConfig()  
+
 
 class ExecuteFrame(ttk.Frame):
 
@@ -99,9 +100,9 @@ class ExecuteFrame(ttk.Frame):
             # save output configuration file (any previous configuration is re-written since propagation is the first step 
             # to any of the future calculations such as coverage or communications, etc)
 
-            out_config.update_prop_out(prop_done=True, sat_id=sat_id, sat_eci_state_fp=sat_eci_state_fp, sat_kep_state_fp=sat_kep_state_fp) 
+            config.out_config.update_prop_out(prop_done=True, sat_id=sat_id, sat_eci_state_fp=sat_eci_state_fp, sat_kep_state_fp=sat_kep_state_fp) 
             with open('output.json', 'w', encoding='utf-8') as f:
-                json.dump(out_config.to_dict(), f, ensure_ascii=False, indent=4)
+                json.dump(config.out_config.to_dict(), f, ensure_ascii=False, indent=4)
 
             prop_progress_bar.stop()            
 

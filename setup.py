@@ -13,5 +13,5 @@ setup(
     packages=['eos'],
     scripts=[ 
     ],
-    install_requires=['numpy', 'pandas', 'scipy', 'lowtran', 'nose', 'sphinx', 'sphinx_rtd_theme'] 
+    install_requires=['numpy', 'pandas', 'scipy', 'lowtran', 'nose', 'sphinx', 'sphinx_rtd_theme', 'cartopy'] 
 )
