@@ -2,9 +2,8 @@ import tkinter as tk
 import tkinter.filedialog
 from tkinter import ttk 
 import os
+import eos.gui.helpwindow as helpwindow
 class StartFrame(ttk.Frame):
-
-    BTNWIDTH = 15
 
     def __init__(self, parent, controller):
         ttk.Frame.__init__(self, parent)
@@ -19,10 +18,12 @@ class StartFrame(ttk.Frame):
         welcomenote = ttk.Label(self, text=text, wraplength=400, justify="center")
         welcomenote.grid(row=0, column=0, columnspan=4, pady=(20,10))        
         
-        new_btn = ttk.Button(self, text="New", command=self.click_new_sim, width=StartFrame.BTNWIDTH)
-        load_btn = ttk.Button(self, text="Load", width=StartFrame.BTNWIDTH)
-        ex_btn = ttk.Button(self, text="Examples", width=StartFrame.BTNWIDTH)
-        help_btn = ttk.Button(self, text="Help", width=StartFrame.BTNWIDTH)
+        new_btn = ttk.Button(self, text="New", command=self.click_new_sim, width=15)        
+        help_btn = ttk.Button(self, text="Help", width=15, command=helpwindow.click_help)
+        load_btn = ttk.Button(self, text="Load", width=15)
+        load_btn.bind('<Enter>',helpwindow.help_window_update)
+        ex_btn = ttk.Button(self, text="Examples", width=15)
+        
         new_btn.grid(row=1, column=0)
         load_btn.grid(row=1, column=1)
         ex_btn.grid(row=1, column=2)
@@ -37,4 +38,8 @@ class StartFrame(ttk.Frame):
     def click_new_sim(self):      
         sim_dir_path = tkinter.filedialog.askdirectory(initialdir=os.getcwd(), title="Please select an empty folder:")  
         os.chdir(sim_dir_path) # set working directory
+    
+
+
+        
         
