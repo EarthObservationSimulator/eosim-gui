@@ -9,6 +9,7 @@ import orbitpy
 import tkinter.filedialog, tkinter.messagebox
 from instrupy.public_library import Instrument
 import os
+import eos.gui.helpwindow as helpwindow
 import logging
 
 logger = logging.getLogger(__name__)
@@ -462,10 +463,12 @@ class ConfigureFrame(ttk.Frame):
             # other specs frame
             other_specs_frame = ttk.LabelFrame(specs_frame) # specifications other then FOV, maneuver, orientation frame
             other_specs_frame.grid(row=0, column=0, padx=10, pady=10)
+            other_specs_frame.bind('<Enter>',lambda event, widget_id="basicsensor": helpwindow.update_help_window(event, widget_id))
             
             # fov specs frame
-            fov_specs_frame = ttk.LabelFrame(specs_frame, text="Field-Of-View") # field-of-view (FOV) specifications frame
-            fov_specs_frame.grid(row=0, column=1, padx=10, pady=10, sticky='n')  
+            fov_specs_frame = ttk.LabelFrame(specs_frame, text="Field-Of-View") # field-of-view (FOV) specifications frame            
+            fov_specs_frame.grid(row=0, column=1, padx=10, pady=10, sticky='n') 
+            fov_specs_frame.bind('<Enter>',lambda event, widget_id="basicsensor_fovspecs": helpwindow.update_help_window(event, widget_id)) 
 
             fov_type_frame = ttk.Frame(fov_specs_frame)
             fov_type_frame.grid(row=0, column=0, sticky='nswe', padx=10, pady=10)
@@ -494,6 +497,7 @@ class ConfigureFrame(ttk.Frame):
             # manuver frame
             maneuver_frame = ttk.LabelFrame(specs_frame, text="Manuever") # manuver specs frame
             maneuver_frame.grid(row=0, column=3, padx=10, pady=10, sticky='n')
+            maneuver_frame.bind('<Enter>',lambda event, widget_id="maneuver": helpwindow.update_help_window(event, widget_id))
 
             maneuver_type_frame = ttk.Frame(maneuver_frame)
             maneuver_type_frame.grid(row=0, column=0, sticky='nswe', padx=10, pady=10)

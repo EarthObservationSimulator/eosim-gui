@@ -1,0 +1,68 @@
+{
+    "main":{
+        "heading": "Help!",
+        "description": ["I need somebody\n" ,
+                        "(Help!) not just anybody\n" ,
+                        "(Help!) you know I need someone"],
+        "images": false,
+        "morehelp": false
+    },
+    "load":{
+        "heading": "Load",
+        "description": ["Select the folder containing mission data."],
+        "images": false,
+        "morehelp": false
+    },
+    "new":{
+        "heading": "New",
+        "description": ["Select an empty folder as workspace to save all the mission data.\n",
+                        "Default folder location is ./eos/output/"],
+        "images": false,
+        "morehelp": false
+    },
+    "welcome":{
+        "heading": "Welcome",
+        "description": ["Click here to go to the start page."],
+        "images": false,
+        "morehelp": false
+    },
+    "configure":{
+        "heading": "Configure",
+        "description": ["Define the mission parameters and solver settings."],
+        "images": false,
+        "morehelp": false
+    },
+    "execute":{
+        "heading": "Execute",
+        "description": ["Execute mission. Orbit propagation, coverage calculation, ",
+                        "satellite-to-ground-station contacts, satellite-to-satellite contacts ",
+                        "can be calculated."],
+        "images": false,
+        "morehelp": false
+    },
+    "visualize":{
+        "heading": "Visualize",
+        "description": ["Visualize the results of the execution by means of textual data, 2d-plots and map-plots."],
+        "images": false,
+        "morehelp": false
+    },
+    "basicsensor":{
+        "heading": "Basic Sensor",
+        "description": ["Model parameters of a basic-sensor."],
+        "images": false,
+        "morehelp": false
+    },
+    "fovspecs":{
+        "heading": "Field-Of-View",
+        "description": ["Specify the field of view."],
+        "images": false,
+        "morehelp": false
+    },
+    "maneuver":{
+        "heading": "Maneuver",
+        "description": ["Specify the maneuver"],
+        "images": false,
+        "morehelp": "./instrupy/docs/_build/html/miscellaneous.html#manuverability-and-corresponging-for-calculations"
+    }
+
+}

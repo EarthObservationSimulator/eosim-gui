@@ -11,7 +11,10 @@ import sys
 import logging
 import time
 import traceback
+import eos.gui.helpwindow as helpwindow
+import logging
 
+logger = logging.getLogger(__name__)
 class MainApplication:   
 
     def __init__(self, parent, loglevel=logging.INFO):
@@ -25,7 +28,7 @@ class MainApplication:
                
         MainApplication.build_main_window(self, loglevel)      
         
-        GuiStyle()
+        GuiStyle() # consifure all the styles used in the GUI (shall affect the other modules too)
         
         
     def report_callback_exception(self, exc_type, exc_value, exc_traceback):
@@ -63,12 +66,16 @@ class MainApplication:
         
         welcome_btn = ttk.Button(lsidebar, text='WELCOME',command=lambda: self.show_frame("StartFrame"))
         welcome_btn.grid(row=0, column=0, sticky='nswe')
+        welcome_btn.bind('<Enter>',lambda event, widget_id="welcome": helpwindow.update_help_window(event, widget_id))
         configure_btn = ttk.Button(lsidebar, text='CONFIGURE',command=lambda: self.show_frame("ConfigureFrame"))
         configure_btn.grid(row=1, column=0, sticky='nswe')
-        propagate_btn = ttk.Button(lsidebar, text='EXECUTE',command=lambda: self.show_frame("ExecuteFrame")) 
-        propagate_btn.grid(row=2, column=0, sticky='nswe')
-        power_btn = ttk.Button(lsidebar, text='VISUALIZE',command=lambda: self.show_frame("VisualizeFrame")) 
-        power_btn.grid(row=3, column=0, sticky='nswe')
+        configure_btn.bind('<Enter>',lambda event, widget_id="configure": helpwindow.update_help_window(event, widget_id))
+        execute_btn = ttk.Button(lsidebar, text='EXECUTE',command=lambda: self.show_frame("ExecuteFrame")) 
+        execute_btn.grid(row=2, column=0, sticky='nswe')
+        execute_btn.bind('<Enter>',lambda event, widget_id="execute": helpwindow.update_help_window(event, widget_id))
+        visualize_btn = ttk.Button(lsidebar, text='VISUALIZE',command=lambda: self.show_frame("VisualizeFrame")) 
+        visualize_btn.grid(row=3, column=0, sticky='nswe')
+        visualize_btn.bind('<Enter>',lambda event, widget_id="visualize": helpwindow.update_help_window(event, widget_id))
         synobs_btn = ttk.Button(lsidebar, text='TBD',command=lambda: self.show_frame("SynObsFrame")) 
         synobs_btn.grid(row=4, column=0, sticky='nswe')            
 
