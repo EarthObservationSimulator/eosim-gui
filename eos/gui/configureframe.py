@@ -10,6 +10,8 @@ import tkinter.filedialog, tkinter.messagebox
 from instrupy.public_library import Instrument
 import os
 import eos.gui.helpwindow as helpwindow
+import pickle
+from orbitpy import preprocess
 import logging
 
 logger = logging.getLogger(__name__)
@@ -89,6 +91,14 @@ class ConfigureFrame(ttk.Frame):
         run_all_btn.grid(row=0, column=2,ipadx=20, sticky='s')
 
     def click_save_config(self):
+
+        logger.info(".......Preprocessing configuration .......")
+        user_dir = os.getcwd() + '/'
+        pi = preprocess.PreProcess(miss_specs.to_dict(), user_dir) # generates grid if-needed, calculates propagation 
+                                                         # and coverage parameters, enumerates orbits, etc.
+        prop_cov_param = pi.generate_prop_cov_param() 
+        pickle.dump(prop_cov_param, open("prop_cov_param.p", "wb"))
+
         with open('MissionSpecs.json', 'w', encoding='utf-8') as f:
             json.dump(miss_specs.to_dict(), f, ensure_ascii=False, indent=4)
         logger.info("Configuration Saved.")

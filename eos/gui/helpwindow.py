@@ -8,7 +8,7 @@ from PIL import ImageTk,Image
 
 help_win = None
 
-with open(os.path.dirname(os.path.realpath(__file__))+"\\help\\help_database.json", 'r') as help_db_file:
+with open(os.path.dirname(os.path.realpath(__file__))+"/help/help_database.json", 'r') as help_db_file:
     help_db = json.load(help_db_file) 
 
 def on_closing():

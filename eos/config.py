@@ -149,14 +149,22 @@ class OutputConfig:
     def from_dict(d):
         return OutputConfig(prop_done=d.get('propDone', None),
                             cov_done=d.get('covDone', None),
-                            sat_out=d.get('satOut', None)
-                           )
+                            sat_out=d.get('satOut', None)) 
 
-    def update_prop_out(self, prop_done, sat_id, sat_eci_state_fp, sat_kep_state_fp):
+    def update_prop_out(self, sat_id, sat_eci_state_fp, sat_kep_state_fp):
         self.prop_done = True
         self.sat_out = list() # erase any previous entries
         for k in range(0,len(sat_id)):
             self.sat_out.append({"@id":sat_id[k], "StateFilePath":sat_eci_state_fp[k], "KepStateFilePath":sat_kep_state_fp[k]})
+
+    def update_cov_out(self, sat_id, sat_acc_fl):
+        self.cov_done = True
+        for k in range(0,len(self.sat_out)):
+            indx = sat_id.index(self.sat_out[k]["@id"]) # match the sat_acc_fl to the list of satellites in the output config object
+            if indx is not None:
+                self.sat_out[k].update({"AccessFilePath":sat_acc_fl[indx]})
+            else:
+                raise Exception("Satellite id not found.")
 
     def get_satellite_ids(self):
         return [x["@id"] for x in self.sat_out]
