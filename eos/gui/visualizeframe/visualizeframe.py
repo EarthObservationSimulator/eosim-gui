@@ -5,6 +5,7 @@ from eos import config
 from eos.gui.visualizeframe.insightsframe import InsightsFrame
 from eos.gui.visualizeframe.vis2dframe import Vis2DFrame
 from eos.gui.visualizeframe.vismapframe import VisMapFrame
+from eos.gui.visualizeframe.visglobeframe import VisGlobeFrame
 import random
 from tkinter import messagebox
 import json
@@ -40,12 +41,12 @@ class VisualizeFrame(ttk.Frame):
         self.columnconfigure(0,weight=1)        
 
         # define the visualization frame
-        pvis_frame = ttk.Frame(self) 
-        pvis_frame.grid(row=0, column=0, sticky='nswe')
-        pvis_frame.rowconfigure(0,weight=1)
-        pvis_frame.columnconfigure(0,weight=1)
+        vis_frame = ttk.Frame(self) 
+        vis_frame.grid(row=0, column=0, sticky='nswe')
+        vis_frame.rowconfigure(0,weight=1)
+        vis_frame.columnconfigure(0,weight=1)
 
-        tabControl = ttk.Notebook(pvis_frame)
+        tabControl = ttk.Notebook(vis_frame)
         tab1 = ttk.Frame(tabControl)
         tab2 = ttk.Frame(tabControl)
         tab3 = ttk.Frame(tabControl)
@@ -58,7 +59,8 @@ class VisualizeFrame(ttk.Frame):
 
         tabControl.pack(expand = True, fill ="both")   
 
-        InsightsFrame(pvis_frame, tab1)
-        Vis2DFrame(pvis_frame, tab2)
-        VisMapFrame(pvis_frame, tab3)
+        InsightsFrame(vis_frame, tab1)
+        Vis2DFrame(vis_frame, tab2)
+        VisMapFrame(vis_frame, tab3)
+        VisGlobeFrame(vis_frame, tab4)
 
