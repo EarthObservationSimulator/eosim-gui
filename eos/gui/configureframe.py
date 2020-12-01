@@ -1,6 +1,7 @@
 from tkinter import ttk 
 import tkinter as tk
 from eos.config import GuiStyle, MissionConfig
+from eos import config
 from orbitpy.preprocess import OrbitParameters, PreProcess
 import random
 from tkinter import messagebox
@@ -93,20 +94,28 @@ class ConfigureFrame(ttk.Frame):
     def click_save_config(self):
 
         logger.info(".......Preprocessing configuration .......")
-        user_dir = os.getcwd() + '/'
+        user_dir = config.out_config.get_user_dir()
         pi = preprocess.PreProcess(miss_specs.to_dict(), user_dir) # generates grid if-needed, calculates propagation 
                                                          # and coverage parameters, enumerates orbits, etc.
         prop_cov_param = pi.generate_prop_cov_param() 
-        pickle.dump(prop_cov_param, open("prop_cov_param.p", "wb"))
 
-        with open('MissionSpecs.json', 'w', encoding='utf-8') as f:
+        # store data for later use during execution, visualization
+        pickle.dump(prop_cov_param, open(user_dir+"prop_cov_param.p", "wb"))
+
+        with open(user_dir+"comm_param.p", "wb") as f:
+            pickle.dump(pi.comm_dir, f)
+            pickle.dump(pi.gnd_stn_fl, f)
+            pickle.dump(pi.ground_stn_info, f)
+        print(pi.ground_stn_info)
+        with open(user_dir+'MissionSpecs.json', 'w', encoding='utf-8') as f:
             json.dump(miss_specs.to_dict(), f, ensure_ascii=False, indent=4)
         logger.info("Configuration Saved.")
     
     def click_clear_config(self):
         ''' Clear the configuration (both in the local variable and in the MissionSpecs file) '''
+        ser_dir = config.out_config.get_user_dir()
         miss_specs.clear()
-        with open('MissionSpecs.json', 'w', encoding='utf-8') as f:
+        with open(user_dir+'MissionSpecs.json', 'w', encoding='utf-8') as f:
             json.dump(miss_specs.to_dict(), f, ensure_ascii=False, indent=4)
         logger.info("Configuration cleared.")
 
@@ -1371,8 +1380,8 @@ class ConfigureFrame(ttk.Frame):
 
         self.gs_info = []
         def add_gs():
-            self.gs_info.append({'@id': float(gs_specs_gsid_entry.get()), 
-                                 'name': float(gs_specs_name_entry.get()), 
+            self.gs_info.append({'@id': (gs_specs_gsid_entry.get()), 
+                                 'name': str(gs_specs_name_entry.get()), 
                                  'lat': float(gs_specs_lat_entry.get()), 
                                  'lon': float(gs_specs_lon_entry.get()),                                              
                                  'alt': float(gs_specs_alt_entry.get()),
@@ -1388,7 +1397,7 @@ class ConfigureFrame(ttk.Frame):
 
         ttk.Label(gs_add_by_entry_frame, text="Name").grid(row=2, column=0, sticky='w', padx=10, pady=10)
         gs_specs_name_entry = ttk.Entry(gs_add_by_entry_frame, width=10)
-        gs_specs_name_entry.insert(0,-10)
+        gs_specs_name_entry.insert(0,'GreenSpinach')
         gs_specs_name_entry.bind("<FocusIn>", lambda args: gs_specs_name_entry.delete('0', 'end'))
         gs_specs_name_entry.grid(row=2, column=1, sticky='w')
 

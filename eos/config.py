@@ -3,7 +3,7 @@ import tkinter as tk
 from orbitpy.preprocess import OrbitParameters
 from instrupy.public_library import Instrument
 import json
-
+import os
 class GuiStyle():
     main_win_width = 900
     main_win_height = int(main_win_width*9/21) # 21:9 aspect ratio
@@ -140,16 +140,19 @@ class OutputConfig:
         This class would be referenced by the various plotting functions in EOS to gather the available results. 
         Using this class, a JSON file called 'output.json' would be written in the user directory.    
     """
-    def __init__(self, prop_done=None, cov_done=None, sat_out=None):
+    def __init__(self, prop_done=None, cov_done=None, sat_out=None, user_dir=None, gnd_stn_comm_done=None):
         self.prop_done = prop_done if prop_done is not None else bool(False)
         self.cov_done = cov_done if cov_done is not None else bool(False)
         self.sat_out = list(sat_out) if sat_out is not None else list()
+        self.user_dir = user_dir if user_dir is not None else os.path.join(os.path.dirname(__file__), '../output/')
+        self.gnd_stn_comm_done = gnd_stn_comm_done if gnd_stn_comm_done is not None else bool(False)
 
     @staticmethod
     def from_dict(d):
         return OutputConfig(prop_done=d.get('propDone', None),
                             cov_done=d.get('covDone', None),
-                            sat_out=d.get('satOut', None)) 
+                            sat_out=d.get('satOut', None),
+                            user_dir=d.get('user_dir', None)) 
 
     def update_prop_out(self, sat_id, sat_eci_state_fp, sat_kep_state_fp):
         self.prop_done = True
@@ -160,11 +163,32 @@ class OutputConfig:
     def update_cov_out(self, sat_id, sat_acc_fl):
         self.cov_done = True
         for k in range(0,len(self.sat_out)):
-            indx = sat_id.index(self.sat_out[k]["@id"]) # match the sat_acc_fl to the list of satellites in the output config object
+            indx = sat_id.index(self.sat_out[k]["@id"]) # match the sat_id to the list of satellites in the output config object
             if indx is not None:
                 self.sat_out[k].update({"AccessFilePath":sat_acc_fl[indx]})
             else:
                 raise Exception("Satellite id not found.")
+
+    def update_ground_stns_comm(self, sat_id, gnd_stn_id, gndstncomm_concise_fl, gndstncomm_detailed_fl): 
+        ''' sat_id is a single value, the rest of the parameters are lists, i.e. multiple ground-stations per satellite
+        '''
+        self.gnd_stn_comm_done = True
+        internal_index = self.get_satellite_ids().index(sat_id)
+        if internal_index is not None:
+            gs = []
+            if not isinstance(gnd_stn_id, list): 
+                gnd_stn_id = [gnd_stn_id]
+
+            print(gnd_stn_id)
+            for k in range(0,len(gnd_stn_id)): # iterate through ground stations accessed by the satellite
+                gs.append({"@id": gnd_stn_id[k], "concise_fl":gndstncomm_concise_fl[k], "detailed_fl":gndstncomm_detailed_fl[k]})
+
+            self.sat_out[internal_index].update({"GroundStationComm":gs})
+        else:
+            raise Exception("Satellite id not found.")
+
+    def set_user_dir(self,user_dir):
+        self.user_dir = user_dir
 
     def get_satellite_ids(self):
         return [x["@id"] for x in self.sat_out]
@@ -175,12 +199,16 @@ class OutputConfig:
     def get_satellite_kepstate_fp(self):
         return [x["KepStateFilePath"] for x in self.sat_out]
 
+    def get_user_dir(self):
+        return self.user_dir
+
     def to_dict(self):
         """ Format the OutputConfig object into a dictionary (so it may later be exported as JSON file)."""
 
         output_config_dict = dict({"propDone":self.prop_done,
                                    "covDone": self.cov_done,
-                                   "satOut": self.sat_out
+                                   "satOut": self.sat_out,
+                                   "user_dir": self.user_dir
                                   }) 
         return output_config_dict
 

@@ -3,6 +3,7 @@ import tkinter.filedialog
 from tkinter import ttk 
 import os
 import eos.gui.helpwindow as helpwindow
+from eos import config
 import logging
 
 logger = logging.getLogger(__name__)
@@ -42,8 +43,8 @@ class StartFrame(ttk.Frame):
     
     def click_new_sim(self):      
         sim_dir_path = tkinter.filedialog.askdirectory(initialdir=os.getcwd(), title="Please select an empty folder:")  
-        os.chdir(sim_dir_path) # set working directory
-    
+        config.out_config.set_user_dir(sim_dir_path+"/")
+
 
 
         

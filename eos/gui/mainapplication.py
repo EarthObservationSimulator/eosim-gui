@@ -91,8 +91,8 @@ class MainApplication:
         messages.configure(state ='disabled') # Making the text read only 
 
         # redirect stdout, logging messages to messages ScrolledText widget
-        sys.stdout = TextRedirector(messages, "stdout")
-        sys.stderr = TextRedirector(messages, "stderr")
+        #sys.stdout = TextRedirector(messages, "stdout")
+        #sys.stderr = TextRedirector(messages, "stderr")
         logging.basicConfig(level=loglevel, handlers=[
                     logging.FileHandler("debug.log", 'w'),
                     logging.StreamHandler(stream=sys.stdout)

@@ -11,7 +11,6 @@ def main(loglevel):
     root = tk.Tk()
     root.resizable(False, False)
     MainApplication(root, loglevel)
-    os.chdir('output') # set to default working directory
     root.mainloop()
 
 if __name__ == "__main__":
