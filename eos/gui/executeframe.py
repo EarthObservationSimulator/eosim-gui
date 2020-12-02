@@ -82,23 +82,23 @@ class ExecuteFrame(ttk.Frame):
         progress_bar = ttk.Progressbar(progressbar_frame, orient='horizontal', length=300, mode='indeterminate')
         progress_bar.grid(row=0, column=0,  padx=20, sticky='n')
 
-        pexec_btn = ttk.Button(pexec_frame, text="Orbit Propagator", width=40, command=lambda:self.click_pexec_btn(progress_bar), style='Execute.TButton')
+        pexec_btn = tk.Button(pexec_frame, text="Orbit Propagator", width=40, wraplength=100, command=lambda:self.click_pexec_btn(progress_bar))
         pexec_btn.grid(row=0, column=0, padx=20, ipady=10, pady=5, sticky='s')
         
         
-        covexec_btn = ttk.Button(covexec_frame, text="Coverage Calculator", width=40, command=lambda:self.click_covexec_btn(progress_bar))
+        covexec_btn = tk.Button(covexec_frame, text="Coverage Calculator", width=40, wraplength=100, command=lambda:self.click_covexec_btn(progress_bar))
         covexec_btn.grid(row=0, column=0, padx=20, ipady=10, pady=5, sticky='s')
 
 
-        gndconexec_btn = ttk.Button(gndconexec_frame, text="Ground-Station Contact Finder", width=40, command=lambda:self.click_gndconexec_btn(progress_bar))
+        gndconexec_btn = tk.Button(gndconexec_frame, text="Ground-Station Contact Finder", width=40, wraplength=100, command=lambda:self.click_gndconexec_btn(progress_bar))
         gndconexec_btn.grid(row=0, column=0, padx=20, ipady=10, pady=5, sticky='s')
 
 
-        sat2satconexec_btn = ttk.Button(sat2satconexec_frame, text="Sat-to-Sat Contact Finder", width=40, command=lambda:self.click_sat2satconexec_btn(progress_bar))
+        sat2satconexec_btn = tk.Button(sat2satconexec_frame, text="Sat-to-Sat Contact Finder", width=40, wraplength=100, command=lambda:self.click_sat2satconexec_btn(progress_bar))
         sat2satconexec_btn.grid(row=0, column=0, padx=20, ipady=10, pady=5, sticky='s')
 
 
-        obsmetcalcexec_btn = ttk.Button(obsmetcalcsexec_frame, text="Observation-metrics Calculator", width=40, command=lambda:self.click_obsmetcalcexec_btn(progress_bar))
+        obsmetcalcexec_btn = tk.Button(obsmetcalcsexec_frame, text="Obs-metrics Calculator", width=40, wraplength=100, command=lambda:self.click_obsmetcalcexec_btn(progress_bar))
         obsmetcalcexec_btn.grid(row=0, column=0, padx=20, ipady=10, pady=5, sticky='s')
 
     def click_gndconexec_btn(self, progress_bar):
@@ -109,6 +109,7 @@ class ExecuteFrame(ttk.Frame):
            
             # Gather the required inputs
             with open(user_dir+ 'comm_param.p', 'rb') as f:
+                comm_dir = pickle.load(f)
                 gnd_stn_fl = pickle.load(f)
                 ground_stn_info = pickle.load(f)
 
@@ -143,7 +144,7 @@ class ExecuteFrame(ttk.Frame):
                     gnd_stn_comm = communications.GroundStationComm(sat_dirs=sat_dirs[k], sat_state_fls=sat_state_fls[k], gnd_stn_fl=gnd_stn_fl, ground_stn_info=ground_stn_info)
                     [gnd_stn_i, gndstncomm_concise_fls, gndstncomm_detailed_fls] = gnd_stn_comm.compute_all_contacts() 
                      # update output configuration file 
-                    config.out_config.update_ground_stns_comm(sat_id=sat_ids[k], gnd_stn_id = gnd_stn_i, gndstncomm_concise_fl=gndstncomm_concise_fls, gndstncomm_detailed_fl=gndstncomm_detailed_fls)
+                    config.out_config.update_ground_stns_comm(sat_id=sat_ids[k], gnd_stn_id = gnd_stn_i, gndstncomm_concise_fls=gndstncomm_concise_fls, gndstncomm_detailed_fls=gndstncomm_detailed_fls)
                 
                 logger.info(".......DONE.......") 
 
@@ -165,6 +166,8 @@ class ExecuteFrame(ttk.Frame):
             # Gather the required inputs
             with open(user_dir+ 'comm_param.p', 'rb') as f:
                 comm_dir = pickle.load(f)
+                gnd_stn_fl = pickle.load(f)
+                ground_stn_info = pickle.load(f)
 
             prop_cov_param = pickle.load( open(user_dir+ "prop_cov_param.p", "rb" ) )              
                    
@@ -199,8 +202,6 @@ class ExecuteFrame(ttk.Frame):
                 json.dump(config.out_config.to_dict(), f, ensure_ascii=False, indent=4)
 
             progress_bar.stop()
-            
-
         # execute propagation
         threading.Thread(target=real_click_sat2satconexec_btn).start()
 
@@ -263,7 +264,7 @@ class ExecuteFrame(ttk.Frame):
             
             progress_bar.start(10)
             # read in the preprocessed propagation and coverage parameters
-            prop_cov_param = pickle.load( user_dir+ open( "prop_cov_param.p", "rb" ) )   
+            prop_cov_param = pickle.load( open(user_dir+ "prop_cov_param.p", "rb" ) )   
 
             # Run coverage for each of the satellties (orbits) in the constellation
             sat_id = [] # list of satellites (ids) for which coverage is calculated
@@ -272,7 +273,6 @@ class ExecuteFrame(ttk.Frame):
             for orb_indx in range(0,len(prop_cov_param)):
                 pcp = copy.deepcopy(prop_cov_param[orb_indx])
                 pcp.do_prop = False # force skip of propagation calculations
-                print(pcp.do_cov)
                 opc = orbitpropcov.OrbitPropCov(pcp)
                 print(".......Running Coverage calculations for satellite.......", pcp.sat_id)
                 opc.run()

@@ -46,7 +46,7 @@ def click_help(parent):
 
 def update_help_window(event, widget_id):
     
-    img_dir = os.path.dirname(os.path.realpath(__file__)) + "\\help\\"
+    img_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "help") + "/"
 
     global help_win
     if(help_win is None):
@@ -70,7 +70,7 @@ def update_help_window(event, widget_id):
     if(help_content["images"] is not None and help_content["images"] is not False):
         global org_img # to prevent garbage collection
         global img # to prevent garbage collection
-        org_img = Image.open(img_dir+help_content["images"][1])
+        org_img = Image.open(img_dir+help_content["images"][0])
         resized = org_img.resize((400,400),Image.ANTIALIAS)
         img = ImageTk.PhotoImage(resized) # Keep a reference, prevent GC
         desc.image_create('end', image=img)

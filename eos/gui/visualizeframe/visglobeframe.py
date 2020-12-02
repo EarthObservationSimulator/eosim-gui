@@ -13,6 +13,7 @@ from eos import config
 import instrupy
 import pandas as pd
 import numpy as np
+import pickle
 import tkinter
 from tkinter import ttk 
 from eos import config
@@ -23,6 +24,10 @@ logger = logging.getLogger(__name__)
 class VisGlobeFrame(ttk.Frame):    
 
     def __init__(self, win, tab):
+
+        self.http_server_started = False
+        
+
         vis_globe_frame = ttk.Frame(tab)
         vis_globe_frame.pack(expand = True, fill ="both", padx=10, pady=10)
         vis_globe_frame.rowconfigure(0,weight=1)
@@ -62,6 +67,32 @@ class VisGlobeFrame(ttk.Frame):
         czml_pkts = [] # list of packets
         czml_pkts.append(clk_pkt)
 
+        # make the ground-station packets
+        with open(curdir+"ground_station_template.json", 'r') as f:
+            gndstn_pkt_template = json.load(f)
+        
+        # get list of ground-stations
+        with open(user_dir+ 'comm_param.p', 'rb') as f:
+            comm_dir = pickle.load(f)
+            gnd_stn_fl = pickle.load(f)
+            ground_stn_info = pickle.load(f)
+        if(gnd_stn_fl):
+            self.gnd_stn_specs = pd.read_csv(gnd_stn_fl, header=0, delimiter=r",")  
+        elif(ground_stn_info):
+            self.gnd_stn_specs = pd.DataFrame(ground_stn_info)
+        else:
+            self.gnd_stn_specs = None
+        
+        if self.gnd_stn_specs is not None:
+            for index, row in self.gnd_stn_specs.iterrows():
+                _pkt = copy.deepcopy(gndstn_pkt_template)
+                _pkt["id"] = row["index"]
+                _pkt["name"] = row["name"]
+                _pkt["label"]["text"] = row["name"]
+                _pkt["position"] = {}
+                _pkt["position"]["cartographicDegrees"] = [row["lon[deg]"], row["lat[deg]"], row["alt[km]"]*1e3]
+                czml_pkts.append(_pkt)
+
         # make the satellite packets
         with open(curdir+"satellite_template.json", 'r') as f:
             sat_pkt_template = json.load(f) 
@@ -89,8 +120,6 @@ class VisGlobeFrame(ttk.Frame):
             _sat_pkt["position"]["epoch"] = epoch.isoformat() + 'Z' #TODO: check Z
             _sat_pkt["position"]["cartesian"] = sat_state_df.values.flatten().tolist()
 
-            
-
             czml_pkts.append(_sat_pkt)
         
         # intersatellite comm packets
@@ -115,9 +144,7 @@ class VisGlobeFrame(ttk.Frame):
                         time_from = epoch.isoformat() + 'Z' #TODO: check Z
                         time_to = (epoch + datetime.timedelta(0,int(row['AccessFromIndex'] * step_size))).isoformat() + 'Z' #TODO: check Z
                         interval = time_from + "/" + time_to
-                        contacts.append({"interval":interval, "boolean":False})
-
-                    
+                        contacts.append({"interval":interval, "boolean":False})                   
                 
                 time_from = (epoch + datetime.timedelta(0,int(row['AccessFromIndex'] * step_size))).isoformat() + 'Z' #TODO: check Z
                 time_to = (epoch + datetime.timedelta(0,int(row['AccessToIndex'] * step_size))).isoformat() + 'Z' #TODO: check Z
@@ -160,11 +187,14 @@ class VisGlobeFrame(ttk.Frame):
         
         # Execute the cesium app
         def start_webserver():
-            web_dir = os.path.join(os.path.dirname(__file__), '../../../cesium_app/')
-            os.chdir(web_dir)
-
-            httpd = HTTPServer(('localhost', 8080), SimpleHTTPRequestHandler)
-            httpd.serve_forever()
+            if(self.http_server_started is False):
+                web_dir = os.path.join(os.path.dirname(__file__), '../../../cesium_app/')
+                os.chdir(web_dir)          
+                self.httpd = HTTPServer(('localhost', 8080), SimpleHTTPRequestHandler)
+                self.http_server_started = True
+                self.httpd.serve_forever()
+            else:
+                pass
 
         # start webserver
         threading.Thread(target=start_webserver).start()

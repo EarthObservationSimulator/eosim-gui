@@ -9,7 +9,7 @@
     //////////////////////////////////////////////////////////////////////////
 
     var viewer = new Cesium.Viewer('cesiumContainer', {
-        scene3DOnly: true,
+        scene3DOnly: false,
         selectionIndicator: false,
         baseLayerPicker: false
     });

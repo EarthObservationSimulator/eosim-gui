@@ -1,9 +1,10 @@
 {
     "main":{
         "heading": "Help!",
-        "description": ["I need somebody\n" ,
-                        "(Help!) not just anybody\n" ,
-                        "(Help!) you know I need someone"],
+        "description": ["Welcome to the EOS help panel.",
+                        "Hover around any area of interest and this window " ,
+                        "shall display information if available."
+                        ],
         "images": false,
         "morehelp": false
     },
@@ -63,6 +64,17 @@
         "description": ["Specify the maneuver"],
         "images": false,
         "morehelp": "./instrupy/docs/_build/html/miscellaneous.html#manuverability-and-corresponging-for-calculations"
+    },
+    "mercator_proj":{
+        "heading": "A Mercator projection.",
+        "description": ["central_longitude – The central longitude. \n",
+                        "min_latitude – The maximum southerly extent of the projection. \n",
+                        "max_latitude – The maximum northerly extent of the projection. Defaults to 84 degrees. \n",
+                        "latitude_true_scale  – The latitude where the scale is 1. Defaults to 0 degrees. \n",
+                        "false_easting – X offset from the planar origin in metres. Defaults to 0. \n",
+                        "false_northing  – Y offset from the planar origin in metres. Defaults to 0. \n"],
+        "images": ["mercator_proj.png"],
+        "morehelp": "https://scitools.org.uk/cartopy/docs/latest/crs/projections.html#mercator"
     }
 
 }

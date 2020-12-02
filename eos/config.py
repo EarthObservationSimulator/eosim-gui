@@ -14,6 +14,8 @@ class GuiStyle():
         gui_style = ttk.Style()
         gui_style.configure('My.TButton', foreground='#334353')
         gui_style.configure('messagearea.TFrame', background='white',  relief='sunken')
+        gui_style.configure('lsidebar.TFrame', background='light grey',  relief='groove')
+        gui_style.configure('lsidebar.TButton')
         # Create style for the frames used within the help window
         gui_style.configure('helpHeading.TFrame', background='#87ceeb')
         gui_style.configure('helpHeading.Label', background='#87ceeb', foreground='white', font=('Times New Roman',18,'bold'))

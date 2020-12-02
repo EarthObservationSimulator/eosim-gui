@@ -1,6 +1,7 @@
 from tkinter import ttk 
 import tkinter as tk
 from eos.config import GuiStyle, MissionConfig
+import eos.gui.helpwindow as helpwindow
 from eos import config
 import instrupy
 import pandas as pd
@@ -108,6 +109,7 @@ class VisMapFrame(ttk.Frame):
                 ttk.Frame.__init__(self, parent)  
                 mercator_proj_frame = ttk.Frame(self) 
                 mercator_proj_frame.grid(row=0, column=0, ipadx=5, ipady=5)
+                mercator_proj_frame.bind('<Enter>',lambda event, widget_id="mercator_proj": helpwindow.update_help_window(event, widget_id))
 
                 ttk.Label(mercator_proj_frame, text="Central Longitude [deg]", wraplength=150).grid(row=0, column=0, padx=10, sticky='w')
                 self.central_longitude_entry = ttk.Entry(mercator_proj_frame, width=10)

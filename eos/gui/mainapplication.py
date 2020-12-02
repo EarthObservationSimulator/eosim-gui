@@ -53,7 +53,7 @@ class MainApplication:
 
         # left-sidebar frame
         # grid configure
-        lsidebar = ttk.Frame(self.parent_frame, width=0.2*parent_frame_width,  height=0.9*parent_frame_height)
+        lsidebar = ttk.Frame(self.parent_frame, width=0.2*parent_frame_width,  height=0.9*parent_frame_height, style="lsidebar.TFrame")
         lsidebar.grid_propagate(0)
         lsidebar.grid(row=0, column=0, rowspan=2, sticky='nswe')
         lsidebar.columnconfigure(0,weight=1)
@@ -64,20 +64,20 @@ class MainApplication:
         lsidebar.rowconfigure(4,weight=1)
         lsidebar.rowconfigure(5,weight=8)
         
-        welcome_btn = ttk.Button(lsidebar, text='WELCOME',command=lambda: self.show_frame("StartFrame"))
-        welcome_btn.grid(row=0, column=0, sticky='nswe')
+        welcome_btn = ttk.Button(lsidebar, text='WELCOME',command=lambda: self.show_frame("StartFrame"), style="lsidebar.TButton")
+        welcome_btn.grid(row=0, column=0, sticky='nswe', padx=5, pady=5)
         welcome_btn.bind('<Enter>',lambda event, widget_id="welcome": helpwindow.update_help_window(event, widget_id))
-        configure_btn = ttk.Button(lsidebar, text='CONFIGURE',command=lambda: self.show_frame("ConfigureFrame"))
-        configure_btn.grid(row=1, column=0, sticky='nswe')
+        configure_btn = ttk.Button(lsidebar, text='CONFIGURE',command=lambda: self.show_frame("ConfigureFrame"), style="lsidebar.TButton")
+        configure_btn.grid(row=1, column=0, sticky='nswe', padx=5, pady=5)
         configure_btn.bind('<Enter>',lambda event, widget_id="configure": helpwindow.update_help_window(event, widget_id))
-        execute_btn = ttk.Button(lsidebar, text='EXECUTE',command=lambda: self.show_frame("ExecuteFrame")) 
-        execute_btn.grid(row=2, column=0, sticky='nswe')
+        execute_btn = ttk.Button(lsidebar, text='EXECUTE',command=lambda: self.show_frame("ExecuteFrame"), style="lsidebar.TButton") 
+        execute_btn.grid(row=2, column=0, sticky='nswe', padx=5, pady=5)
         execute_btn.bind('<Enter>',lambda event, widget_id="execute": helpwindow.update_help_window(event, widget_id))
-        visualize_btn = ttk.Button(lsidebar, text='VISUALIZE',command=lambda: self.show_frame("VisualizeFrame")) 
-        visualize_btn.grid(row=3, column=0, sticky='nswe')
+        visualize_btn = ttk.Button(lsidebar, text='VISUALIZE',command=lambda: self.show_frame("VisualizeFrame"), style="lsidebar.TButton") 
+        visualize_btn.grid(row=3, column=0, sticky='nswe', padx=5, pady=5)
         visualize_btn.bind('<Enter>',lambda event, widget_id="visualize": helpwindow.update_help_window(event, widget_id))
-        synobs_btn = ttk.Button(lsidebar, text='TBD',command=lambda: self.show_frame("SynObsFrame")) 
-        synobs_btn.grid(row=4, column=0, sticky='nswe')            
+        synobs_btn = ttk.Button(lsidebar, text='TBD', style="lsidebar.TButton") 
+        synobs_btn.grid(row=4, column=0, sticky='nswe', padx=5, pady=5)            
 
         # message area frame
         # grid configure
@@ -91,8 +91,8 @@ class MainApplication:
         messages.configure(state ='disabled') # Making the text read only 
 
         # redirect stdout, logging messages to messages ScrolledText widget
-        #sys.stdout = TextRedirector(messages, "stdout")
-        #sys.stderr = TextRedirector(messages, "stderr")
+        sys.stdout = TextRedirector(messages, "stdout")
+        sys.stderr = TextRedirector(messages, "stderr")
         logging.basicConfig(level=loglevel, handlers=[
                     logging.FileHandler("debug.log", 'w'),
                     logging.StreamHandler(stream=sys.stdout)
@@ -178,5 +178,6 @@ class TextRedirector(object):
     def write(self, str):
         self.widget.configure(state="normal")
         self.widget.insert("end", str, (self.tag,))
+        self.widget.see("end")
         self.widget.configure(state="disabled")
 

@@ -106,14 +106,13 @@ class ConfigureFrame(ttk.Frame):
             pickle.dump(pi.comm_dir, f)
             pickle.dump(pi.gnd_stn_fl, f)
             pickle.dump(pi.ground_stn_info, f)
-        print(pi.ground_stn_info)
         with open(user_dir+'MissionSpecs.json', 'w', encoding='utf-8') as f:
             json.dump(miss_specs.to_dict(), f, ensure_ascii=False, indent=4)
         logger.info("Configuration Saved.")
     
     def click_clear_config(self):
         ''' Clear the configuration (both in the local variable and in the MissionSpecs file) '''
-        ser_dir = config.out_config.get_user_dir()
+        user_dir = config.out_config.get_user_dir()
         miss_specs.clear()
         with open(user_dir+'MissionSpecs.json', 'w', encoding='utf-8') as f:
             json.dump(miss_specs.to_dict(), f, ensure_ascii=False, indent=4)
@@ -487,7 +486,6 @@ class ConfigureFrame(ttk.Frame):
             # fov specs frame
             fov_specs_frame = ttk.LabelFrame(specs_frame, text="Field-Of-View") # field-of-view (FOV) specifications frame            
             fov_specs_frame.grid(row=0, column=1, padx=10, pady=10, sticky='n') 
-            fov_specs_frame.bind('<Enter>',lambda event, widget_id="basicsensor_fovspecs": helpwindow.update_help_window(event, widget_id)) 
 
             fov_type_frame = ttk.Frame(fov_specs_frame)
             fov_type_frame.grid(row=0, column=0, sticky='nswe', padx=10, pady=10)
@@ -1415,13 +1413,13 @@ class ConfigureFrame(ttk.Frame):
 
         ttk.Label(gs_add_by_entry_frame, text="Alt [km]").grid(row=5, column=0, sticky='w', padx=10, pady=10)
         gs_specs_alt_entry = ttk.Entry(gs_add_by_entry_frame, width=10)
-        gs_specs_alt_entry.insert(0,-110)
+        gs_specs_alt_entry.insert(0,10)
         gs_specs_alt_entry.bind("<FocusIn>", lambda args: gs_specs_alt_entry.delete('0', 'end'))
         gs_specs_alt_entry.grid(row=5, column=1, sticky='w')
 
         ttk.Label(gs_add_by_entry_frame, text="Min Elevation [deg]").grid(row=6, column=0, sticky='w', padx=10, pady=10)
         gs_specs_minelv_entry = ttk.Entry(gs_add_by_entry_frame, width=10)
-        gs_specs_minelv_entry.insert(0,-10)
+        gs_specs_minelv_entry.insert(0,7)
         gs_specs_minelv_entry.bind("<FocusIn>", lambda args: gs_specs_minelv_entry.delete('0', 'end'))
         gs_specs_minelv_entry.grid(row=6, column=1, sticky='w')
 
