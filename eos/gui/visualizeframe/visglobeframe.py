@@ -75,6 +75,7 @@ class VisGlobeFrame(ttk.Frame):
 
             sat_state_df = pd.read_csv(sat_state_fp[k],skiprows = [0,1,2,3]) 
             sat_state_df = sat_state_df[['TimeIndex','X[km]','Y[km]','Z[km]']]
+            num_time_indices = len(sat_state_df['TimeIndex']) # TODO: move this elsewhere out of loop
             sat_state_df['Time[s]'] = np.array(sat_state_df['TimeIndex']) * step_size
             sat_state_df['X[m]'] = np.array(sat_state_df['X[km]']) * 1000
             sat_state_df['Y[m]'] = np.array(sat_state_df['Y[km]']) * 1000
@@ -88,7 +89,67 @@ class VisGlobeFrame(ttk.Frame):
             _sat_pkt["position"]["epoch"] = epoch.isoformat() + 'Z' #TODO: check Z
             _sat_pkt["position"]["cartesian"] = sat_state_df.values.flatten().tolist()
 
+            
+
             czml_pkts.append(_sat_pkt)
+        
+        # intersatellite comm packets
+        with open(curdir+"contacts_template.json", 'r') as f:
+            contacts_pkt = json.load(f)
+        
+        czml_pkts.append(contacts_pkt[0])
+
+        intersatcomm = config.out_config.get_intersatcomm()        
+
+        for _comm in intersatcomm: 
+            sat1_id = _comm["sat1_id"]
+            sat2_id = _comm["sat2_id"]
+            contact_df = pd.read_csv(_comm["concise_fl"], skiprows=[0,1])
+            contacts = []
+            is_first_contact = True
+            previous_row = False
+            for index, row in contact_df.iterrows():
+                
+                if(is_first_contact):                    
+                    if(row['AccessFromIndex']!=0): # interval of no contact during the beginning, add this to the contacts (with boolean = False)
+                        time_from = epoch.isoformat() + 'Z' #TODO: check Z
+                        time_to = (epoch + datetime.timedelta(0,int(row['AccessFromIndex'] * step_size))).isoformat() + 'Z' #TODO: check Z
+                        interval = time_from + "/" + time_to
+                        contacts.append({"interval":interval, "boolean":False})
+
+                    
+                
+                time_from = (epoch + datetime.timedelta(0,int(row['AccessFromIndex'] * step_size))).isoformat() + 'Z' #TODO: check Z
+                time_to = (epoch + datetime.timedelta(0,int(row['AccessToIndex'] * step_size))).isoformat() + 'Z' #TODO: check Z
+                interval = time_from + "/" + time_to
+                contacts.append({"interval":interval, "boolean":True})
+
+                if is_first_contact is False:
+                    # attach a period of no-contact between the consecutive contact periods
+                    time_from = (epoch + datetime.timedelta(0,int(previous_row['AccessToIndex'] * step_size))).isoformat() + 'Z' #TODO: check Z
+                    time_to = (epoch + datetime.timedelta(0,int(row['AccessFromIndex'] * step_size))).isoformat() + 'Z' #TODO: check Z
+                    interval = time_from + "/" + time_to
+                    contacts.append({"interval":interval, "boolean":False})
+
+                previous_row = row
+                is_first_contact = False
+
+            # check the time towards the end
+            if contacts: # if any contacts exist
+                if(previous_row['AccessToIndex']!=num_time_indices):
+                    # attach a period of no-contact between the previous interval-end and end-of-simulation
+                    time_from = (epoch + datetime.timedelta(0,int(previous_row['AccessToIndex'] * step_size))).isoformat() + 'Z' #TODO: check Z
+                    time_to = (epoch + datetime.timedelta(0,num_time_indices * step_size)).isoformat() + 'Z' #TODO: check Z
+                    interval = time_from + "/" + time_to
+                    contacts.append({"interval":interval, "boolean":False})
+                
+            _pkt = copy.deepcopy(contacts_pkt[1])
+            _pkt["id"] = str(sat1_id) + " to " + str(sat2_id) 
+            _pkt["name"] = _pkt["id"]
+            _pkt["polyline"]["show"] = contacts if bool(contacts) else False # no contacts throughout the mission case
+            _pkt["polyline"]["positions"]["references"] = [sat1_id+"#position",sat2_id+"#position"]
+            
+            czml_pkts.append(_pkt)
 
         # write the CZML data file
         cesium_data_dir = curdir+"../../../cesium_app/Source/SampleData/"
@@ -96,10 +157,8 @@ class VisGlobeFrame(ttk.Frame):
             json.dump(czml_pkts, f, indent=4)
         # rename file to czml extension
         os.rename(cesium_data_dir+'eos_data.json', cesium_data_dir+'eos_data.czml')
-
         
         # Execute the cesium app
-
         def start_webserver():
             web_dir = os.path.join(os.path.dirname(__file__), '../../../cesium_app/')
             os.chdir(web_dir)

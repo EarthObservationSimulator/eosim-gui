@@ -109,7 +109,6 @@ class ExecuteFrame(ttk.Frame):
            
             # Gather the required inputs
             with open(user_dir+ 'comm_param.p', 'rb') as f:
-                comm_dir = pickle.load(f)
                 gnd_stn_fl = pickle.load(f)
                 ground_stn_info = pickle.load(f)
 
@@ -117,17 +116,15 @@ class ExecuteFrame(ttk.Frame):
                    
             sat_ids = [] # list of satellites (ids) 
             sat_dirs = [] # list of directories where the ground station output is written
-            sat_state_fls = [] # list of the access files
+            sat_state_fls = [] # list of the state files
             for _indx in range(0,len(prop_cov_param)):
                 pcp = copy.deepcopy(prop_cov_param[_indx]) 
                 sat_ids.append(pcp.sat_id)               
                 sat_state_fls.append(pcp.sat_state_fl)
                 _dir = "/".join([str(x) for x in pcp.sat_state_fl.split("/")[0:-1]])+'/'
                 sat_dirs.append(_dir)
-            print(pcp.sat_state_fl.split("/")[0:-1])
-            print(sat_dirs)
             
-            ocf = user_dir + 'Output.json'
+            ocf = user_dir + 'output.json'
             try:
                 with open(ocf, 'r') as output_config_file:
                         _out_config = util.FileUtilityFunctions.from_json(output_config_file)  
@@ -142,13 +139,11 @@ class ExecuteFrame(ttk.Frame):
             else:
                 logger.info(".......Computing satellite-to-ground-station contact periods.......")      
                 # compute for 1 satellite at a time to keep track of which satellites (ids) the resulting files belong to
-                print(sat_ids)
                 for k in range(0,len(sat_ids)):
                     gnd_stn_comm = communications.GroundStationComm(sat_dirs=sat_dirs[k], sat_state_fls=sat_state_fls[k], gnd_stn_fl=gnd_stn_fl, ground_stn_info=ground_stn_info)
-                    [gnd_stn_i, gndstncomm_concise_fl, gndstncomm_detailed_fl] = gnd_stn_comm.compute_all_contacts() 
-                    print([gnd_stn_i, gndstncomm_concise_fl, gndstncomm_detailed_fl] )
+                    [gnd_stn_i, gndstncomm_concise_fls, gndstncomm_detailed_fls] = gnd_stn_comm.compute_all_contacts() 
                      # update output configuration file 
-                    config.out_config.update_ground_stns_comm(sat_id=sat_ids[k], gnd_stn_id = gnd_stn_i, gndstncomm_concise_fl=gndstncomm_concise_fl, gndstncomm_detailed_fl=gndstncomm_detailed_fl)
+                    config.out_config.update_ground_stns_comm(sat_id=sat_ids[k], gnd_stn_id = gnd_stn_i, gndstncomm_concise_fl=gndstncomm_concise_fls, gndstncomm_detailed_fl=gndstncomm_detailed_fls)
                 
                 logger.info(".......DONE.......") 
 
@@ -162,7 +157,52 @@ class ExecuteFrame(ttk.Frame):
         threading.Thread(target=real_click_gndconexec_btn).start()
 
     def click_sat2satconexec_btn(self, progress_bar):
-        pass
+
+        def real_click_sat2satconexec_btn():
+            # Execute sat-to-sat contact finder
+            user_dir = config.out_config.get_user_dir()
+           
+            # Gather the required inputs
+            with open(user_dir+ 'comm_param.p', 'rb') as f:
+                comm_dir = pickle.load(f)
+
+            prop_cov_param = pickle.load( open(user_dir+ "prop_cov_param.p", "rb" ) )              
+                   
+            sat_ids = [] # list of satellites (ids) 
+            sat_dirs = [] # list of directories where the ground station output is written
+            sat_state_fls = [] # list of the state files
+            for _indx in range(0,len(prop_cov_param)):
+                pcp = copy.deepcopy(prop_cov_param[_indx]) 
+                sat_ids.append(pcp.sat_id)               
+                sat_state_fls.append(pcp.sat_state_fl)
+                _dir = "/".join([str(x) for x in pcp.sat_state_fl.split("/")[0:-1]])+'/'
+                sat_dirs.append(_dir)
+            
+            ocf = user_dir + 'output.json'
+            try:
+                with open(ocf, 'r') as output_config_file:
+                        _out_config = util.FileUtilityFunctions.from_json(output_config_file)  
+                config.out_config = OutputConfig.from_dict(_out_config)    
+            except:
+                raise Exception("Output Configuration not found.")
+
+            logger.info(".......Computing satellite-to-satellite contact periods.......") 
+            progress_bar.start(10)            
+
+            opaque_atmos_height_km = 30
+            inter_sat_comm = communications.InterSatelliteComm(sat_ids, sat_state_fls, comm_dir, opaque_atmos_height_km)
+            [sat1_ids, sat2_ids, intersatcomm_concise_fls, intersatcomm_detailed_fls] = inter_sat_comm.compute_all_contacts()
+            config.out_config.update_intersatcomm(sat1_ids=sat1_ids, sat2_ids=sat2_ids, intersatcomm_concise_fls=intersatcomm_concise_fls, intersatcomm_detailed_fls=intersatcomm_detailed_fls)
+            logger.info(".......DONE.......") 
+
+            with open(ocf, 'w', encoding='utf-8') as f:
+                json.dump(config.out_config.to_dict(), f, ensure_ascii=False, indent=4)
+
+            progress_bar.stop()
+            
+
+        # execute propagation
+        threading.Thread(target=real_click_sat2satconexec_btn).start()
 
     def click_obsmetcalcexec_btn(self, progress_bar):
         pass 
@@ -201,7 +241,7 @@ class ExecuteFrame(ttk.Frame):
             # save output configuration file (any previous configuration is re-written since propagation is the first step 
             # to any of the future calculations such as coverage or communications, etc)
             config.out_config.update_prop_out(sat_id=sat_id, sat_eci_state_fp=sat_eci_state_fp, sat_kep_state_fp=sat_kep_state_fp) 
-            with open(user_dir+'output.json', 'w', encoding='utf-8') as f:
+            with open(user_dir + 'output.json', 'w', encoding='utf-8') as f:
                 json.dump(config.out_config.to_dict(), f, ensure_ascii=False, indent=4)
 
             progress_bar.stop()            
@@ -241,7 +281,7 @@ class ExecuteFrame(ttk.Frame):
                 print(".......Done.......")
 
             # update output configuration file            
-            ocf = user_dir + 'Output.json'
+            ocf = user_dir + 'output.json'
             try:
                 with open(ocf, 'r') as output_config_file:
                         _out_config = util.FileUtilityFunctions.from_json(output_config_file)  

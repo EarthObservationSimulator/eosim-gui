@@ -140,19 +140,24 @@ class OutputConfig:
         This class would be referenced by the various plotting functions in EOS to gather the available results. 
         Using this class, a JSON file called 'output.json' would be written in the user directory.    
     """
-    def __init__(self, prop_done=None, cov_done=None, sat_out=None, user_dir=None, gnd_stn_comm_done=None):
+    def __init__(self, prop_done=None, cov_done=None, sat_out=None, user_dir=None, gnd_stn_comm_done=None, intersat_comm_done=None, intersat_comm=None):
         self.prop_done = prop_done if prop_done is not None else bool(False)
         self.cov_done = cov_done if cov_done is not None else bool(False)
         self.sat_out = list(sat_out) if sat_out is not None else list()
         self.user_dir = user_dir if user_dir is not None else os.path.join(os.path.dirname(__file__), '../output/')
         self.gnd_stn_comm_done = gnd_stn_comm_done if gnd_stn_comm_done is not None else bool(False)
+        self.intersat_comm_done = intersat_comm_done if intersat_comm_done is not None else bool(False)
+        self.intersat_comm = list(intersat_comm) if intersat_comm is not None else list()
 
     @staticmethod
     def from_dict(d):
         return OutputConfig(prop_done=d.get('propDone', None),
                             cov_done=d.get('covDone', None),
                             sat_out=d.get('satOut', None),
-                            user_dir=d.get('user_dir', None)) 
+                            user_dir=d.get('user_dir', None),
+                            gnd_stn_comm_done=d.get('gnd_stn_comm_done', None),
+                            intersat_comm_done=d.get('intersat_comm_done', None),
+                            intersat_comm=d.get('interSatComm',None)) 
 
     def update_prop_out(self, sat_id, sat_eci_state_fp, sat_kep_state_fp):
         self.prop_done = True
@@ -169,7 +174,7 @@ class OutputConfig:
             else:
                 raise Exception("Satellite id not found.")
 
-    def update_ground_stns_comm(self, sat_id, gnd_stn_id, gndstncomm_concise_fl, gndstncomm_detailed_fl): 
+    def update_ground_stns_comm(self, sat_id, gnd_stn_id, gndstncomm_concise_fls, gndstncomm_detailed_fls): 
         ''' sat_id is a single value, the rest of the parameters are lists, i.e. multiple ground-stations per satellite
         '''
         self.gnd_stn_comm_done = True
@@ -181,12 +186,20 @@ class OutputConfig:
 
             print(gnd_stn_id)
             for k in range(0,len(gnd_stn_id)): # iterate through ground stations accessed by the satellite
-                gs.append({"@id": gnd_stn_id[k], "concise_fl":gndstncomm_concise_fl[k], "detailed_fl":gndstncomm_detailed_fl[k]})
+                gs.append({"@id": gnd_stn_id[k], "concise_fl":gndstncomm_concise_fls[k], "detailed_fl":gndstncomm_detailed_fls[k]})
 
             self.sat_out[internal_index].update({"GroundStationComm":gs})
         else:
             raise Exception("Satellite id not found.")
 
+    def update_intersatcomm(self, sat1_ids, sat2_ids, intersatcomm_concise_fls, intersatcomm_detailed_fls):
+        self.intersat_comm_done = True
+        for k in range(0,len(sat1_ids)):
+            self.intersat_comm.append({"sat1_id": sat1_ids[k], "sat2_id":sat2_ids[k], "concise_fl": intersatcomm_concise_fls[k], "detailed_fl":intersatcomm_detailed_fls[k]})
+
+    def get_intersatcomm(self):
+        return self.intersat_comm
+        
     def set_user_dir(self,user_dir):
         self.user_dir = user_dir
 
@@ -208,7 +221,10 @@ class OutputConfig:
         output_config_dict = dict({"propDone":self.prop_done,
                                    "covDone": self.cov_done,
                                    "satOut": self.sat_out,
-                                   "user_dir": self.user_dir
+                                   "user_dir": self.user_dir,
+                                   "gnd_stn_comm_done": self.gnd_stn_comm_done,
+                                   "intersat_comm_done": self.intersat_comm_done,
+                                   "interSatComm": self.intersat_comm
                                   }) 
         return output_config_dict
 
