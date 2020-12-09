@@ -179,5 +179,6 @@ class TextRedirector(object):
         self.widget.configure(state="normal")
         self.widget.insert("end", str, (self.tag,))
         self.widget.see("end")
+        self.widget.insert("end",'\n')
         self.widget.configure(state="disabled")
 

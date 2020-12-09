@@ -286,6 +286,7 @@ class ConfigureFrame(ttk.Frame):
             satellite = OrbitParameters(_id=uid_entry.get(), sma=float(sma_entry.get())+orbitpy.util.Constants.radiusOfEarthInKM, ecc=ecc_entry.get(), 
                             inc=inc_entry.get(), raan=raan_entry.get(), aop=aop_entry.get(), ta=ta_entry.get())
             miss_specs.add_satellite(satellite)
+            logger.info("Satellite added.")
             
 
         ok_btn = ttk.Button(okcancel_frame, text="Add", command=ok_click, width=ConfigureFrame.BTNWIDTH)
@@ -916,6 +917,7 @@ class ConfigureFrame(ttk.Frame):
 
                     _sen = Instrument.from_dict(data)
                     miss_specs.add_sensor(_sen, sat_tree.selection())
+                    logger.info("Sensor added.")
                     select_sat_win.destroy()
 
                 ok_btn_2 = ttk.Button(okcancel_frame_2, text="Ok", command=ok_click_2, width=ConfigureFrame.BTNWIDTH)
@@ -1319,10 +1321,12 @@ class ConfigureFrame(ttk.Frame):
             if self._cov_type.get() == "GridPointsCoverageCalculator":
                 specs = frames[self._cov_type.get()].get_specs()
                 miss_specs.add_coverage_grid(specs)
+                logger.info("Coverage grid added.")
                 cov_win.destroy()
             if self._cov_type.get() == "PointingOptionsCoverageCalculator":
                 specs = frames[self._cov_type.get()].get_specs()
                 miss_specs.add_pointing_options(specs) 
+                logger.info("Pointings Options added.")
                 cov_win.destroy()
             
         ok_btn = ttk.Button(okcancel_frame, text="Ok", command=ok_click, width=ConfigureFrame.BTNWIDTH)
@@ -1445,6 +1449,7 @@ class ConfigureFrame(ttk.Frame):
             if self._gs_specs_type.get() == "DataFile":
                 specs = {"gndStnFilePath": self.gs_data_fp  }              
             miss_specs.add_ground_stations(specs)
+            logger.info("Ground station(s) added.")
             gs_win.destroy()  
                             
         ok_btn = ttk.Button(okcancel_frame, text="Ok", command=ok_click, width=ConfigureFrame.BTNWIDTH)

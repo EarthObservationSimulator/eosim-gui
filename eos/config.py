@@ -194,6 +194,9 @@ class OutputConfig:
         else:
             raise Exception("Satellite id not found.")
 
+    def get_satout(self):
+        return self.sat_out
+
     def update_intersatcomm(self, sat1_ids, sat2_ids, intersatcomm_concise_fls, intersatcomm_detailed_fls):
         self.intersat_comm_done = True
         for k in range(0,len(sat1_ids)):

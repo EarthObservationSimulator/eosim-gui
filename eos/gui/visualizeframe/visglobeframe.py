@@ -17,6 +17,7 @@ import pickle
 import tkinter
 from tkinter import ttk 
 from eos import config
+import uuid
 import logging
 
 logger = logging.getLogger(__name__)
@@ -122,10 +123,36 @@ class VisGlobeFrame(ttk.Frame):
 
             czml_pkts.append(_sat_pkt)
         
+        # make packets showing the coverage grid
+        # make the ground-station packets
+        with open(curdir+"covgrid_pkt_template.json", 'r') as f:
+            covgrid_pkt_template = json.load(f)
+        
+        # get the coverage gird
+        covgrid_fl = None
+        with open(user_dir+ 'MissionSpecs.json', 'rb') as f:
+            miss_specs = json.load(f)
+        if(miss_specs.get("grid", None) is not None):
+            if(miss_specs["grid"]["@type"] == "customGrid"):
+                covgrid_fl =  miss_specs["grid"]["covGridFilePath"] 
+            elif(miss_specs["grid"]["@type"] == "autoGrid"):               
+                covgrid_fl =  user_dir+ 'covGrid'
+
+        if(covgrid_fl is not None): # a coverage grid has been defined
+            self.cov_grid = pd.read_csv(covgrid_fl, header=0, delimiter=r",")   
+
+            for index, row in self.cov_grid.iterrows():
+                _pkt = copy.deepcopy(covgrid_pkt_template)
+                _pkt["id"] = "Gridpoint/"+str(row["gpi"])
+                _pkt["position"] = {}
+                _pkt["position"]["cartographicDegrees"] = [row["lon[deg]"], row["lat[deg]"], 0]
+                czml_pkts.append(_pkt)
+
         # intersatellite comm packets
         with open(curdir+"contacts_template.json", 'r') as f:
             contacts_pkt = json.load(f)
         
+        contacts_pkt[0]["id"] = str(uuid.uuid4()) # TODO: Not sure if a parent packet is required
         czml_pkts.append(contacts_pkt[0])
 
         intersatcomm = config.out_config.get_intersatcomm()        
@@ -177,6 +204,65 @@ class VisGlobeFrame(ttk.Frame):
             _pkt["polyline"]["positions"]["references"] = [sat1_id+"#position",sat2_id+"#position"]
             
             czml_pkts.append(_pkt)
+
+        # ground-station comm packets
+        with open(curdir+"contacts_template.json", 'r') as f:
+            contacts_pkt = json.load(f)
+        
+        contacts_pkt[0]["id"] = str(uuid.uuid4()) # TODO: Not sure if a parent packet is required
+        czml_pkts.append(contacts_pkt[0])
+
+        sat_out = config.out_config.get_satout()        
+
+        for _sat in sat_out: 
+            sat_id = _sat["@id"]
+            if _sat.get("GroundStationComm", None) is not None:
+                for _gs in _sat["GroundStationComm"]:
+                    groundstn_id = _gs["@id"]
+                    contact_df = pd.read_csv(_gs["concise_fl"], skiprows=[0,1])
+                    contacts = []
+                    is_first_contact = True
+                    previous_row = False
+                    for index, row in contact_df.iterrows():
+                        
+                        if(is_first_contact):                    
+                            if(row['AccessFromIndex']!=0): # interval of no contact during the beginning, add this to the contacts (with boolean = False)
+                                time_from = epoch.isoformat() + 'Z' #TODO: check Z
+                                time_to = (epoch + datetime.timedelta(0,int(row['AccessFromIndex'] * step_size))).isoformat() + 'Z' #TODO: check Z
+                                interval = time_from + "/" + time_to
+                                contacts.append({"interval":interval, "boolean":False})                   
+                        
+                        time_from = (epoch + datetime.timedelta(0,int(row['AccessFromIndex'] * step_size))).isoformat() + 'Z' #TODO: check Z
+                        time_to = (epoch + datetime.timedelta(0,int(row['AccessToIndex'] * step_size))).isoformat() + 'Z' #TODO: check Z
+                        interval = time_from + "/" + time_to
+                        contacts.append({"interval":interval, "boolean":True})
+
+                        if is_first_contact is False:
+                            # attach a period of no-contact between the consecutive contact periods
+                            time_from = (epoch + datetime.timedelta(0,int(previous_row['AccessToIndex'] * step_size))).isoformat() + 'Z' #TODO: check Z
+                            time_to = (epoch + datetime.timedelta(0,int(row['AccessFromIndex'] * step_size))).isoformat() + 'Z' #TODO: check Z
+                            interval = time_from + "/" + time_to
+                            contacts.append({"interval":interval, "boolean":False})
+
+                        previous_row = row
+                        is_first_contact = False
+
+                    # check the time towards the end
+                    if contacts: # if any contacts exist
+                        if(previous_row['AccessToIndex']!=num_time_indices):
+                            # attach a period of no-contact between the previous interval-end and end-of-simulation
+                            time_from = (epoch + datetime.timedelta(0,int(previous_row['AccessToIndex'] * step_size))).isoformat() + 'Z' #TODO: check Z
+                            time_to = (epoch + datetime.timedelta(0,num_time_indices * step_size)).isoformat() + 'Z' #TODO: check Z
+                            interval = time_from + "/" + time_to
+                            contacts.append({"interval":interval, "boolean":False})
+                        
+                    _pkt = copy.deepcopy(contacts_pkt[1])
+                    _pkt["id"] = str(sat_id) + " to " + str(groundstn_id) 
+                    _pkt["name"] = _pkt["id"]
+                    _pkt["polyline"]["show"] = contacts if bool(contacts) else False # no contacts throughout the mission case
+                    _pkt["polyline"]["positions"]["references"] = [sat_id+"#position",groundstn_id+"#position"]
+                    
+                    czml_pkts.append(_pkt)
 
         # write the CZML data file
         cesium_data_dir = curdir+"../../../cesium_app/Source/SampleData/"
