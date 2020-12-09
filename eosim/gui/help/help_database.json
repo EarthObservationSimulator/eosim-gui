@@ -1,7 +1,7 @@
 {
     "main":{
         "heading": "Help!",
-        "description": ["Welcome to the EOS help panel.",
+        "description": ["Welcome to the EOSim help panel.",
                         "Hover around any area of interest and this window " ,
                         "shall display information if available."
                         ],
@@ -17,7 +17,7 @@
     "new":{
         "heading": "New",
         "description": ["Select an empty folder as workspace to save all the mission data.\n",
-                        "Default folder location is ./eos/output/"],
+                        "Default folder location is ./eosim/output/"],
         "images": false,
         "morehelp": false
     },
@@ -64,6 +64,12 @@
         "description": ["Specify the maneuver"],
         "images": false,
         "morehelp": "./instrupy/docs/_build/html/miscellaneous.html#manuverability-and-corresponging-for-calculations"
+    },
+    "opaque_atmos_height":{
+        "heading": "Opaque atmospheric height",
+        "description": ["Height in kilometers above surface of Earth beyond which line-of-sight communication can take place between pair of satellites."],
+        "images": false,
+        "morehelp": false
     },
     "mercator_proj":{
         "heading": "A Mercator projection.",

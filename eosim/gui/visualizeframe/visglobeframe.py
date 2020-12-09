@@ -4,19 +4,19 @@ import webbrowser
 import threading
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import time
-from eos.config import OutputConfig
+from eosim.config import OutputConfig
 import copy
 import datetime
 import pandas as pd
 import numpy as np
-from eos import config
+from eosim import config
 import instrupy
 import pandas as pd
 import numpy as np
 import pickle
 import tkinter
 from tkinter import ttk 
-from eos import config
+from eosim import config
 import uuid
 import logging
 
@@ -266,10 +266,10 @@ class VisGlobeFrame(ttk.Frame):
 
         # write the CZML data file
         cesium_data_dir = curdir+"../../../cesium_app/Source/SampleData/"
-        with open(cesium_data_dir+"eos_data.json", 'w') as f: # TODO change the directory where the CZML file is stored
+        with open(cesium_data_dir+"eosim_data.json", 'w') as f: # TODO change the directory where the CZML file is stored
             json.dump(czml_pkts, f, indent=4)
         # rename file to czml extension
-        os.rename(cesium_data_dir+'eos_data.json', cesium_data_dir+'eos_data.czml')
+        os.rename(cesium_data_dir+'eosim_data.json', cesium_data_dir+'eosim_data.czml')
         
         # Execute the cesium app
         def start_webserver():

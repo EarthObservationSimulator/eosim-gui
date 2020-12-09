@@ -1,5 +1,5 @@
 import tkinter as tk
-from eos.gui.mainapplication import MainApplication
+from eosim.gui.mainapplication import MainApplication
 import os
 import sys
 import argparse
@@ -15,7 +15,7 @@ def main(loglevel):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description='Earth Observation Simulator'
+        description='Earth Observation Simulator (EOSim)'
     )
     parser.add_argument(
         '-loglevel',

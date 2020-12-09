@@ -1,7 +1,7 @@
 from tkinter import ttk 
 import tkinter as tk
-from eos.config import GuiStyle, MissionConfig
-from eos import config
+from eosim.config import GuiStyle, MissionConfig
+from eosim import config
 from orbitpy.preprocess import OrbitParameters, PreProcess
 import random
 from tkinter import messagebox
@@ -10,7 +10,7 @@ import orbitpy
 import tkinter.filedialog, tkinter.messagebox
 from instrupy.public_library import Instrument
 import os
-import eos.gui.helpwindow as helpwindow
+import eosim.gui.helpwindow as helpwindow
 import pickle
 from orbitpy import preprocess
 import logging
@@ -71,12 +71,10 @@ class ConfigureFrame(ttk.Frame):
         settings_frame.columnconfigure(1,weight=1)
         prp_set_btn = ttk.Button(settings_frame, text="Propagate", command=self.click_propagate_settings_btn, width=ConfigureFrame.BTNWIDTH)
         prp_set_btn.grid(row=0, column=0)
-        com_set_btn = ttk.Button(settings_frame, text="Comm", width=ConfigureFrame.BTNWIDTH)
+        com_set_btn = ttk.Button(settings_frame, text="Inter-Sat Comm", command=self.click_intersatcomm_settings_btn, width=ConfigureFrame.BTNWIDTH)
         com_set_btn.grid(row=0, column=1)
         cov_set_btn = ttk.Button(settings_frame, text="Coverage", command=self.click_coverage_settings_btn, width=ConfigureFrame.BTNWIDTH)
         cov_set_btn.grid(row=1, column=0)
-        obs_syn_btn = ttk.Button(settings_frame, text="TBD", width=ConfigureFrame.BTNWIDTH)
-        obs_syn_btn.grid(row=1, column=1)
 
         #
         clr_sv_run_frame = ttk.Frame(self) 
@@ -102,6 +100,8 @@ class ConfigureFrame(ttk.Frame):
         # store data for later use during execution, visualization
         pickle.dump(prop_cov_param, open(user_dir+"prop_cov_param.p", "wb"))
 
+        pickle.dump(pi, open(user_dir+"preprocess_data.p", "wb"))
+
         with open(user_dir+"comm_param.p", "wb") as f:
             pickle.dump(pi.comm_dir, f)
             pickle.dump(pi.gnd_stn_fl, f)
@@ -117,6 +117,40 @@ class ConfigureFrame(ttk.Frame):
         with open(user_dir+'MissionSpecs.json', 'w', encoding='utf-8') as f:
             json.dump(miss_specs.to_dict(), f, ensure_ascii=False, indent=4)
         logger.info("Configuration cleared.")
+
+    def click_intersatcomm_settings_btn(self):
+        intersatcomm_settings_win = tk.Toplevel()
+        intersatcomm_settings_win.rowconfigure(0,weight=1)
+        intersatcomm_settings_win.rowconfigure(1,weight=1)
+        intersatcomm_settings_win.rowconfigure(2,weight=1)
+        intersatcomm_settings_win.columnconfigure(0,weight=1)
+
+        intersatcomm_settings_frame = ttk.Frame(intersatcomm_settings_win)
+        intersatcomm_settings_frame.grid(row=0, column=0, padx=20, pady=20)
+        intersatcomm_settings_frame.bind('<Enter>',lambda event, widget_id="opaque_atmos_height": helpwindow.update_help_window(event, widget_id)) 
+
+        okcancel_frame = ttk.Frame(intersatcomm_settings_win)
+        okcancel_frame.grid(row=1, column=0, padx=20, pady=20)
+
+        ttk.Label(intersatcomm_settings_frame, text="Opaque Atmosphere Height [km]").grid(row=0, column=0, sticky='w')
+        opaque_atmos_height_entry = ttk.Entry(intersatcomm_settings_frame, width=6)
+        opaque_atmos_height_entry.grid(row=0, column=1, padx=2, pady=2)
+        opaque_atmos_height_entry.insert(0,30)
+        opaque_atmos_height_entry.bind("<FocusIn>", lambda args: opaque_atmos_height_entry.delete('0', 'end'))
+
+        # okcancel frame
+        def ok_click():
+            miss_specs.update_intersatcomm(opaque_atmos_height = opaque_atmos_height_entry.get())
+            logger.info("Updated opaque atmospheric height")
+            intersatcomm_settings_win.destroy()
+
+        ok_btn = ttk.Button(okcancel_frame, text="OK", command=ok_click, width=ConfigureFrame.BTNWIDTH)
+        ok_btn.grid(row=0, column=0)
+
+        cancel_btn = ttk.Button(okcancel_frame, text="Cancel", command=intersatcomm_settings_win.destroy, width=ConfigureFrame.BTNWIDTH)
+        cancel_btn.grid(row=0, column=1)
+        
+
 
     def click_mission_btn(self):      
 

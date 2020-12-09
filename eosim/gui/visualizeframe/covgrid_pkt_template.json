@@ -1,0 +1,26 @@
+{
+  "id":"GridPoint/GP",
+  "name":"gp1",
+  "point":{
+    "id": 123,
+    "title": "Point",
+    "description": "A point, or viewport-aligned circle.",
+    "type": "object",
+    "properties": {
+        "show": true,
+        "pixelSize": 1,
+        "color": "white",
+        "outlineColor": "white",
+        "outlineWidth": 0.0,
+        "scaleByDistance": 1,
+        "translucencyByDistance": 0.5,
+        "distanceDisplayCondition": false,
+        "disableDepthTestDistance": 0.0
+    }
+  }, 
+  "position":{
+    "cartographicDegrees ":[
+      -77, 37, 100000 
+    ]
+  }
+}

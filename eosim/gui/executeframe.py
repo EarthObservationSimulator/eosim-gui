@@ -1,7 +1,7 @@
 from tkinter import ttk 
 import tkinter as tk
-from eos.config import GuiStyle, MissionConfig, OutputConfig
-from eos import config
+from eosim.config import GuiStyle, MissionConfig, OutputConfig
+from eosim import config
 import random
 from tkinter import messagebox
 import json
@@ -164,6 +164,9 @@ class ExecuteFrame(ttk.Frame):
             user_dir = config.out_config.get_user_dir()
            
             # Gather the required inputs
+            with open(user_dir+ 'preprocess_data.p', 'rb') as f:
+                pi = pickle.load(f)
+
             with open(user_dir+ 'comm_param.p', 'rb') as f:
                 comm_dir = pickle.load(f)
                 gnd_stn_fl = pickle.load(f)
@@ -192,7 +195,8 @@ class ExecuteFrame(ttk.Frame):
             logger.info(".......Computing satellite-to-satellite contact periods.......") 
             progress_bar.start(10)            
 
-            opaque_atmos_height_km = 30
+            opaque_atmos_height_km = pi.opaque_atmos_height_km
+            logger.info("Considering opaque atmospheric height to be : " + str(opaque_atmos_height_km) + "km") 
             inter_sat_comm = communications.InterSatelliteComm(sat_ids, sat_state_fls, comm_dir, opaque_atmos_height_km)
             [sat1_ids, sat2_ids, intersatcomm_concise_fls, intersatcomm_detailed_fls] = inter_sat_comm.compute_all_contacts()
             config.out_config.update_intersatcomm(sat1_ids=sat1_ids, sat2_ids=sat2_ids, intersatcomm_concise_fls=intersatcomm_concise_fls, intersatcomm_detailed_fls=intersatcomm_detailed_fls)

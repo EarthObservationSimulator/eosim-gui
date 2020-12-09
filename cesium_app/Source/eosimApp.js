@@ -15,7 +15,7 @@
     });
 	
     var czml = new Cesium.CzmlDataSource();
-    czml.load("./Source/SampleData/eos_data.czml")
+    czml.load("./Source/SampleData/eosim_data.czml")
 
 
     viewer.dataSources.add(

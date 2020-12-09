@@ -5,12 +5,12 @@ def readme():
         return f.read()
 
 setup(
-    name='EOS',
+    name='EOSim',
     version='0.1',
     description='Earth Observation Simulation',
     author='BAERI',
     author_email='vinay.ravindra@nasa.gov',
-    packages=['eos'],
+    packages=['eosim'],
     scripts=[ 
     ],
     install_requires=['numpy', 'pandas', 'scipy', 'lowtran', 'nose', 'sphinx', 'sphinx_rtd_theme', 'cartopy'] 

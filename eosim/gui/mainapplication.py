@@ -6,12 +6,12 @@ from .executeframe import ExecuteFrame
 from .visualizeframe.visualizeframe import VisualizeFrame
 import tkinter.scrolledtext
 import os
-from eos.config import GuiStyle
+from eosim.config import GuiStyle
 import sys
 import logging
 import time
 import traceback
-import eos.gui.helpwindow as helpwindow
+import eosim.gui.helpwindow as helpwindow
 import logging
 
 logger = logging.getLogger(__name__)

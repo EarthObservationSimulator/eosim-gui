@@ -29,7 +29,7 @@ class GuiStyle():
 class MissionConfig:
     """ Class which holds all the mission configuration parameters """
     def __init__(self, epoch=None, duration=None, satellite=None, sensor=None, sat_to_sensor_map=None, prop=None, 
-                 cov_grid=None, pnt_opts=None, gnd_stns = None):
+                 cov_grid=None, pnt_opts=None, gnd_stns = None, intersatcomm=None):
         self.epoch = epoch if epoch is not None else None
         self.duration = duration if duration is not None else None
         self.satellite = list(satellite) if satellite is not None else list() # satellite is the same as orbit
@@ -39,6 +39,7 @@ class MissionConfig:
         self.cov_grid =  cov_grid if cov_grid is not None else None
         self.pnt_opts =  pnt_opts if pnt_opts is not None else None
         self.gnd_stns =  gnd_stns if gnd_stns is not None else None
+        self.intersatcomm =  intersatcomm if intersatcomm is not None else None
     
     def clear(self):
         self.epoch = None
@@ -50,9 +51,13 @@ class MissionConfig:
         self.cov_grid = None
         self.pnt_opts = None
         self.gnd_stns = None
+        self.intersatcomm = None
     
     def update_epoch(self, epoch):
         self.epoch = epoch
+
+    def update_intersatcomm(self, opaque_atmos_height = None):
+        self.intersatcomm = {"opaqueAtmosphericHeight": opaque_atmos_height}
 
     def update_duration(self, duration):
         self.duration = duration
@@ -132,14 +137,15 @@ class MissionConfig:
                                 "propagator": self.prop,
                                 "grid": self.cov_grid,
                                 "pointingOptions": self.pnt_opts,
-                                "groundStations": self.gnd_stns
+                                "groundStations": self.gnd_stns,
+                                "interSatelliteComm": self.intersatcomm
                                }) 
         return miss_specs_dict
 
 class OutputConfig:
-    """ A class to allow handling of the produced results of the various functionalities of EOS (propagation, coverage, etc).
+    """ A class to allow handling of the produced results of the various functionalities of EOSim (propagation, coverage, etc).
         The class is updated with pointers to the resultant data files as and when a new result is produced. 
-        This class would be referenced by the various plotting functions in EOS to gather the available results. 
+        This class would be referenced by the various plotting functions in EOSim to gather the available results. 
         Using this class, a JSON file called 'output.json' would be written in the user directory.    
     """
     def __init__(self, prop_done=None, cov_done=None, sat_out=None, user_dir=None, gnd_stn_comm_done=None, intersat_comm_done=None, intersat_comm=None):

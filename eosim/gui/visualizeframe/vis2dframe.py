@@ -1,7 +1,7 @@
 from tkinter import ttk 
 import tkinter as tk
 import tkinter.filedialog, tkinter.messagebox
-from eos import config
+from eosim import config
 from orbitpy import preprocess, orbitpropcov, communications, obsdatametrics, util
 import instrupy
 import pandas as pd

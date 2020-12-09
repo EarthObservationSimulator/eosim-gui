@@ -1,7 +1,7 @@
 from tkinter import ttk 
 import tkinter as tk
-from eos.config import GuiStyle, MissionConfig
-from eos import config
+from eosim.config import GuiStyle, MissionConfig
+from eosim import config
 import logging
 
 logger = logging.getLogger(__name__)

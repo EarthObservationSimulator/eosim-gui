@@ -1,16 +1,11 @@
-# Earth Observation Simulator (EOS)
+# Earth Observation Simulator (EOSim)
 
 
 
 
 ## Install
 
-Requires: `python 3.8`, `gfortran`, `pip`
-
-1. Navigate to the `eos/` directory and run `make`. 
-2. Run tests using the `make runtest` command and get the *OK* message.
-
-Find the documentation in: `instruments/instrupy/docs/_build/html/user_json_desc.html`
+Requires: `python 3.8`, ``cartopy`
 
 ### Cesium
 

@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'EOS'
+project = 'EOSim'
 copyright = '2020, Vinay Ravindra'
 author = 'Vinay Ravindra'
 

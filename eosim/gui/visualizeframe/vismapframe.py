@@ -1,8 +1,8 @@
 from tkinter import ttk 
 import tkinter as tk
-from eos.config import GuiStyle, MissionConfig
-import eos.gui.helpwindow as helpwindow
-from eos import config
+from eosim.config import GuiStyle, MissionConfig
+import eosim.gui.helpwindow as helpwindow
+from eosim import config
 import instrupy
 import pandas as pd
 import numpy as np

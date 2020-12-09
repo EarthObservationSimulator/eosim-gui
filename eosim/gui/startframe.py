@@ -2,8 +2,8 @@ import tkinter as tk
 import tkinter.filedialog
 from tkinter import ttk 
 import os
-import eos.gui.helpwindow as helpwindow
-from eos import config
+import eosim.gui.helpwindow as helpwindow
+from eosim import config
 import logging
 
 logger = logging.getLogger(__name__)

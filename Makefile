@@ -1,4 +1,4 @@
-PROJECT := EOS
+PROJECT := EOSim
 
 .DEFAULT_GOAL := all
 
