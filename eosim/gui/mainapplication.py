@@ -1,9 +1,10 @@
 import tkinter as tk 
 from tkinter import ttk 
-from .startframe import StartFrame
+from .welcomeframe import WelcomeFrame
 from .configureframe import ConfigureFrame
 from .executeframe import ExecuteFrame 
 from .visualizeframe.visualizeframe import VisualizeFrame
+from .operations.operationsframe import OperationsFrame
 import tkinter.scrolledtext
 import os
 from eosim.config import GuiStyle
@@ -64,7 +65,7 @@ class MainApplication:
         lsidebar.rowconfigure(4,weight=1)
         lsidebar.rowconfigure(5,weight=8)
         
-        welcome_btn = ttk.Button(lsidebar, text='WELCOME',command=lambda: self.show_frame("StartFrame"), style="lsidebar.TButton")
+        welcome_btn = ttk.Button(lsidebar, text='WELCOME',command=lambda: self.show_frame("WelcomeFrame"), style="lsidebar.TButton")
         welcome_btn.grid(row=0, column=0, sticky='nswe', padx=5, pady=5)
         welcome_btn.bind('<Enter>',lambda event, widget_id="welcome": helpwindow.update_help_window(event, widget_id))
         configure_btn = ttk.Button(lsidebar, text='CONFIGURE',command=lambda: self.show_frame("ConfigureFrame"), style="lsidebar.TButton")
@@ -76,8 +77,8 @@ class MainApplication:
         visualize_btn = ttk.Button(lsidebar, text='VISUALIZE',command=lambda: self.show_frame("VisualizeFrame"), style="lsidebar.TButton") 
         visualize_btn.grid(row=3, column=0, sticky='nswe', padx=5, pady=5)
         visualize_btn.bind('<Enter>',lambda event, widget_id="visualize": helpwindow.update_help_window(event, widget_id))
-        synobs_btn = ttk.Button(lsidebar, text='TBD', style="lsidebar.TButton") 
-        synobs_btn.grid(row=4, column=0, sticky='nswe', padx=5, pady=5)            
+        operations_btn = ttk.Button(lsidebar, text='OPERATIONS',command=lambda: self.show_frame("OperationsFrame"), style="lsidebar.TButton") 
+        operations_btn.grid(row=4, column=0, sticky='nswe', padx=5, pady=5)            
 
         # message area frame
         # grid configure
@@ -91,8 +92,8 @@ class MainApplication:
         messages.configure(state ='disabled') # Making the text read only 
 
         # redirect stdout, logging messages to messages ScrolledText widget
-        sys.stdout = TextRedirector(messages, "stdout")
-        sys.stderr = TextRedirector(messages, "stderr")
+        #sys.stdout = TextRedirector(messages, "stdout")
+        #sys.stderr = TextRedirector(messages, "stderr")
         logging.basicConfig(level=loglevel, handlers=[
                     logging.FileHandler("debug.log", 'w'),
                     logging.StreamHandler(stream=sys.stdout)
@@ -116,7 +117,7 @@ class MainApplication:
         # put all of the pages in the same location;
         # the one on the top of the stacking order
         # will be the one that is visible.
-        for F in (StartFrame, ConfigureFrame, ExecuteFrame, VisualizeFrame):
+        for F in (WelcomeFrame, ConfigureFrame, ExecuteFrame, VisualizeFrame, OperationsFrame):
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
@@ -126,7 +127,7 @@ class MainApplication:
             # will be the one that is visible.
             frame.grid(row=0, column=0, sticky="nsew")
 
-        self.show_frame("StartFrame")  
+        self.show_frame("WelcomeFrame")  
 
     def show_frame(self, page_name):
         '''Show a frame for the given page name'''
@@ -164,7 +165,7 @@ class TopMenuBar:
 
         menubar.add_cascade(label="Edit", menu=editmenu)
         helpmenu = tk.Menu(menubar, tearoff=0)
-        helpmenu.add_command(label="Help Index", command=donothing)
+        helpmenu.add_command(label="Help Window", command=lambda: helpwindow.click_help(parent))
         helpmenu.add_command(label="About...", command=donothing)
         menubar.add_cascade(label="Help", menu=helpmenu)
 

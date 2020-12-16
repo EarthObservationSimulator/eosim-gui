@@ -2,6 +2,7 @@ from tkinter import ttk
 import tkinter as tk
 from eosim.config import GuiStyle, MissionConfig
 from eosim import config
+import orbitpy
 from orbitpy.preprocess import OrbitParameters, PreProcess
 import random
 from tkinter import messagebox
@@ -13,6 +14,7 @@ import os
 import eosim.gui.helpwindow as helpwindow
 import pickle
 from orbitpy import preprocess
+from netCDF4 import Dataset as netCDF4Dataset
 import logging
 
 logger = logging.getLogger(__name__)
@@ -268,6 +270,7 @@ class ConfigureFrame(ttk.Frame):
         sat_kep_specs_frame.rowconfigure(4,weight=1)
         sat_kep_specs_frame.rowconfigure(5,weight=1) 
         sat_kep_specs_frame.rowconfigure(6,weight=1)
+        sat_kep_specs_frame.rowconfigure(7,weight=1)
 
         okcancel_frame = ttk.Frame(sat_win_frame)
         okcancel_frame.grid(row=1, column=0)  
@@ -280,22 +283,22 @@ class ConfigureFrame(ttk.Frame):
         uid_entry.grid(row=0, column=1, sticky='w')
 
         ttk.Label(sat_kep_specs_frame, text="Altitude [km]", wraplength=150).grid(row=1, column=0, padx=10, pady=10, sticky='w')
-        sma_entry = ttk.Entry(sat_kep_specs_frame, width=10)
-        sma_entry.insert(0,500)
-        sma_entry.bind("<FocusIn>", lambda args: sma_entry.delete('0', 'end'))
-        sma_entry.grid(row=1, column=1, sticky='w')
+        alt_entry = ttk.Entry(sat_kep_specs_frame, width=10)
+        alt_entry.insert(0,500)
+        alt_entry.bind("<FocusIn>", lambda args: alt_entry.delete('0', 'end'))
+        alt_entry.grid(row=1, column=1, sticky='w')
 
         ttk.Label(sat_kep_specs_frame, text="Eccentricity", wraplength=150).grid(row=2, column=0, padx=10, pady=10, sticky='w')
-        ecc_entry = ttk.Entry(sat_kep_specs_frame, width=10)
-        ecc_entry.insert(0,0.001)
-        ecc_entry.bind("<FocusIn>", lambda args: ecc_entry.delete('0', 'end'))
-        ecc_entry.grid(row=2, column=1, sticky='w')
+        self.ecc_entry = ttk.Entry(sat_kep_specs_frame, width=10)
+        self.ecc_entry.insert(0,0.001)
+        self.ecc_entry.bind("<FocusIn>", lambda args: self.ecc_entry.delete('0', 'end'))
+        self.ecc_entry.grid(row=2, column=1, sticky='w')
 
         ttk.Label(sat_kep_specs_frame, text="Inclination [deg]", wraplength=150).grid(row=3, column=0, padx=10, pady=10, sticky='w')
-        inc_entry = ttk.Entry(sat_kep_specs_frame, width=10)
-        inc_entry.insert(0,45)
-        inc_entry.bind("<FocusIn>", lambda args: inc_entry.delete('0', 'end'))
-        inc_entry.grid(row=3, column=1, sticky='w')
+        self.inc_entry = ttk.Entry(sat_kep_specs_frame, width=10)
+        self.inc_entry.insert(0,45)
+        self.inc_entry.bind("<FocusIn>", lambda args: self.inc_entry.delete('0', 'end'))
+        self.inc_entry.grid(row=3, column=1, sticky='w')
         
         ttk.Label(sat_kep_specs_frame, text="RAAN [deg]", wraplength=150).grid(row=4, column=0, padx=10, pady=10, sticky='w')
         raan_entry = ttk.Entry(sat_kep_specs_frame, width=10)
@@ -315,10 +318,34 @@ class ConfigureFrame(ttk.Frame):
         ta_entry.bind("<FocusIn>", lambda args: ta_entry.delete('0', 'end'))
         ta_entry.grid(row=6, column=1, sticky='w')
 
+        def checked_sso():
+            if(self.cir_sso_alt_fix_var.get() == 1):
+                self.ecc_entry.delete('0','end')
+                self.ecc_entry.insert(0,0)
+                self.ecc_entry.configure(state="disabled")
+                self.inc_entry.delete('0','end')
+                self.inc_entry.configure(state="disabled")
+            else:
+                self.ecc_entry.configure(state="normal")
+                self.inc_entry.configure(state="normal")
+                
+        self.cir_sso_alt_fix_var = tk.IntVar()
+        circularSSOAltitudeFixed_chkbox= ttk.Checkbutton(sat_kep_specs_frame, text='Circular SSO, ALtitude Fixed',variable=self.cir_sso_alt_fix_var, onvalue=1, offvalue=0, command=checked_sso)
+        circularSSOAltitudeFixed_chkbox.grid(row=7, column=0, sticky='w')
+
         # okcancel frame
         def ok_click():            
-            satellite = OrbitParameters(_id=uid_entry.get(), sma=float(sma_entry.get())+orbitpy.util.Constants.radiusOfEarthInKM, ecc=ecc_entry.get(), 
-                            inc=inc_entry.get(), raan=raan_entry.get(), aop=aop_entry.get(), ta=ta_entry.get())
+            if(self.cir_sso_alt_fix_var.get() == 1):
+                inc = orbitpy.util.calculate_inclination_circular_SSO(float(alt_entry.get()))                
+                self.inc_entry.configure(state="normal")
+                self.inc_entry.delete('0','end')
+                self.inc_entry.insert(0,inc)
+                self.inc_entry.configure(state="disabled")
+                logger.info("SSO with circular orbit, fixed altitude was enabled.")
+                logger.info("Inclination of the SSO orbit is: " + str(inc) + "deg")
+
+            satellite = OrbitParameters(_id=uid_entry.get(), sma=float(alt_entry.get())+orbitpy.util.Constants.radiusOfEarthInKM, ecc=self.ecc_entry.get(), 
+                            inc=self.inc_entry.get(), raan=raan_entry.get(), aop=aop_entry.get(), ta=ta_entry.get())
             miss_specs.add_satellite(satellite)
             logger.info("Satellite added.")
             
@@ -515,7 +542,7 @@ class ConfigureFrame(ttk.Frame):
 
             # other specs frame
             other_specs_frame = ttk.LabelFrame(specs_frame) # specifications other then FOV, maneuver, orientation frame
-            other_specs_frame.grid(row=0, column=0, padx=10, pady=10)
+            other_specs_frame.grid(row=0, column=0, rowspan=2, padx=10, pady=10)
             other_specs_frame.bind('<Enter>',lambda event, widget_id="basicsensor": helpwindow.update_help_window(event, widget_id))
             
             # fov specs frame
@@ -530,11 +557,15 @@ class ConfigureFrame(ttk.Frame):
             fov_specs_container = ttk.Frame(fov_specs_frame)
             fov_specs_container.grid(row=1, column=0, sticky='nswe', padx=10, pady=10)
             fov_specs_container.columnconfigure(0,weight=1)
-            fov_specs_container.rowconfigure(0,weight=1)
+            fov_specs_container.rowconfigure(0,weight=1)            
+
+            # select data source frame        
+            syndata_frame = ttk.LabelFrame(specs_frame, text="Synthetic Data Configuration") # synthetic data configuration frame
+            syndata_frame.grid(row=1, column=1, padx=10, pady=10, sticky='n') 
 
             # orientation frame
             orien_frame = ttk.LabelFrame(specs_frame, text="Orientation") # sensor orientation frame
-            orien_frame.grid(row=0, column=2, padx=10, pady=10, sticky='n')
+            orien_frame.grid(row=0, column=2, rowspan=2, padx=10, pady=10, sticky='n')
 
             orien_type_frame = ttk.Frame(orien_frame)
             orien_type_frame.grid(row=0, column=0, sticky='nswe', padx=10, pady=10)
@@ -548,7 +579,7 @@ class ConfigureFrame(ttk.Frame):
 
             # manuver frame
             maneuver_frame = ttk.LabelFrame(specs_frame, text="Manuever") # manuver specs frame
-            maneuver_frame.grid(row=0, column=3, padx=10, pady=10, sticky='n')
+            maneuver_frame.grid(row=0, column=3,rowspan=2, padx=10, pady=10, sticky='n')
             maneuver_frame.bind('<Enter>',lambda event, widget_id="maneuver": helpwindow.update_help_window(event, widget_id))
 
             maneuver_type_frame = ttk.Frame(maneuver_frame)
@@ -559,12 +590,11 @@ class ConfigureFrame(ttk.Frame):
             maneuver_specs_container = ttk.Frame(maneuver_frame)
             maneuver_specs_container.grid(row=1, column=0, sticky='nswe', padx=10, pady=10)
             maneuver_specs_container.columnconfigure(0,weight=1)
-            maneuver_specs_container.rowconfigure(0,weight=1)
-            
+            maneuver_specs_container.rowconfigure(0,weight=1)            
 
             # ok cancel frame
             okcancel_frame = ttk.Frame(specs_frame)
-            okcancel_frame.grid(row=1, column=0, columnspan=4, padx=10, pady=10) 
+            okcancel_frame.grid(row=2, column=0, columnspan=4, padx=10, pady=10) 
 
             # define the widgets in other_specs_frame
             ttk.Label(other_specs_frame, text="Unique ID", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
@@ -608,6 +638,24 @@ class ConfigureFrame(ttk.Frame):
             dr_entry.insert(0,250)
             dr_entry.bind("<FocusIn>", lambda args: dr_entry.delete('0', 'end'))
             dr_entry.grid(row=6, column=1, sticky='w', padx=10, pady=10)
+
+            # define the widgets in syndata_frame
+            def click_sel_envdata_src_btn(): 
+                self.envdata_fp = None               
+                self.envdata_fp = tkinter.filedialog.askopenfilenames(initialdir=os.getcwd(), title="Please select the environment data file:", filetypes=(("All files","*.*"),("NetCDF files","*.nc")))
+                self.envdata_fp = list(self.envdata_fp)
+                if self.envdata_fp[0] != '':                    
+                    envdata = netCDF4Dataset(self.envdata_fp[0], "r", format="NETCDF4")                    
+                    for key, value in envdata.variables.items():
+                        self.env_vars.append(key)
+                    self.env_vars_combobox['values'] = self.env_vars
+                    self.env_vars_combobox.current(0)
+            
+            self.envdata_fp = None
+            self.env_vars = []
+            ttk.Button(syndata_frame, text="Select ENV data source", command=click_sel_envdata_src_btn).grid(row=0,column=0, padx=10, pady=10)
+            self.env_vars_combobox = ttk.Combobox(syndata_frame, values=self.env_vars)
+            self.env_vars_combobox.grid(row=1, column=0)
 
             # define the widgets in fov_specs_frame
             class ConicalFOV(ttk.Frame):
@@ -948,6 +996,10 @@ class ConfigureFrame(ttk.Frame):
                         data['orientation']['xRotation'] = specs[0] 
                         data['orientation']['yRotation'] = specs[1]
                         data['orientation']['zRotation'] = specs[1]
+
+                    data['syntheticDataConfig'] = {}
+                    data['syntheticDataConfig']['sourceFilePaths'] = self.envdata_fp
+                    data['syntheticDataConfig']['environVar'] = self.env_vars_combobox.get()
 
                     _sen = Instrument.from_dict(data)
                     miss_specs.add_sensor(_sen, sat_tree.selection())

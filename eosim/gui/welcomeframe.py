@@ -7,7 +7,7 @@ from eosim import config
 import logging
 
 logger = logging.getLogger(__name__)
-class StartFrame(ttk.Frame):
+class WelcomeFrame(ttk.Frame):
 
     def __init__(self, parent, controller):
         ttk.Frame.__init__(self, parent)

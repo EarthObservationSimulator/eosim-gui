@@ -38,7 +38,7 @@ class VisGlobeFrame(ttk.Frame):
         vis_globe_plot_frame = ttk.LabelFrame(vis_globe_frame, text='Cesium powered 3D Visualiation', labelanchor='n')
         vis_globe_plot_frame.grid(row=0, column=0, sticky='nswe', padx=(10,10))
 
-         # plot frame
+        # plot frame
         ttk.Button(vis_globe_plot_frame, text="Launch", command=self.click_launch).pack(padx=10, pady=10, ipadx=10, ipady=10, expand=True)
 
     
