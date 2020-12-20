@@ -60,7 +60,10 @@ class PlotMapVars(instrupy.util.EnumEntity):
                 data = np.array(sat_df.index) * step_size # index = "TimeIndex"
                 _header = 'Time[s]'
             elif(var == cls.ALT):
-                data = np.array(sat_df["SMA[km]"]) - instrupy.util.Constants.radiusOfEarthInKM
+                sat_dist = []
+                sat_dist = np.array(sat_df["X[km]"])*np.array(sat_df["X[km]"]) + np.array(sat_df["Y[km]"])*np.array(sat_df["Y[km]"]) + np.array(sat_df["Z[km]"])*np.array(sat_df["Z[km]"])
+                sat_dist = np.sqrt(sat_dist)
+                data = np.array(sat_dist) - instrupy.util.Constants.radiusOfEarthInKM
                 _header = 'Alt[km]'
             elif(var==cls.SPD):
                 data = np.array(sat_df["VX[km/s]"])*np.array(sat_df["VX[km/s]"]) + np.array(sat_df["VY[km/s]"])*np.array(sat_df["VY[km/s]"]) + np.array(sat_df["VZ[km/s]"])*np.array(sat_df["VZ[km/s]"])
