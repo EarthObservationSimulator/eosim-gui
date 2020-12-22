@@ -88,7 +88,7 @@ class MissionConfig:
         
         sensor_id = sensor.get_id() # get the unique instrument id
         # note that the self.sat_to_sensor_map index is tied to the index of self.sensor
-        self.sat_to_sensor_map.append((sensor_id, sensor_to_sat)) # tuple of sensor-id and list of satetllites to which the sensor is attached
+        self.sat_to_sensor_map.append((sensor_id, sensor_to_sat)) # tuple of sensor-id and *list* of satetllites to which the sensor is attached
 
     def add_coverage_grid(self, data):
         self.cov_grid = data
@@ -192,7 +192,6 @@ class OutputConfig:
             if not isinstance(gnd_stn_id, list): 
                 gnd_stn_id = [gnd_stn_id]
 
-            print(gnd_stn_id)
             for k in range(0,len(gnd_stn_id)): # iterate through ground stations accessed by the satellite
                 gs.append({"@id": gnd_stn_id[k], "concise_fl":gndstncomm_concise_fls[k], "detailed_fl":gndstncomm_detailed_fls[k]})
 
@@ -202,6 +201,10 @@ class OutputConfig:
 
     def get_satout(self):
         return self.sat_out
+
+    def update_calc_obsmetrics(self, sat_id, ssid, obsMetrics_fl):
+        # TBD
+        pass
 
     def update_intersatcomm(self, sat1_ids, sat2_ids, intersatcomm_concise_fls, intersatcomm_detailed_fls):
         self.intersat_comm_done = True

@@ -1,0 +1,22 @@
+{
+    "id":"ObservedGroundPoint",
+    "name":"GPx",
+    "point": {
+      "scale":1.5,
+      "pixelSize": 10,
+      "show":{
+          "interval":"0000-01-01T00:00:00Z/2012-03-15T10:16:06.97400000000198Z",
+          "boolean":true
+      },
+      "color":  {"rgba": [0,255,0,255]},
+      "scaleByDistance": 1,
+      "translucencyByDistance": 0.5,
+      "distanceDisplayCondition": false,
+      "disableDepthTestDistance": 0.0
+    },
+    "position":{
+      "cartographicDegrees":[
+        -77, 37, 100000 
+      ]
+    }
+  }

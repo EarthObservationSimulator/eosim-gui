@@ -210,7 +210,57 @@ class ExecuteFrame(ttk.Frame):
         threading.Thread(target=real_click_sat2satconexec_btn).start()
 
     def click_obsmetcalcexec_btn(self, progress_bar):
-        pass 
+
+        def real_click_obsmetcalcexec_btn():
+            # Execute observation metrics calculations
+            user_dir = config.out_config.get_user_dir()
+            usf = user_dir + 'MissionSpecs.json'
+            try:
+                with open(usf, 'r') as mission_specs_file:
+                        miss_specs = util.FileUtilityFunctions.from_json(mission_specs_file)      
+            except:
+                raise Exception("Mission Configuration not found.")
+            
+            progress_bar.start(10)
+
+            # read in the preprocessed data
+            with open(user_dir+ 'preprocess_data.p', 'rb') as f:
+                pi = pickle.load(f)
+
+            if "instrument" in miss_specs:
+                instru_specs = miss_specs['instrument']
+            elif "satellite" in miss_specs:
+                instru_specs = []
+                for sat in miss_specs["satellite"]:
+                    if("instrument" in sat):
+                        instru_specs.extend(sat["instrument"])
+
+            if(instru_specs is not None):
+                logger.info("Started computation of observation metrics")
+                obs = obsdatametrics.ObsDataMetrics(pi.sats)
+                [sat_id, ssid, obsMetrics_fl] = obs.compute_all_obs_metrics()   
+                logger.info("Computed observation metrics")   
+            else:
+                logger.info("No instruments present, skinng computation of observation metrics")  
+                pass
+
+            # update output configuration file            
+            ocf = user_dir + 'output.json'
+            try:
+                with open(ocf, 'r') as output_config_file:
+                        _out_config = util.FileUtilityFunctions.from_json(output_config_file)  
+                config.out_config = OutputConfig.from_dict(_out_config)    
+            except:
+                raise Exception("Output Configuration not found.")
+            
+            config.out_config.update_calc_obsmetrics(sat_id=sat_id, ssid=ssid, obsMetrics_fl=obsMetrics_fl)
+            with open(ocf, 'w', encoding='utf-8') as f:
+                json.dump(config.out_config.to_dict(), f, ensure_ascii=False, indent=4)
+
+            progress_bar.stop()            
+
+        # execute propagation
+        threading.Thread(target=real_click_obsmetcalcexec_btn).start() 
              
     def click_pexec_btn(self, progress_bar):
 
@@ -278,11 +328,11 @@ class ExecuteFrame(ttk.Frame):
                 pcp = copy.deepcopy(prop_cov_param[orb_indx])
                 pcp.do_prop = False # force skip of propagation calculations
                 opc = orbitpropcov.OrbitPropCov(pcp)
-                print(".......Running Coverage calculations for satellite.......", pcp.sat_id)
+                logger.info(".......Running Coverage calculations for satellite " + str(pcp.sat_id) + "....")
                 opc.run()
                 sat_id.append(pcp.sat_id)
                 sat_acc_fl.append(pcp.sat_acc_fl)
-                print(".......Done.......")
+                logger.info(".......Done.......")
 
             # update output configuration file            
             ocf = user_dir + 'output.json'

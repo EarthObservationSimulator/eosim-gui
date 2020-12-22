@@ -13,6 +13,8 @@ from orbitpy.util import EnumEntity
 import pandas as pd
 import json
 import datetime
+import numpy as np
+import pandas as pd
 import time
 import copy
 import uuid
@@ -22,7 +24,8 @@ logger = logging.getLogger(__name__)
 class CommandType(EnumEntity):
     """Enumeration of recoginized command types."""
     TAKEIMAGE = "TAKEIMAGE",
-    TRANSMITDATA = "TRANSMITDATA"
+    TRANSMITDATA = "TRANSMITDATA",
+    SETTINGS = "SETTINGS"
 
 class MissionEntityType(EnumEntity):
     """Enumeration of recoginized command types."""
@@ -146,7 +149,12 @@ class CesiumGlobeOperationsVisualizationFrame:
             operations = json.load(f)
 
         czml_pkts = []
-        # ground-station comm packets
+
+        # observed powition packet
+        with open(czml_template_dir+"observed_gp_template.json", 'r') as f:
+            oberv_pkt = json.load(f)
+
+        # ground-station, inter-satellite comm packets
         with open(czml_template_dir+"contacts_template.json", 'r') as f:
             contacts_pkt = json.load(f)
         
@@ -175,10 +183,8 @@ class CesiumGlobeOperationsVisualizationFrame:
         # between satellite and satellite
         for j in range(0,len(sat_out)):
             sat1_id = sat_out[j]["@id"]
-            print(sat1_id)
             for k in range(j+1,len(sat_out)):                
                 sat2_id = sat_out[k]["@id"]
-                print(sat2_id)
                 _pkt = copy.deepcopy(contacts_pkt[1])
                 _pkt["id"] = str(sat1_id) + "-to-" + str(sat2_id) 
                 _pkt["name"] = _pkt["id"]
@@ -186,11 +192,15 @@ class CesiumGlobeOperationsVisualizationFrame:
                 _pkt["polyline"]["positions"]["references"] = [str(sat1_id)+"#position",str(sat2_id)+"#position"]
                 czml_pkts.append(_pkt)
 
+        # get the coverage grid file-path
         for oper in operations:
-            # iterate over each operation in the list of operations. If they correspond to ground-station communications or intersatellite communications,
-            # make the corresponding czml packet
-            if(CommandType.get(oper['@type']) == CommandType.TRANSMITDATA):
-                
+            if(CommandType.get(oper['@type']) == CommandType.SETTINGS):
+                covgrid_fp = oper["covGridFilePath"]
+
+        # iterate over each operation in the list of operations. If they correspond to ground-station communications or intersatellite communications,
+        # make the corresponding czml packet
+        for oper in operations:            
+            if(CommandType.get(oper['@type']) == CommandType.TRANSMITDATA):                
                 # TODO: Perform validation checks below
                 if(MissionEntityType.get(oper["txEntityType"])==MissionEntityType.SATELLITE):
                     pass
@@ -214,9 +224,23 @@ class CesiumGlobeOperationsVisualizationFrame:
                 _pkt["id"] = str(tx_entity_id) + "-to-" + str(rx_entity_id) 
                 _pkt["name"] = _pkt["id"]
                 _pkt["polyline"]["show"] = contact if bool(contact) else False # no (valid) contacts throughout the mission case
-                _pkt["polyline"]["positions"]["references"] = [str(tx_entity_id)+"#position",str(rx_entity_id)+"#position"]
-                
+                _pkt["polyline"]["positions"]= [str(tx_entity_id)+"#position",str(rx_entity_id)+"#position"]                
                 czml_pkts.append(_pkt)
+            
+            elif(CommandType.get(oper['@type']) == CommandType.TAKEIMAGE):
+
+                time_from = (epoch + datetime.timedelta(0,int(oper['timeIndexStart'] * step_size))).isoformat() + 'Z' #TODO: check Z
+                time_to = (epoch + datetime.timedelta(0,int(oper['timeIndexEnd'] * step_size))).isoformat() + 'Z' #TODO: check Z
+                interval = time_from + "/" + time_to
+                initialize_interval = {"interval":mission_interval, "boolean":False} # this is necessary, else the point is shown over entire mission interval 
+                obs_interval = {"interval":interval, "boolean":True} 
+
+                for obs_pos in oper["observedPosition"]["cartographicDegrees"]: # iterate over possibly multiple points seen over the same time-interval
+                    _pkt = copy.deepcopy(oberv_pkt)
+                    _pkt["id"] = "ObservedGroundPointSat" + str(oper["satelliteId"]) + "Instru" + str(oper["instrumentId"]) + str(time_from) # only one czml packet per (sat, instru, time-start)
+                    _pkt["point"]["show"] = [initialize_interval, obs_interval]
+                    _pkt["position"]["cartographicDegrees"]= obs_pos
+                    czml_pkts.append(_pkt)
 
         return czml_pkts
 
