@@ -1,7 +1,7 @@
 import tkinter as tk 
 from tkinter import ttk 
 from .welcomeframe import WelcomeFrame
-from .configureframe import ConfigureFrame
+from .configure.cfframe import ConfigureFrame
 from .executeframe import ExecuteFrame 
 from .visualizeframe.visualizeframe import VisualizeFrame
 from .operations.operationsframe import OperationsFrame
@@ -92,8 +92,8 @@ class MainApplication:
         messages.configure(state ='disabled') # Making the text read only 
 
         # redirect stdout, logging messages to messages ScrolledText widget
-        #sys.stdout = TextRedirector(messages, "stdout")
-        #sys.stderr = TextRedirector(messages, "stderr")
+        sys.stdout = TextRedirector(messages, "stdout")
+        sys.stderr = TextRedirector(messages, "stderr")
         logging.basicConfig(level=loglevel, handlers=[
                     logging.FileHandler("debug.log", 'w'),
                     logging.StreamHandler(stream=sys.stdout)
