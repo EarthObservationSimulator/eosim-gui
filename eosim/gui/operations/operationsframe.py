@@ -154,14 +154,20 @@ class OperationsFrame(ttk.Frame):
                     [heightDetectors, widthDetectors] = instru.get_pixel_config()
 
                     # compute the pixel position data (center, edges, poles)
+                    logger.info("...start computation of pixel positions...")
                     pixel_pos_data = SensorFOVProjection.get_pixel_position_data(user_dir, date_JDUt1, state_eci, sat_orien, sen_orien, angleWidth, angleHeight, heightDetectors, widthDetectors)
+                    logger.info("...stop computation of pixel positions...")
 
                     # compute the pixel polygons
                     pixels = PixelShapelyPolygon(pixel_pos_data)
+                    logger.info("...start computation of pixel polygons...")
                     [pixel_poly, pixel_center_pos] = pixels.make_all_pixel_polygon()
+                    logger.info("...stop computation of pixel polygons...")
 
                     # compute the synthetic data from the instrument
+                    logger.info("...start interpolation ...")
                     [pixel_center_pos, interpl_var_data, env_var] = instru.synthesize_observation(time_JDUT1=date_JDUt1, pixel_center_pos=pixel_center_pos)
+                    logger.info("...stop interpolation...")
 
                     # store the results (pixel position data, shapely polygons, interpolated data) inside a pickle object with the name same as the cmd_id
                     syn_data_dir = config.out_config.get_syndatadir()
@@ -256,9 +262,9 @@ class CesiumGlobeOperationsVisualizationFrame:
         # initialize communication between every pair of entities to "no-contact". Note that these packets have to appear strictly before the packets showing the contacts.
         # between satellite and ground-station
         sat_out = config.out_config.get_satout()  
-        time_from = epoch.isoformat() + 'Z' #TODO: check Z
-        time_to = (epoch + datetime.timedelta(0,int(num_time_indices* step_size))).isoformat() + 'Z' #TODO: check Z
-        mission_interval = time_from + "/" + time_to
+        miss_time_from = epoch.isoformat() + 'Z' #TODO: check Z
+        miss_time_to = (epoch + datetime.timedelta(0,int(num_time_indices* step_size))).isoformat() + 'Z' #TODO: check Z
+        mission_interval = miss_time_from + "/" + miss_time_to
 
         # satellite with ground-station
         sat_with_gs_comm_ids = []
@@ -328,7 +334,8 @@ class CesiumGlobeOperationsVisualizationFrame:
 
                 offset = 0 # TODO: Need to Revise
                 time_from = (epoch + datetime.timedelta(0,offset+int(oper['timeIndexStart'] * step_size))).isoformat() + 'Z' #TODO: check Z
-                time_to = (epoch + datetime.timedelta(0,offset+int(oper['timeIndexEnd'] * step_size))).isoformat() + 'Z' #TODO: check Z
+                #time_to = (epoch + datetime.timedelta(0,offset+int(oper['timeIndexEnd'] * step_size))).isoformat() + 'Z' #TODO: check Z
+                time_to = miss_time_to# TODO: Undo this
                 interval = time_from + "/" + time_to
                 initialize_interval = {"interval":mission_interval, "boolean":False} # this is necessary, else the point is shown over entire mission interval 
                 obs_interval = {"interval":interval, "boolean":True} 
@@ -340,14 +347,14 @@ class CesiumGlobeOperationsVisualizationFrame:
                     _pkt = copy.deepcopy(oberv_pkt)
                     _pkt["id"] = "ObservedGroundPointSat" + str(oper["satelliteId"]) + "Instru" + str(oper["instrumentId"]) + str(time_from) + "_"+str(k) # only one czml packet per (sat, instru, time-start)
                     _pkt["point"]["show"] = [initialize_interval, obs_interval]
-                    _pkt["position"]["cartographicDegrees"]= [obs_pos[1], obs_pos[0], 0]
+                    _pkt["position"]["cartographicDegrees"]= obs_pos
 
-                    if(oper["observationValue"] < 3):
+                    if(oper["observationValue"] <= 0.3333):
                         _pkt["point"]["color"] = {"rgba": [255,0,0,255]}
-                    elif(oper["observationValue"] > 3 and oper["observationValue"] < 6):
-                        _pkt["point"]["color"] = {"rgba": [0,0,255,255]}
-                    elif(oper["observationValue"] > 9):
-                        _pkt["point"]["color"] = {"rgba": [0,255,0,255]}
+                    elif(oper["observationValue"] > 0.333 and oper["observationValue"] <= 0.66666):
+                        _pkt["point"]["color"] = {"rgba": [255,255,0,255]}
+                    elif(oper["observationValue"] > 0.66666):
+                        _pkt["point"]["color"] = {"rgba": [0,255,17,255]}
 
                     czml_pkts.append(_pkt)
                     k = k + 1

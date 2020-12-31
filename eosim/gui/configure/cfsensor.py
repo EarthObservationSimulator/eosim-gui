@@ -325,12 +325,12 @@ class BasicSensorInputConfigure():
         
         self.envdata_fp = None
         self.env_vars = []
-        ttk.Button(syndata_frame, text="Select ENV data source", command=click_sel_envdata_src_btn).grid(row=0,column=0, padx=10, pady=10)
+        ttk.Button(syndata_frame, text="Select science data file", command=click_sel_envdata_src_btn).grid(row=0,column=0, padx=10, pady=10)
         self.env_vars_combobox = ttk.Combobox(syndata_frame, values=self.env_vars)
         self.env_vars_combobox.grid(row=1, column=0)
 
         ttk.Label(syndata_frame, text="Select interpolation method").grid(row=2,column=0, padx=10, pady=10)
-        self.interpl_method_combobox = ttk.Combobox(syndata_frame, values=['scipy.interpolate.linear', 'metpy.interpolate.linear'])
+        self.interpl_method_combobox = ttk.Combobox(syndata_frame, values=['scipy Linear', 'metpy Linear', 'metpy Nearest Neighbor', 'mepy Cubic', 'metpy Radial Basis', 'metpy Natural Newighbour 2D', 'metpy Barnes 2D', 'metpy Cressman 2D'])
         self.interpl_method_combobox.grid(row=3, column=0)
         self.interpl_method_combobox.current(0)
 
@@ -537,7 +537,7 @@ class BasicSensorInputConfigure():
                 data['syntheticDataConfig'] = {}
                 data['syntheticDataConfig']['sourceFilePaths'] = self.envdata_fp
                 data['syntheticDataConfig']['environVar'] = self.env_vars_combobox.get()
-                data['syntheticDataConfig']['interplMethod'] = self.interpl_method_combobox.get()
+                data['syntheticDataConfig']['interplMethod'] = 'scipy.interpolate.linear' # self.interpl_method_combobox.get() TODO
 
                 _sen = Instrument.from_dict(data)
                 config.miss_specs.add_sensor(_sen, sat_tree.selection())

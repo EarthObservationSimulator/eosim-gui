@@ -139,6 +139,7 @@ class CfPropagate():
                 prop['customTimeResFactor'] = float(specs[1]) if specs[1] != "" else None          
  
                 config.miss_specs.add_propagator(prop)
+                logger.info('Updated propagator settings.')
                 prop_win.destroy()
             
         ok_btn = ttk.Button(okcancel_frame, text="Ok", command=ok_click, width=15)
