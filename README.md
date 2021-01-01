@@ -2,42 +2,29 @@
 
 
 
-
 ## Install
 
-Requires: `python 3.8`, ``cartopy`
+Requires: Unix-like operating system (requirement of `orbitpy`), `python 3.8`, `pip`, `orbitpy`, `instrupy`, `cartopy`, `metpy`, `scipy` and `astropy`.
 
-### Cesium
+## License and Copyright
 
-No need to install/ download the CesiumJS package. The index.html code within the app page refers to the remote cesium source javascript file.
+Copyright 2021 Bay Area Environmental Research Institute
 
-install node.js
-https://github.com/nodesource/distributions/blob/master/README.md#debinstall
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-Using Ubuntu:
-```
-curl -sL https://deb.nodesource.com/setup_15.x | sudo -E bash -
-sudo apt-get install -y nodejs
-```
+    http://www.apache.org/licenses/LICENSE-2.0
 
-Workshop code (the basic App directory):
-https://github.com/CesiumGS/cesium-workshop/tree/basic-app
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 
-From within the worshop folder:
+## Credits and Acknowledgments
 
-Run 
-
-> npm install
-> npm start 
-
-(OR)
-
-> python -m http.server 8080
-
-
-## Examples
-
-
+This work has been funded by grants from the National Aeronautics and Space Administration (NASA) Earth Science Technology Office (ESTO) through the Advanced Information Systems Technology (AIST) Program.
 
 ## Questions?
 
