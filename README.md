@@ -1,10 +1,13 @@
 # Earth Observation Simulator (EOSim)
 
-
-
 ## Install
 
 Requires: Unix-like operating system (requirement of `orbitpy`), `python 3.8`, `pip`, `orbitpy`, `instrupy`, `cartopy`, `metpy`, `scipy` and `astropy`.
+
+Run the application using the following command from terminal:
+```
+python bin/eosimapp.py
+```
 
 ## License and Copyright
 
@@ -25,6 +28,11 @@ limitations under the License.
 ## Credits and Acknowledgments
 
 This work has been funded by grants from the National Aeronautics and Space Administration (NASA) Earth Science Technology Office (ESTO) through the Advanced Information Systems Technology (AIST) Program.
+
+EOSim uses:
+
+- CesiumJS (https://cesium.com/cesiumjs/)
+- cesium-workshop (https://github.com/CesiumGS/cesium-workshop)
 
 ## Questions?
 
