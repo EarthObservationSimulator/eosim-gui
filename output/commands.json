@@ -1,0 +1,65 @@
+[
+{
+    "@type": "TakeImage",
+    "satelliteId": 536,
+    "timeIndexStart": 171,    
+    "timeIndexEnd": 174,    
+    "instrumentId": 1,
+    "satelliteOrientation":"0,15,0",
+    "instrumentOrientation":"0,0,0"
+},
+{
+    "@type": "TakeImage",
+    "satelliteId": 536,
+    "timeIndexStart": 206,    
+    "timeIndexEnd": 209,    
+    "instrumentId": 1,
+    "satelliteOrientation":"0,25,0",
+    "instrumentOrientation":"0,0,0"
+},
+{
+    "@type": "TakeImage",
+    "satelliteId": 536,
+    "timeIndexStart": 206,    
+    "timeIndexEnd": 209,    
+    "instrumentId": 2,
+    "satelliteOrientation":"0,0,0",
+    "instrumentOrientation":"0,0,0"
+},
+{
+    "@type": "TransmitData",
+    "txEntityId": 536,
+    "txEntityType": "Satellite",
+    "rxEntityId": "satG_216_1",
+    "rxEntityType": "Satellite",
+    "timeIndexStart": 4325,
+    "timeIndexEnd": 4500
+},
+{
+    "@type": "TransmitData",
+    "txEntityId": "satG_216_1",
+    "txEntityType": "Satellite",
+    "rxEntityId": "satG_216_2",
+    "rxEntityType": "Satellite",
+    "timeIndexStart": 6574,
+    "timeIndexEnd": 7000
+},
+{
+    "@type": "TransmitData",
+    "txEntityId": 536,
+    "txEntityType": "Satellite",
+    "rxEntityId": 39,
+    "rxEntityType": "GroundStation",
+    "timeIndexStart": 38060,
+    "timeIndexEnd": 38300
+},
+{
+    "@type": "TransmitData",
+    "txEntityId": 626,
+    "txEntityType": "Satellite",
+    "rxEntityId": 39,
+    "rxEntityType": "GroundStation",
+    "timeIndexStart": 32351,
+    "timeIndexEnd": 32400
+}
+]

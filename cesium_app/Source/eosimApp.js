@@ -10,14 +10,14 @@
 
     var viewer = new Cesium.Viewer('cesiumContainer', {
         scene3DOnly: false,
-        selectionIndicator: false,
+        selectionIndicator: true,
         baseLayerPicker: false
     });
 	
     var czml = new Cesium.CzmlDataSource();
     czml.load("./Source/SampleData/eosim_data.czml")
 
-
+    
     viewer.dataSources.add(
       czml
     );

@@ -359,6 +359,41 @@ class CesiumGlobeOperationsVisualizationFrame:
                     czml_pkts.append(_pkt)
                     k = k + 1
 
+        # temporary for 2021-01-04 projectdemo: write "operations" packet containing custom keys to be displayed in the control panel console
+        # assumes that the packets in the command file are ordered in time
+        
+        obs_count_entry = []
+        gp_count_entry  = []
+        sat_orien_entry  = []
+        instru_orien_entry = []
+        obs_count = 0
+        gp_count = 0
+        obs_start_prev = epoch.isoformat() + 'Z'
+        for oper in operations:
+            if(CommandType.get(oper['@type']) == CommandType.TAKEIMAGE):
+                
+                obs_start = (epoch + datetime.timedelta(0,offset+int(oper['timeIndexStart'] * step_size))).isoformat() + 'Z' #TODO: check Z
+                interval = obs_start_prev + "/" + obs_start
+                
+                obs_count_entry.append({"interval": interval, "number": obs_count})
+                gp_count_entry.append({"interval": interval, "number": gp_count})
+                sat_orien_entry.append({"interval": interval, "number": oper["satelliteOrientation"]})
+                instru_orien_entry.append({"interval": interval, "number": oper["instrumentOrientation"]})
+                
+                obs_count = obs_count + 1
+                gp_count = gp_count + len(oper["observedPosition"]["cartographicDegrees"])
+                obs_start_prev = obs_start
+        
+        # last interval has special treatment
+        interval = obs_start_prev + "/" + miss_time_to
+        obs_count_entry.append({"interval": interval, "number": obs_count})
+        gp_count_entry.append({"interval": interval, "number": gp_count})
+        sat_orien_entry.append({"interval": interval, "number": oper["satelliteOrientation"]})
+        instru_orien_entry.append({"interval": interval, "number": oper["instrumentOrientation"]})
+  
+        _pkt = { "id": "operations", "properties": {"observationCount": obs_count_entry, "gpCount": gp_count_entry, "satelliteOrientation": sat_orien_entry, "instrumentOrientation": instru_orien_entry}}
+        czml_pkts.append(_pkt)
+
         return czml_pkts
 
     def execute_cesium_engine(self, cesium_data_dir, czml_pkts):
