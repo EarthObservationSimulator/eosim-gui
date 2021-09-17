@@ -6,6 +6,7 @@ docs/_build/*
 docs/_templates/*
 !docs/_templates/.gitkeep
 test_sim/*
+output/*
 
 # objects, executables, core dumps
 *.o
