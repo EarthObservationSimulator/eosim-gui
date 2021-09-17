@@ -10,8 +10,7 @@ from eosim import config
 from eosim.gui.visualizeframe.visglobeframe import VisGlobeFrame
 from eosim.gui.mapprojections import Mercator, EquidistantConic, LambertConformal, Robinson, LambertAzimuthalEqualArea, Gnomonic
 from orbitpy.util import EnumEntity
-from orbitpy.sensorfovprojection import SensorFOVProjection, PixelShapelyPolygon
-from instrupy.public_library import Instrument
+# from orbitpy.sensorfovprojection import SensorFOVProjection, PixelShapelyPolygon REV_TEST
 import pandas as pd
 import json
 import datetime
@@ -155,11 +154,13 @@ class OperationsFrame(ttk.Frame):
 
                     # compute the pixel position data (center, edges, poles)
                     logger.info("...start computation of pixel positions...")
-                    pixel_pos_data = SensorFOVProjection.get_pixel_position_data(user_dir, date_JDUt1, state_eci, sat_orien, sen_orien, angleWidth, angleHeight, heightDetectors, widthDetectors)
+                    # REV_TEST
+                    # pixel_pos_data = SensorFOVProjection.get_pixel_position_data(user_dir, date_JDUt1, state_eci, sat_orien, sen_orien, angleWidth, angleHeight, heightDetectors, widthDetectors)
                     logger.info("...stop computation of pixel positions...")
 
                     # compute the pixel polygons
-                    pixels = PixelShapelyPolygon(pixel_pos_data)
+                    # REV_TEST
+                    # pixels = PixelShapelyPolygon(pixel_pos_data)
                     logger.info("...start computation of pixel polygons...")
                     [pixel_poly, pixel_center_pos] = pixels.make_all_pixel_polygon()
                     logger.info("...stop computation of pixel polygons...")

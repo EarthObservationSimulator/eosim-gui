@@ -1,8 +1,4 @@
 from tkinter import ttk 
-import tkinter as tk
-from orbitpy.preprocess import OrbitParameters
-from instrupy.public_library import Instrument
-import json
 import os
 import logging
 logger = logging.getLogger(__name__)

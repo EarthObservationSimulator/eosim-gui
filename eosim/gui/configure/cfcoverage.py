@@ -4,17 +4,14 @@ from eosim.config import GuiStyle, MissionConfig
 from eosim import config
 from eosim.gui.configure import cfmission
 import orbitpy
-from orbitpy.preprocess import OrbitParameters, PreProcess
 import random
 from tkinter import messagebox
 import json
 import orbitpy
 import tkinter.filedialog, tkinter.messagebox
-from instrupy.public_library import Instrument
 import os
 import eosim.gui.helpwindow as helpwindow
 import pickle
-from orbitpy import preprocess
 import logging
 
 logger = logging.getLogger(__name__)

@@ -4,17 +4,14 @@ from eosim.config import GuiStyle, MissionConfig
 from eosim import config
 from eosim.gui.configure import cfmission
 import orbitpy
-from orbitpy.preprocess import OrbitParameters, PreProcess
 import random
 from tkinter import messagebox
 import json
 import orbitpy
 import tkinter.filedialog, tkinter.messagebox
-from instrupy.public_library import Instrument
 import os
 import eosim.gui.helpwindow as helpwindow
 import pickle
-from orbitpy import preprocess
 import logging
 
 logger = logging.getLogger(__name__)
@@ -168,6 +165,7 @@ class CfConstellation():
 
         # okcancel frame
         def ok_click():               
+            ''' REV_TEST
             if self._constl_type.get() == "HomogenousWalkerFrame":
                 specs = frames[self._constl_type.get()].get_specs()
                 data = {}
@@ -182,6 +180,7 @@ class CfConstellation():
 
                 sats = PreProcess.walker_orbits(data)                        
                 config.miss_specs.add_satellite(sats)
+            '''
             
         ok_btn = ttk.Button(okcancel_frame, text="Add", command=ok_click, width=15)
         ok_btn.grid(row=0, column=0)

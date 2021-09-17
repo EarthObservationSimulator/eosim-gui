@@ -1,11 +1,7 @@
 import tkinter as tk
 from eosim.gui.mainapplication import MainApplication
-import os
-import sys
 import argparse
-import shutil
 import logging
-import time
 
 def main(loglevel): 
     root = tk.Tk()

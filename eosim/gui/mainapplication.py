@@ -5,13 +5,13 @@ from .configure.cfframe import ConfigureFrame
 from .executeframe import ExecuteFrame 
 from .visualizeframe.visualizeframe import VisualizeFrame
 from .operations.operationsframe import OperationsFrame
+
 import tkinter.scrolledtext
 import os
 from eosim.config import GuiStyle
 import sys
 import logging
 import time
-import traceback
 import eosim.gui.helpwindow as helpwindow
 import logging
 
@@ -29,8 +29,7 @@ class MainApplication:
                
         MainApplication.build_main_window(self, loglevel)      
         
-        GuiStyle() # consifure all the styles used in the GUI (shall affect the other modules too)
-        
+        GuiStyle() # configure all the styles used in the GUI (shall affect the other modules too)        
         
     def report_callback_exception(self, exc_type, exc_value, exc_traceback):
         logging.error(
@@ -79,7 +78,7 @@ class MainApplication:
         visualize_btn.bind('<Enter>',lambda event, widget_id="visualize": helpwindow.update_help_window(event, widget_id))
         operations_btn = ttk.Button(lsidebar, text='OPERATIONS',command=lambda: self.show_frame("OperationsFrame"), style="lsidebar.TButton") 
         operations_btn.grid(row=4, column=0, sticky='nswe', padx=5, pady=5)            
-
+        
         # message area frame
         # grid configure
         messagearea = ttk.Frame(self.parent_frame, width= 0.8*parent_frame_width, height=0.2*parent_frame_height, style ='messagearea.TFrame')

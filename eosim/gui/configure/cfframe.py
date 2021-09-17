@@ -13,17 +13,14 @@ from eosim.gui.configure.cfcoverage import CfCoverage
 from eosim.gui.configure.cfgroundstation import CfGroundStation
 
 import orbitpy
-from orbitpy.preprocess import OrbitParameters, PreProcess
 import random
 from tkinter import messagebox
 import json
 import orbitpy
 import tkinter.filedialog, tkinter.messagebox
-from instrupy.public_library import Instrument
 import os
 import eosim.gui.helpwindow as helpwindow
 import pickle
-from orbitpy import preprocess
 from netCDF4 import Dataset as netCDF4Dataset
 import logging
 
@@ -108,7 +105,8 @@ class ConfigureFrame(ttk.Frame):
         run_all_btn.grid(row=0, column=2,ipadx=20, sticky='s')
 
     def click_save_config(self):
-
+        
+        ''' REV_TEST
         logger.info(".......Preprocessing configuration .......")
         user_dir = config.out_config.get_user_dir()
         pi = preprocess.PreProcess(config.miss_specs.to_dict(), user_dir) # generates grid if-needed, calculates propagation 
@@ -127,6 +125,7 @@ class ConfigureFrame(ttk.Frame):
         with open(user_dir+'MissionSpecs.json', 'w', encoding='utf-8') as f:
             json.dump(config.miss_specs.to_dict(), f, ensure_ascii=False, indent=4)
         logger.info("Configuration Saved.")
+        '''
     
     def click_clear_config(self):
         ''' Clear the configuration (both in the local variable and in the MissionSpecs file) '''

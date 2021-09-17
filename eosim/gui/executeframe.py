@@ -7,14 +7,13 @@ from tkinter import messagebox
 import json
 import orbitpy
 import tkinter.filedialog, tkinter.messagebox
-from instrupy.public_library import Instrument
 from instrupy.util import *
 import os
 import shutil
 import sys
 import csv
 import glob
-from orbitpy import preprocess, orbitpropcov, communications, obsdatametrics, util
+#from orbitpy import orbitpropcov, communications, obsdatametrics, util REV_TEST
 import threading
 import time
 import pandas as pd
