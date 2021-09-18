@@ -8,9 +8,9 @@
         "images": false,
         "morehelp": false
     },
-    "load":{
-        "heading": "Load",
-        "description": ["Select the folder containing mission data."],
+    "open":{
+        "heading": "Open",
+        "description": ["Select the folder containing previously run mission data."],
         "images": false,
         "morehelp": false
     },

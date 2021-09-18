@@ -38,6 +38,7 @@ class MainApplication:
             )
 
     def build_main_window(self, loglevel):
+        """ This function configures the various frames within the self.parent (root) window."""
 
         TopMenuBar(self.parent)
         
@@ -105,8 +106,8 @@ class MainApplication:
         # the container is where we'll stack a bunch of frames
         # on top of each other, then the one we want visible
         # will be raised above the others
-        # grid configure
         container = ttk.Frame(self.parent_frame, width=0.6*parent_frame_width, height=0.8*parent_frame_height)
+        # grid configure
         container.grid_propagate(0)
         container.grid(row=0, column=1, sticky='nswe')
         container.columnconfigure(0,weight=1)
@@ -141,28 +142,16 @@ class TopMenuBar:
         self.parent = parent
         menubar = tk.Menu(self.parent)
         filemenu = tk.Menu(menubar, tearoff=0)
-        filemenu.add_command(label="New", command=donothing)
+        filemenu.add_command(label="Sim", command=donothing)
         filemenu.add_command(label="Open", command=donothing)
         filemenu.add_command(label="Save", command=donothing)
         filemenu.add_command(label="Save as...", command=donothing)
-        filemenu.add_command(label="Close", command=donothing)
 
         filemenu.add_separator()
 
         filemenu.add_command(label="Exit", command=self.parent.quit)
         menubar.add_cascade(label="File", menu=filemenu)
-        editmenu = tk.Menu(menubar, tearoff=0)
-        editmenu.add_command(label="Undo", command=donothing)
-
-        editmenu.add_separator()
-
-        editmenu.add_command(label="Cut", command=donothing)
-        editmenu.add_command(label="Copy", command=donothing)
-        editmenu.add_command(label="Paste", command=donothing)
-        editmenu.add_command(label="Delete", command=donothing)
-        editmenu.add_command(label="Select All", command=donothing)
-
-        menubar.add_cascade(label="Edit", menu=editmenu)
+        
         helpmenu = tk.Menu(menubar, tearoff=0)
         helpmenu.add_command(label="Help Window", command=lambda: helpwindow.click_help(parent))
         helpmenu.add_command(label="About...", command=donothing)
