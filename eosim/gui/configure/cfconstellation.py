@@ -1,17 +1,9 @@
 from tkinter import ttk 
 import tkinter as tk
-from eosim.config import GuiStyle, MissionConfig
 from eosim import config
-from eosim.gui.configure import cfmission
-import orbitpy
 import random
-from tkinter import messagebox
-import json
 import orbitpy
-import tkinter.filedialog, tkinter.messagebox
-import os
 import eosim.gui.helpwindow as helpwindow
-import pickle
 import logging
 
 logger = logging.getLogger(__name__)
@@ -41,7 +33,7 @@ class CfConstellation():
         # on top of each other, then the one we want visible
         # will be raised above the others
         # grid configure
-        constl_specs_container = ttk.LabelFrame(constl_win_frame, text="Specifications", width=250, height=370)
+        constl_specs_container = ttk.LabelFrame(constl_win_frame, text="Specifications", width=250, height=320)
         constl_specs_container.grid_propagate(0)
         constl_specs_container.grid(row=1, column=0, sticky='nswe', padx=20, pady=20)
         constl_specs_container.columnconfigure(0,weight=1)
@@ -165,11 +157,18 @@ class CfConstellation():
 
         # okcancel frame
         def ok_click():               
-            ''' REV_TEST
+            try:
+                date_dict = orbitpy.util.OrbitState.date_to_dict(config.mission_specs.epoch)
+            except:
+                logger.info("Please set the mission date before adding satellite.")
+                return
+
             if self._constl_type.get() == "HomogenousWalkerFrame":
                 specs = frames[self._constl_type.get()].get_specs()
                 data = {}
                 data['@id'] = specs[0]
+                data['@type'] = 'Walker Delta Constellation'
+                data['date'] = date_dict                
                 data['numberSatellites'] = specs[1]
                 data['numberPlanes'] = specs[2]
                 data['relativeSpacing'] = specs[3]
@@ -178,9 +177,9 @@ class CfConstellation():
                 data['inc'] = specs[6]
                 data['aop'] = specs[7]                
 
-                sats = PreProcess.walker_orbits(data)                        
-                config.miss_specs.add_satellite(sats)
-            '''
+                config.mission_specs.add_constellation_from_dict(data, spc_bus_dict=None, instru_dict=None)
+                logger.info("Homogenous Walker constellation added.")
+            
             
         ok_btn = ttk.Button(okcancel_frame, text="Add", command=ok_click, width=15)
         ok_btn.grid(row=0, column=0)

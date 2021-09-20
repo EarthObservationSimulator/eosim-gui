@@ -1,7 +1,21 @@
 from tkinter import ttk 
 import os
+
+from orbitpy.mission import Mission
+
 import logging
 logger = logging.getLogger(__name__)
+
+""" This variable is used to the workspace directory where the output files of EOSim shall be saved.  
+    This object is imported and referenced over all the EOSim modules and hence acts as a sort of global 
+    variable for the entire EOSim software."""
+workspace_dir = None
+
+""" A MissionConfig instance to be used to store the mission configuration. This 
+    object is imported and referenced over all the EOSim modules and hence
+    acts as a sort of global variable for the entire EOSim software.
+"""
+mission_specs = Mission() 
 class GuiStyle():
     main_win_width = 900
     main_win_height = int(main_win_width*9/21) # 21:9 aspect ratio
@@ -150,11 +164,11 @@ class MissionConfig:
                                }) 
         return miss_specs_dict
 
-miss_specs = MissionConfig() 
+
 class OutputConfig:
     """ A class to allow handling of the produced results of the various functionalities of EOSim (propagation, coverage, etc).
-        The class is updated with pointers to the resultant data files as and when a new result is produced. 
-        This class would be referenced by the various plotting functions in EOSim to gather the available results. 
+        The class is updated with file-locations of the resultant data files as and when a new result is produced. 
+        This class would be referenced by the various plotting functions in EOSim. 
         Using this class, a JSON file called 'output.json' would be written in the user directory.    
     """
     def __init__(self, prop_done=None, cov_done=None, sat_out=None, user_dir=None, gnd_stn_comm_done=None, 
@@ -279,4 +293,8 @@ class OutputConfig:
                                   }) 
         return output_config_dict
 
+""" A OutputConfig instance to be used to store the output meta-data. This 
+    object is imported and referenced over all the EOSim modules and hence
+    acts as a sort of global variable for the entire EOSim software.
+"""
 out_config = OutputConfig()  

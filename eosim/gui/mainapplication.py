@@ -6,13 +6,14 @@ from .executeframe import ExecuteFrame
 from .visualizeframe.visualizeframe import VisualizeFrame
 from .operations.operationsframe import OperationsFrame
 
+from eosim import config
+import eosim.gui.helpwindow as helpwindow
+
 import tkinter.scrolledtext
 import os
-from eosim.config import GuiStyle
 import sys
 import logging
 import time
-import eosim.gui.helpwindow as helpwindow
 import logging
 
 logger = logging.getLogger(__name__)
@@ -25,11 +26,11 @@ class MainApplication:
         self.parent.title("Earth Observation Simulator")
         dir_path = os.path.dirname(os.path.realpath(__file__))
         #self.parent.iconbitmap(True, dir_path+"/../../icon.ico")
-        self.parent.geometry(GuiStyle.main_window_geom)    
+        self.parent.geometry(config.GuiStyle.main_window_geom)    
                
         MainApplication.build_main_window(self, loglevel)      
         
-        GuiStyle() # configure all the styles used in the GUI (shall affect the other modules too)        
+        config.GuiStyle() # configure all the styles used in the GUI (shall affect the other modules too)        
         
     def report_callback_exception(self, exc_type, exc_value, exc_traceback):
         logging.error(
@@ -45,8 +46,8 @@ class MainApplication:
         # create a parent frame to encompass all frames
         self.parent_frame = ttk.Frame(self.parent)
         self.parent_frame.grid(row=0, column=0, padx=10, pady=10)
-        parent_frame_width = GuiStyle.main_win_width - 20
-        parent_frame_height = GuiStyle.main_win_height - 20
+        parent_frame_width = config.GuiStyle.main_win_width - 20
+        parent_frame_height = config.GuiStyle.main_win_height - 20
 
         # parent window grid configure
         self.parent_frame.rowconfigure(0,weight=1)
@@ -136,13 +137,18 @@ class MainApplication:
 
 def donothing():
     pass
+
+def click_new_sim():      
+    sim_dir_path = tkinter.filedialog.askdirectory(initialdir=os.getcwd(), title="Please select an empty folder:")  
+    config.workspace_dir = sim_dir_path+"/"
+    logger.info("New workspace directory selected.")
 class TopMenuBar:
     
     def __init__(self, parent):
         self.parent = parent
         menubar = tk.Menu(self.parent)
         filemenu = tk.Menu(menubar, tearoff=0)
-        filemenu.add_command(label="Sim", command=donothing)
+        filemenu.add_command(label="New", command=click_new_sim)
         filemenu.add_command(label="Open", command=donothing)
         filemenu.add_command(label="Save", command=donothing)
         filemenu.add_command(label="Save as...", command=donothing)
@@ -150,7 +156,7 @@ class TopMenuBar:
         filemenu.add_separator()
 
         filemenu.add_command(label="Exit", command=self.parent.quit)
-        menubar.add_cascade(label="File", menu=filemenu)
+        menubar.add_cascade(label="Sim", menu=filemenu)
         
         helpmenu = tk.Menu(menubar, tearoff=0)
         helpmenu.add_command(label="Help Window", command=lambda: helpwindow.click_help(parent))

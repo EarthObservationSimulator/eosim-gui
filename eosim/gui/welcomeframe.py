@@ -1,4 +1,3 @@
-import tkinter as tk
 import tkinter.filedialog
 from tkinter import ttk 
 import os
@@ -57,10 +56,11 @@ class WelcomeFrame(ttk.Frame):
         help_btn.grid(row=1, column=3, ipady=30, pady=(20,30))
         '''
 
-    
+    ''' REV_TEST
     def click_new_sim(self):      
         sim_dir_path = tkinter.filedialog.askdirectory(initialdir=os.getcwd(), title="Please select an empty folder:")  
         config.out_config.set_user_dir(sim_dir_path+"/")
+    '''
 
 
 

@@ -1,6 +1,5 @@
 from tkinter import ttk 
 import tkinter as tk
-from eosim.config import GuiStyle, MissionConfig
 from eosim import config
 
 from eosim.gui.configure.cfmission import CfMission
@@ -12,16 +11,7 @@ from eosim.gui.configure.cfintersatellitecomm import CfInterSatelliteComm
 from eosim.gui.configure.cfcoverage import CfCoverage
 from eosim.gui.configure.cfgroundstation import CfGroundStation
 
-import orbitpy
-import random
-from tkinter import messagebox
 import json
-import orbitpy
-import tkinter.filedialog, tkinter.messagebox
-import os
-import eosim.gui.helpwindow as helpwindow
-import pickle
-from netCDF4 import Dataset as netCDF4Dataset
 import logging
 
 logger = logging.getLogger(__name__)
@@ -97,15 +87,24 @@ class ConfigureFrame(ttk.Frame):
         clr_sv_run_frame.columnconfigure(0,weight=1)
         clr_sv_run_frame.columnconfigure(1,weight=1)
         clr_sv_run_frame.columnconfigure(2,weight=1)
-        clear_conf_btn = ttk.Button(clr_sv_run_frame, text="Clear Config", command=self.click_clear_config, width=15)
+        clear_conf_btn = ttk.Button(clr_sv_run_frame, text="Clear Config", command=self.click_clear_config, width=25)
         clear_conf_btn.grid(row=0, column=0, ipadx=20, sticky='s')
-        save_conf_btn = ttk.Button(clr_sv_run_frame, text="Save Config", command=self.click_save_config, width=15)
-        save_conf_btn.grid(row=0, column=1, ipadx=20, sticky='s')
-        run_all_btn = ttk.Button(clr_sv_run_frame, text="Run All", width=15)
-        run_all_btn.grid(row=0, column=2,ipadx=20, sticky='s')
+        save_conf_btn = ttk.Button(clr_sv_run_frame, text="Save Config", command=self.click_save_config, width=25)
+        save_conf_btn.grid(row=0, column=2, ipadx=20, sticky='s')
+
 
     def click_save_config(self):
+        """ Save the mission configuration as a JSON file."""
         
+        wdir = config.workspace_dir
+        if wdir is None:
+            logger.info("Please select the workspace directory in the menubar by going to Sim->New.")
+            return
+        
+        with open(wdir+'MissionSpecs.json', 'w', encoding='utf-8') as f:
+            json.dump(config.mission_specs.to_dict(), f, ensure_ascii=False, indent=4)
+        logger.info("Configuration Saved.")
+
         ''' REV_TEST
         logger.info(".......Preprocessing configuration .......")
         user_dir = config.out_config.get_user_dir()
@@ -128,7 +127,7 @@ class ConfigureFrame(ttk.Frame):
         '''
     
     def click_clear_config(self):
-        ''' Clear the configuration (both in the local variable and in the MissionSpecs file) '''
+        ''' Clear the configuration (both in the local variable and in the MissionSpecs file written in the workspace directory) '''
         user_dir = config.out_config.get_user_dir()
         config.miss_specs.clear()
         with open(user_dir+'MissionSpecs.json', 'w', encoding='utf-8') as f:

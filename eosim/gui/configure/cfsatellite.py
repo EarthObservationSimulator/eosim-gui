@@ -1,17 +1,9 @@
 from tkinter import ttk 
 import tkinter as tk
-from eosim.config import GuiStyle, MissionConfig
 from eosim import config
-from eosim.gui.configure import cfmission
 import orbitpy
 import random
-from tkinter import messagebox
-import json
-import orbitpy
-import tkinter.filedialog, tkinter.messagebox
-import os
 import eosim.gui.helpwindow as helpwindow
-import pickle
 import logging
 
 logger = logging.getLogger(__name__)
@@ -102,7 +94,7 @@ class CfSatellite():
                 self.inc_entry.configure(state="normal")
                 
         self.cir_sso_alt_fix_var = tk.IntVar()
-        circularSSOAltitudeFixed_chkbox= ttk.Checkbutton(sat_kep_specs_frame, text='Circular SSO, ALtitude Fixed',variable=self.cir_sso_alt_fix_var, onvalue=1, offvalue=0, command=checked_sso)
+        circularSSOAltitudeFixed_chkbox= ttk.Checkbutton(sat_kep_specs_frame, text='Circular SSO, Altitude Fixed',variable=self.cir_sso_alt_fix_var, onvalue=1, offvalue=0, command=checked_sso)
         circularSSOAltitudeFixed_chkbox.grid(row=7, column=0, sticky='w')
 
         # okcancel frame
@@ -116,9 +108,25 @@ class CfSatellite():
                 logger.info("SSO with circular orbit, fixed altitude was enabled.")
                 logger.info("Inclination of the SSO orbit is: " + str(inc) + "deg")
 
-            satellite = OrbitParameters(_id=uid_entry.get(), sma=float(alt_entry.get())+orbitpy.util.Constants.radiusOfEarthInKM, ecc=self.ecc_entry.get(), 
-                            inc=self.inc_entry.get(), raan=raan_entry.get(), aop=aop_entry.get(), ta=ta_entry.get())
-            config.miss_specs.add_satellite(satellite)
+            try:
+                date_dict = orbitpy.util.OrbitState.date_to_dict(config.mission_specs.epoch)
+            except:
+                logger.info("Please set the mission date before adding satellite.")
+                return
+            orbitState_dict = {'date': date_dict,
+                               'state': {'@type': 'KEPLERIAN_EARTH_CENTERED_INERTIAL', 
+                                         'sma': float(alt_entry.get())+orbitpy.util.Constants.radiusOfEarthInKM,
+                                         'ecc': float(self.ecc_entry.get()), 
+                                         'inc': float(self.inc_entry.get()),
+                                         'raan': float(raan_entry.get()), 
+                                         'aop': float(aop_entry.get()), 
+                                         'ta': float(ta_entry.get())
+                                        }
+                              }
+            satellite_dict = {'name': None, '@id':uid_entry.get(), 'orbitState': orbitState_dict,
+                              'spacecraftBus': None, 'instrument': None}
+
+            config.mission_specs.add_spacecraft_from_dict(satellite_dict)
             logger.info("Satellite added.")
             
 

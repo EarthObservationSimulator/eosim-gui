@@ -89,8 +89,11 @@ class CfMission():
 
         # okcancel frame
         def ok_click():
-            config.miss_specs.update_epoch(str(epoch_year_entry.get()) + ',' + str(epoch_month_entry.get()) + ',' + str(epoch_day_entry.get()) + ',' + str(epoch_hour_entry.get()) + ',' + str(epoch_min_entry.get()) + ',' + str(epoch_sec_entry.get()))
-            config.miss_specs.update_duration(duration_entry.get())
+            epoch_dict = {'@type': 'GREGORIAN_UTC', 'year': int(epoch_year_entry.get()), 'month': int(epoch_month_entry.get()), 'day': int(epoch_day_entry.get()),
+                          'hour': int(epoch_hour_entry.get()), 'minute': int(epoch_min_entry.get()), 'second': float(epoch_sec_entry.get())}
+            config.mission_specs.update_epoch_from_dict(epoch_dict)
+            config.mission_specs.update_duration(float(duration_entry.get()))
+            logger.info("Mission epoch and duration updated.")
             miss_win.destroy()
 
         ok_btn = ttk.Button(okcancel_frame, text="OK", command=ok_click, width=15)

@@ -1,17 +1,11 @@
 from tkinter import ttk 
 import tkinter as tk
-from eosim.config import GuiStyle, MissionConfig
 from eosim import config
-from eosim.gui.configure import cfmission
-import orbitpy
 import random
-from tkinter import messagebox
 import json
-import orbitpy
 import tkinter.filedialog, tkinter.messagebox
 import os
 import eosim.gui.helpwindow as helpwindow
-import pickle
 import logging
 
 logger = logging.getLogger(__name__)
@@ -62,14 +56,16 @@ class CfGroundStation():
                                                         variable=self._gs_specs_type, value="ManualEntry")
         gs_specs_type_rbtn_1.grid(row=0, column=0, padx=10, pady=10)
 
-        self.gs_info = []
         def add_gs():
-            self.gs_info.append({'@id': (gs_specs_gsid_entry.get()), 
-                                 'name': str(gs_specs_name_entry.get()), 
-                                 'lat': float(gs_specs_lat_entry.get()), 
-                                 'lon': float(gs_specs_lon_entry.get()),                                              
-                                 'alt': float(gs_specs_alt_entry.get()),
-                                 'minElevation': float(gs_specs_minelv_entry.get())})
+            gs_info_dict = {'@id': (gs_specs_gsid_entry.get()), 
+                            'name': str(gs_specs_name_entry.get()), 
+                            'latitude': float(gs_specs_lat_entry.get()), 
+                            'longitude': float(gs_specs_lon_entry.get()),                                              
+                            'altitude': float(gs_specs_alt_entry.get()),
+                            'minimumElevation': float(gs_specs_minelv_entry.get())
+                            }
+            config.mission_specs.add_groundstation_from_dict(gs_info_dict)
+            logger.info("Ground station added.")
 
         ttk.Button(gs_add_by_entry_frame, text="Add GS", command=add_gs).grid(row=0, column=1, padx=10, pady=10)
         
@@ -114,7 +110,7 @@ class CfGroundStation():
         gs_specs_type_rbtn_2.grid(row=0, column=0, padx=10, pady=5)
 
         def click_gs_data_file_path_btn():
-            self.gs_data_fp = tkinter.filedialog.askopenfilename(initialdir=os.getcwd(), title="Please select the ground-station data file:", filetypes=(("All files","*.*"), ("csv files","*.csv")))  
+            self.gs_data_fp = tkinter.filedialog.askopenfilename(initialdir=os.getcwd(), title="Please select the ground-station data file:", filetypes=(("All files","*.*"), ("JSON files","*.json")))  
             gs_data_fp_entry.configure(state='normal')
             gs_data_fp_entry.delete(0,'end')
             gs_data_fp_entry.insert(0,self.gs_data_fp)
@@ -127,11 +123,12 @@ class CfGroundStation():
         # okcancel frame
         def ok_click():               
             if self._gs_specs_type.get() == "ManualEntry":
-                specs = {"stationInfo": self.gs_info}                
+                pass           
             if self._gs_specs_type.get() == "DataFile":
-                specs = {"gndStnFilePath": self.gs_data_fp  }              
-            config.miss_specs.add_ground_stations(specs)
-            logger.info("Ground station(s) added.")
+                with open(self.gs_data_fp, 'r') as f:
+                    specs = json.load(f)            
+                config.mission_specs.add_groundstation_from_dict(specs)
+                logger.info("Ground station(s) added from data-file.")
             gs_win.destroy()  
                             
         ok_btn = ttk.Button(okcancel_frame, text="Ok", command=ok_click, width=15)
