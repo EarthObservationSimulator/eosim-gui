@@ -1,17 +1,8 @@
 from tkinter import ttk 
 import tkinter as tk
-from eosim.config import GuiStyle, MissionConfig
 from eosim import config
-from eosim.gui.configure import cfmission
 import orbitpy
-import random
-from tkinter import messagebox
-import json
-import orbitpy
-import tkinter.filedialog, tkinter.messagebox
-import os
 import eosim.gui.helpwindow as helpwindow
-import pickle
 import logging
 
 logger = logging.getLogger(__name__)
@@ -72,7 +63,11 @@ class CfPropagate():
                 self.cus_time_resf_entry.grid(row=2, column=1, sticky='w')               
             
             def get_specs(self):
-                return [self.cus_time_step_entry.get(), self.cus_time_resf_entry.get()]               
+                specs = {}
+                specs['@type'] = 'J2 ANALYTICAL PROPAGATOR'
+                specs['stepSize'] = float(self.cus_time_step_entry.get()) if self.cus_time_step_entry.get() != "" else None
+                specs['propTimeResFactor'] = float(self.cus_time_resf_entry.get()) if self.cus_time_resf_entry.get() != "" else None
+                return specs             
 
         class GMATPreComputedSatelliteStates(ttk.Frame):
             def __init__(self, parent, controller):
@@ -100,7 +95,7 @@ class CfPropagate():
         
         # propagator types child frame
         MODES = [
-            ("J2 Analytical Propagator", "OrbitPyJ2AnalyticalPropagator"),
+            ("J2 ANALYTICAL PROPAGATOR", "OrbitPyJ2AnalyticalPropagator"),
             ("GMAT Pre-computed Satellite States", "GMATPreComputedSatelliteStates"),
             ("STK Pre-computed Satellite States", "STKPreComputedSatelliteStates")
         ]
@@ -129,14 +124,9 @@ class CfPropagate():
         # okcancel frame
         def ok_click():               
             if self._prop_type.get() == "OrbitPyJ2AnalyticalPropagator":
-                specs = frames[self._prop_type.get()].get_specs()
-                prop = {}
-                prop['@type'] = 'OrbitPyJ2Analytical'
-                prop['customTimeStep'] = float(specs[0]) if specs[0] != "" else None
-                prop['customTimeResFactor'] = float(specs[1]) if specs[1] != "" else None          
- 
-                config.miss_specs.add_propagator(prop)
-                logger.info('Updated propagator settings.')
+                specs = frames[self._prop_type.get()].get_specs()          
+                config.mission_specs.update_propagator_settings(specs, propTimeResFactor=specs["propTimeResFactor"])
+                logger.info('Updated propagator settings. If you have relied upon the auto-generated (time) step-size,note that it has been generated using the current list of spacecraft.')
                 prop_win.destroy()
             
         ok_btn = ttk.Button(okcancel_frame, text="Ok", command=ok_click, width=15)
