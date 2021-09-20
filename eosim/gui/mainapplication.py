@@ -140,7 +140,7 @@ def donothing():
 
 def click_new_sim():      
     sim_dir_path = tkinter.filedialog.askdirectory(initialdir=os.getcwd(), title="Please select an empty folder:")  
-    config.workspace_dir = sim_dir_path+"/"
+    config.mission_specs.update_settings(outDir=sim_dir_path+"/")
     logger.info("New workspace directory selected.")
 class TopMenuBar:
     

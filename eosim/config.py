@@ -6,11 +6,6 @@ from orbitpy.mission import Mission
 import logging
 logger = logging.getLogger(__name__)
 
-""" This variable is used to the workspace directory where the output files of EOSim shall be saved.  
-    This object is imported and referenced over all the EOSim modules and hence acts as a sort of global 
-    variable for the entire EOSim software."""
-workspace_dir = None
-
 """ A MissionConfig instance to be used to store the mission configuration. This 
     object is imported and referenced over all the EOSim modules and hence
     acts as a sort of global variable for the entire EOSim software.
