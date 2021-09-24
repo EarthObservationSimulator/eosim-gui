@@ -1,18 +1,11 @@
 from tkinter import ttk 
 import tkinter as tk
-from eosim.config import GuiStyle, MissionConfig
 from eosim import config
-from eosim.gui.configure import cfmission
-import orbitpy
 import random
-from tkinter import messagebox
-import json
-import orbitpy
 import tkinter.filedialog, tkinter.messagebox
 from instrupy.base import Instrument
 import os
 import eosim.gui.helpwindow as helpwindow
-import pickle
 from netCDF4 import Dataset as netCDF4Dataset
 import logging
 
@@ -26,111 +19,176 @@ class CfSensor():
         sensor_win.rowconfigure(0,weight=1)
         sensor_win.columnconfigure(0,weight=1)
 
+        # create a separate tab for each sensor type
         tabControl = ttk.Notebook(sensor_win)
         tab1 = ttk.Frame(tabControl)
         tab2 = ttk.Frame(tabControl)
         tab3 = ttk.Frame(tabControl)
 
         tabControl.add(tab1, text='Basic Sensor')
-        tabControl.add(tab2, text='Passive Optical Sensor')
+        tabControl.add(tab2, text='Passive Optical Scanner')
         tabControl.add(tab3, text='Synthetic Aperture Radar')
 
         tabControl.pack(expand = 1, fill ="both")   
 
         BasicSensorInputConfigure(sensor_win, tab1)
-        PassiveOptSensorInputConfigure(sensor_win, tab2)
+        PassiveOpticalScanner(sensor_win, tab2)
         SyntheticApertureRadarInputConfigure(sensor_win, tab3)
 
 class NadirOrientation(ttk.Frame):
+    """ Class which handles the nadir-pointing orientation frame."""
     def __init__(self, parent, controller):
         ttk.Frame.__init__(self, parent)
         nadirorien_specs_frame = ttk.Frame(self) 
         nadirorien_specs_frame.grid(row=0, column=0)
 
     def get_specs(self):
-        return 0
+        """ Return the orientation specifications as dictionary."""
+        return {'referenceFrame': 'NADIR_POINTING', 'convention': 'REF_FRAME_ALIGNED'}
 
 class SideLookOrientation(ttk.Frame):
+    """ Class which handles the side-look orientation frame."""
     def __init__(self, parent, controller):
         ttk.Frame.__init__(self, parent)
         sidelookorien_specs_frame = ttk.Frame(self) 
         sidelookorien_specs_frame.grid(row=0, column=0)
 
         # define the widgets
-        ttk.Label(sidelookorien_specs_frame, text="Side Look Angle [deg]", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
+         # define the widgets inside the frame
+        ttk.Label(sidelookorien_specs_frame, text="Reference Frame", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
+        self.ref_frame_combobox = ttk.Combobox(sidelookorien_specs_frame, values=['NADIR_POINTING'])
+        self.ref_frame_combobox.grid(row=0, column=1)
+        self.ref_frame_combobox.current(0)
+        
+        ttk.Label(sidelookorien_specs_frame, text="Side Look Angle [deg]", wraplength=150).grid(row=1, column=0, padx=10, pady=10, sticky='w')
         self.sla_entry = ttk.Entry(sidelookorien_specs_frame, width=10)
         self.sla_entry.insert(0,10)
         self.sla_entry.bind("<FocusIn>", lambda args: self.sla_entry.delete('0', 'end'))
-        self.sla_entry.grid(row=0, column=1, sticky='w', padx=10, pady=10)                   
+        self.sla_entry.grid(row=1, column=1, sticky='w', padx=10, pady=10)     
     
     def get_specs(self):
-        return float(self.sla_entry.get())
+        """ Return the orientation specifications as dictionary."""
+        return { 'referenceFrame': str(self.ref_frame_combobox.get()), 'convention': float(self.sla_entry.get())}
+
+class SyntheticDataConfigurationFrame(ttk.Frame):
+    """ Class to handle the synthetic data configuration."""
+    def __init__(self, parent, controller):
+        
+        ttk.Frame.__init__(self, parent)
+        sdc_frame = ttk.Frame(self) 
+        sdc_frame.grid(row=0, column=0)
+
+        def click_sel_envdata_src_btn(): 
+            self.envdata_fp = None               
+            self.envdata_fp = tkinter.filedialog.askopenfilenames(initialdir=os.getcwd(), title="Please select the environment data file:", filetypes=(("All files","*.*"),("NetCDF files","*.nc")))
+            self.envdata_fp = list(self.envdata_fp)
+            if self.envdata_fp[0] != '':                    
+                envdata = netCDF4Dataset(self.envdata_fp[0], "r", format="NETCDF4")                    
+                for key, value in envdata.variables.items():
+                    self.env_vars.append(key)
+                self.env_vars_combobox['values'] = self.env_vars
+                self.env_vars_combobox.current(0)
+        
+        self.envdata_fp = None
+        self.env_vars = []
+        ttk.Button(sdc_frame, text="Select science data file", command=click_sel_envdata_src_btn).grid(row=0,column=0, padx=10, pady=10)
+        self.env_vars_combobox = ttk.Combobox(sdc_frame, values=self.env_vars)
+        self.env_vars_combobox.grid(row=1, column=0)
+
+        ttk.Label(sdc_frame, text="Select interpolation method").grid(row=2,column=0, padx=10, pady=10)
+        self.interpl_method_combobox = ttk.Combobox(sdc_frame, values=['scipy Linear', 'metpy Linear', 'metpy Nearest Neighbor', 'mepy Cubic', 'metpy Radial Basis', 'metpy Natural Newighbour 2D', 'metpy Barnes 2D', 'metpy Cressman 2D'])
+        self.interpl_method_combobox.grid(row=3, column=0)
+        self.interpl_method_combobox.current(0)
+    
+    def get_specs(self):
+        """Return the synthetic data configuration."""
+        return { "sourceFilePaths": str(self.envdata_fp), 
+                 "geophysicalVar": str(self.env_vars_combobox.get()), 
+                 "interpolMethod": 'scipy.interpolate.linear' # self.interpl_method_combobox.get() TODO
+                }
 
 class XYZOrientation(ttk.Frame):
+    """ Class which handles the XYZ orientation frame."""
     def __init__(self, parent, controller):
         ttk.Frame.__init__(self, parent)
         xyzorien_specs_frame = ttk.Frame(self) 
         xyzorien_specs_frame.grid(row=0, column=0)
 
-        # define the widgets
-        ttk.Label(xyzorien_specs_frame, text="X rotation [deg]", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
+         # define the widgets inside the frame
+        ttk.Label(xyzorien_specs_frame, text="Reference Frame", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
+        self.ref_frame_combobox = ttk.Combobox(xyzorien_specs_frame, values=['NADIR_POINTING'])
+        self.ref_frame_combobox.grid(row=0, column=1)
+        self.ref_frame_combobox.current(0)
+
+        ttk.Label(xyzorien_specs_frame, text="X rotation [deg]", wraplength=150).grid(row=1, column=0, padx=10, pady=10, sticky='w')
         self.xorien_entry = ttk.Entry(xyzorien_specs_frame, width=10)
         self.xorien_entry.insert(0,10)
         self.xorien_entry.bind("<FocusIn>", lambda args: self.xorien_entry.delete('0', 'end'))
-        self.xorien_entry.grid(row=0, column=1, sticky='w', padx=10, pady=10)
+        self.xorien_entry.grid(row=1, column=1, sticky='w', padx=10, pady=10)
         
-        ttk.Label(xyzorien_specs_frame, text="Y rotation [deg]", wraplength=150).grid(row=1, column=0, padx=10, pady=10, sticky='w')
+        ttk.Label(xyzorien_specs_frame, text="Y rotation [deg]", wraplength=150).grid(row=2, column=0, padx=10, pady=10, sticky='w')
         self.yorien_entry = ttk.Entry(xyzorien_specs_frame, width=10)
         self.yorien_entry.insert(0,20)
         self.yorien_entry.bind("<FocusIn>", lambda args: self.yorien_entry.delete('0', 'end'))
-        self.yorien_entry.grid(row=1, column=1, sticky='w', padx=10, pady=10)
+        self.yorien_entry.grid(row=2, column=1, sticky='w', padx=10, pady=10)
 
-        ttk.Label(xyzorien_specs_frame, text="Z rotation [deg]", wraplength=150).grid(row=2, column=0, padx=10, pady=10, sticky='w')
+        ttk.Label(xyzorien_specs_frame, text="Z rotation [deg]", wraplength=150).grid(row=3, column=0, padx=10, pady=10, sticky='w')
         self.zorien_entry = ttk.Entry(xyzorien_specs_frame, width=10)
         self.zorien_entry.insert(0,20)
         self.zorien_entry.bind("<FocusIn>", lambda args: self.zorien_entry.delete('0', 'end'))
-        self.zorien_entry.grid(row=2, column=1, sticky='w', padx=10, pady=10)
+        self.zorien_entry.grid(row=3, column=1, sticky='w', padx=10, pady=10)
     
     def get_specs(self):
-        return [float(self.xorien_entry.get()), float(self.yorien_entry.get()), float(self.zorien_entry.get())]
-
-class ConicalFOV(ttk.Frame):
+        """ Return the orientation specifications as dictionary."""
+        return {'referenceFrame': str(self.ref_frame_combobox.get()), 
+                'convention': 'XYZ',
+                'xRotation': float(self.xorien_entry.get()), 
+                'yRotation': float(self.yorien_entry.get()), 
+                'zRotation': float(self.zorien_entry.get())
+               }
+class CircularFOVGeometry(ttk.Frame):
+    """ Class which handles the circular FOV geometry frame."""
     def __init__(self, parent, controller):
         ttk.Frame.__init__(self, parent)
         confov_specs_frame = ttk.Frame(self) 
         confov_specs_frame.grid(row=0, column=0)
 
         # define the widgets 
-        ttk.Label(confov_specs_frame, text="Full Cone Angle [deg]", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
+        ttk.Label(confov_specs_frame, text="diameter [deg]", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
         self.fca_entry = ttk.Entry(confov_specs_frame, width=10)
-        self.fca_entry.insert(0,10)
+        self.fca_entry.insert(0,30)
         self.fca_entry.bind("<FocusIn>", lambda args: self.fca_entry.delete('0', 'end'))
         self.fca_entry.grid(row=0, column=1, sticky='w', padx=10, pady=10)
 
     def get_specs(self):
-        return (float(self.fca_entry.get()))
+        """ Return the fov geometry specifications as dictionary."""
+        return {'shape': 'CIRCULAR', 'diameter': float(self.fca_entry.get())}
 
-class RectangularFOV(ttk.Frame):
+class RectangularFOVGeometry(ttk.Frame):
     def __init__(self, parent, controller):
+        """ Class which handles the rectangular FOV geometry frame."""
         ttk.Frame.__init__(self, parent)
         rectfov_specs_frame = ttk.Frame(self) 
         rectfov_specs_frame.grid(row=0, column=0)
 
         # define the widgets
-        ttk.Label(rectfov_specs_frame, text="Along track FOV [deg]", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
+        ttk.Label(rectfov_specs_frame, text="Angle Height [deg]", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
         self.atfov_entry = ttk.Entry(rectfov_specs_frame, width=10)
         self.atfov_entry.insert(0,10)
         self.atfov_entry.bind("<FocusIn>", lambda args: self.atfov_entry.delete('0', 'end'))
         self.atfov_entry.grid(row=0, column=1, sticky='w', padx=10, pady=10)
         
-        ttk.Label(rectfov_specs_frame, text="Cross track FOV [deg]", wraplength=150).grid(row=1, column=0, padx=10, pady=10, sticky='w')
+        ttk.Label(rectfov_specs_frame, text="Angle Width [deg]", wraplength=150).grid(row=1, column=0, padx=10, pady=10, sticky='w')
         self.ctfov_entry = ttk.Entry(rectfov_specs_frame, width=10)
         self.ctfov_entry.insert(0,20)
         self.ctfov_entry.bind("<FocusIn>", lambda args: self.ctfov_entry.delete('0', 'end'))
         self.ctfov_entry.grid(row=1, column=1, sticky='w', padx=10, pady=10)
+
+        ttk.Label(rectfov_specs_frame, text="Angle height/ width correspond to along/ cross -track FOV when sensor is aligned in nadir-pointing frame.", wraplength=250).grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky='w')
     
     def get_specs(self):
-        return [float(self.atfov_entry.get()), float(self.ctfov_entry.get())]
+        """ Return the fov geometry specifications as dictionary."""
+        return {'shape': 'RECTANGULAR', 'angleHeight': float(self.atfov_entry.get()), 'angleWidth': float(self.ctfov_entry.get())}
 
 class FixedManeuver(ttk.Frame):
     def __init__(self, parent, controller):
@@ -139,23 +197,23 @@ class FixedManeuver(ttk.Frame):
         fixedmanuv_specs_frame.grid(row=0, column=0)
 
     def get_specs(self):
-        return 0
+        return None
 
-class ConeManeuver(ttk.Frame):
+class CircularManeuver(ttk.Frame):
     def __init__(self, parent, controller):
         ttk.Frame.__init__(self, parent)
-        conemanuv_specs_frame = ttk.Frame(self) 
-        conemanuv_specs_frame.grid(row=0, column=0)
+        circmanuv_specs_frame = ttk.Frame(self) 
+        circmanuv_specs_frame.grid(row=0, column=0)
 
         # define the widgets 
-        ttk.Label(conemanuv_specs_frame, text="Full Cone Angle [deg]", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
-        self.conemanuv_fca_entry = ttk.Entry(conemanuv_specs_frame, width=10)
-        self.conemanuv_fca_entry.insert(0,50)
-        self.conemanuv_fca_entry.bind("<FocusIn>", lambda args: self.conemanuv_fca_entry.delete('0', 'end'))
-        self.conemanuv_fca_entry.grid(row=0, column=1, sticky='w', padx=10, pady=10)
+        ttk.Label(circmanuv_specs_frame, text="Diameter [deg]", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
+        self.circmanuv_fca_entry = ttk.Entry(circmanuv_specs_frame, width=10)
+        self.circmanuv_fca_entry.insert(0,50)
+        self.circmanuv_fca_entry.bind("<FocusIn>", lambda args: self.circmanuv_fca_entry.delete('0', 'end'))
+        self.circmanuv_fca_entry.grid(row=0, column=1, sticky='w', padx=10, pady=10)
 
     def get_specs(self):
-        return (float(self.conemanuv_fca_entry.get()))
+        return {'maneuverType': 'CIRCULAR', 'diameter': float(self.circmanuv_fca_entry.get())}
 
 class RollOnlyManeuver(ttk.Frame):
     def __init__(self, parent, controller):
@@ -175,14 +233,72 @@ class RollOnlyManeuver(ttk.Frame):
         self.manuv_maxroll_entry.insert(0,30)
         self.manuv_maxroll_entry.bind("<FocusIn>", lambda args: self.manuv_maxroll_entry.delete('0', 'end'))
         self.manuv_maxroll_entry.grid(row=1, column=1, sticky='w', padx=10, pady=10)          
-
-        self.yaw180manuv_chkbut = tk.IntVar()
-        self.yaw180manuv_chkbut.set(0)
-        ttk.Checkbutton(rollmanuv_specs_frame, text='180 deg Yaw',variable=self.yaw180manuv_chkbut, onvalue=1, offvalue=0).grid(row=2, column=0, padx=10, pady=10, sticky='w')
             
     def get_specs(self):
-        return [float(self.manuv_minroll_entry.get()), float(self.manuv_maxroll_entry.get()), self.yaw180manuv_chkbut.get()]
+        return {'maneuverType':'Single_Roll_Only', 'A_rollMin': float(self.manuv_minroll_entry.get()), 'A_rollMax': float(self.manuv_maxroll_entry.get())}
+class DoubleRollOnlyManeuver(ttk.Frame):
+    def __init__(self, parent, controller):
+        ttk.Frame.__init__(self, parent)
+        rollmanuv_specs_frame = ttk.Frame(self) 
+        rollmanuv_specs_frame.grid(row=0, column=0)
 
+        # define the widgets
+        ttk.Label(rollmanuv_specs_frame, text="Minimum Roll A [deg]", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
+        self.manuv_minrollA_entry = ttk.Entry(rollmanuv_specs_frame, width=10)
+        self.manuv_minrollA_entry.insert(0,-30)
+        self.manuv_minrollA_entry.bind("<FocusIn>", lambda args: self.manuv_minrollA_entry.delete('0', 'end'))
+        self.manuv_minrollA_entry.grid(row=0, column=1, sticky='w', padx=10, pady=10)                   
+
+        ttk.Label(rollmanuv_specs_frame, text="Maximum Roll A [deg]", wraplength=150).grid(row=1, column=0, padx=10, pady=10, sticky='w')
+        self.manuv_maxrollA_entry = ttk.Entry(rollmanuv_specs_frame, width=10)
+        self.manuv_maxrollA_entry.insert(0,30)
+        self.manuv_maxrollA_entry.bind("<FocusIn>", lambda args: self.manuv_maxrollA_entry.delete('0', 'end'))
+        self.manuv_maxrollA_entry.grid(row=1, column=1, sticky='w', padx=10, pady=10)          
+
+        ttk.Label(rollmanuv_specs_frame, text="Minimum Roll B [deg]", wraplength=150).grid(row=2, column=0, padx=10, pady=10, sticky='w')
+        self.manuv_minrollB_entry = ttk.Entry(rollmanuv_specs_frame, width=10)
+        self.manuv_minrollB_entry.insert(0,-30)
+        self.manuv_minrollB_entry.bind("<FocusIn>", lambda args: self.manuv_minrollB_entry.delete('0', 'end'))
+        self.manuv_minrollB_entry.grid(row=2, column=1, sticky='w', padx=10, pady=10)                   
+
+        ttk.Label(rollmanuv_specs_frame, text="Maximum Roll B [deg]", wraplength=150).grid(row=3, column=0, padx=10, pady=10, sticky='w')
+        self.manuv_maxrollB_entry = ttk.Entry(rollmanuv_specs_frame, width=10)
+        self.manuv_maxrollB_entry.insert(0,30)
+        self.manuv_maxrollB_entry.bind("<FocusIn>", lambda args: self.manuv_maxrollB_entry.delete('0', 'end'))
+        self.manuv_maxrollB_entry.grid(row=3, column=1, sticky='w', padx=10, pady=10)   
+            
+    def get_specs(self):
+        return {'maneuverType':'Double_Roll_Only', 
+                'A_rollMin': float(self.manuv_minrollA_entry.get()), 
+                'A_rollMax': float(self.manuv_maxrollA_entry.get()),
+                'B_rollMin': float(self.manuv_minrollB_entry.get()), 
+                'B_rollMax': float(self.manuv_maxrollB_entry.get())
+                }
+
+class PointingOptionsFrame(ttk.Frame):
+    def __init__(self, parent, controller):
+        ttk.Frame.__init__(self, parent)         
+        popts_frame = ttk.Frame(self) 
+        popts_frame.grid(row=0, column=0, ipadx=5, ipady=5)    
+        self.popts = None
+
+        def click_popts_data_file_path_btn():
+            self.popts_data_fp = tkinter.filedialog.askopenfilename(initialdir=os.getcwd(), title="Please select the pointing-options json file:", filetypes=(("All files","*.*"), ("json files","*.json")))  
+            popts_data_fp_entry.configure(state='normal')
+            popts_data_fp_entry.delete(0,'end')
+            popts_data_fp_entry.insert(0,self.popts_data_fp)
+            popts_data_fp_entry.configure(state='disabled')
+            # load the data onto a dictionary
+            with open(self.popts_data_fp, 'r') as f:
+                self.popts = json.load(f)            
+
+        ttk.Button(popts_frame, text="Select Data File", command=click_popts_data_file_path_btn).grid(row=0, column=0, padx=10, pady=5, columnspan=2)
+        popts_data_fp_entry=tk.Entry(popts_frame, state='disabled')
+        popts_data_fp_entry.grid(row=1,column=0, padx=10, pady=5, sticky='ew', columnspan=2)
+
+    def get_specs(self):
+        """ Return the list of imported pointing-options. """           
+        return self.popts
 class BasicSensorInputConfigure():
     
     def __init__(self, win, tab):
@@ -204,7 +320,7 @@ class BasicSensorInputConfigure():
         other_specs_frame.bind('<Enter>',lambda event, widget_id="basicsensor": helpwindow.update_help_window(event, widget_id))
         
         # fov specs frame
-        fov_specs_frame = ttk.LabelFrame(specs_frame, text="Field-Of-View") # field-of-view (FOV) specifications frame            
+        fov_specs_frame = ttk.LabelFrame(specs_frame, text="(Scene) Field-Of-View geometry") # field-of-view (FOV) specifications frame            
         fov_specs_frame.grid(row=0, column=1, padx=10, pady=10, sticky='n') 
 
         fov_type_frame = ttk.Frame(fov_specs_frame)
@@ -218,8 +334,8 @@ class BasicSensorInputConfigure():
         fov_specs_container.rowconfigure(0,weight=1)            
 
         # select data source frame        
-        syndata_frame = ttk.LabelFrame(specs_frame, text="Synthetic Data Configuration") # synthetic data configuration frame
-        syndata_frame.grid(row=1, column=1, padx=10, pady=10, sticky='n') 
+        syndataconfig_frame = ttk.LabelFrame(specs_frame, text="Synthetic Data Configuration") # synthetic data configuration frame
+        syndataconfig_frame.grid(row=1, column=1, padx=10, pady=10, sticky='n') 
 
         # orientation frame
         orien_frame = ttk.LabelFrame(specs_frame, text="Orientation") # sensor orientation frame
@@ -235,7 +351,7 @@ class BasicSensorInputConfigure():
         orien_specs_container.columnconfigure(0,weight=1)
         orien_specs_container.rowconfigure(0,weight=1)
 
-        # manuver frame
+        # manuever frame
         maneuver_frame = ttk.LabelFrame(specs_frame, text="Manuever") # manuver specs frame
         maneuver_frame.grid(row=0, column=3,rowspan=2, padx=10, pady=10, sticky='n')
         maneuver_frame.bind('<Enter>',lambda event, widget_id="maneuver": helpwindow.update_help_window(event, widget_id))
@@ -248,12 +364,17 @@ class BasicSensorInputConfigure():
         maneuver_specs_container = ttk.Frame(maneuver_frame)
         maneuver_specs_container.grid(row=1, column=0, sticky='nswe', padx=10, pady=10)
         maneuver_specs_container.columnconfigure(0,weight=1)
-        maneuver_specs_container.rowconfigure(0,weight=1)            
+        maneuver_specs_container.rowconfigure(0,weight=1)         
+
+        # pointing-options frame
+        popts_frame = ttk.LabelFrame(specs_frame, text="Pointing Options") # manuver specs frame
+        popts_frame.grid(row=1, column=2,rowspan=2, padx=10, pady=10, sticky='n')  
 
         # ok cancel frame
         okcancel_frame = ttk.Frame(specs_frame)
         okcancel_frame.grid(row=2, column=0, columnspan=4, padx=10, pady=10) 
 
+        ############### Other Specs ###############
         # define the widgets in other_specs_frame
         ttk.Label(other_specs_frame, text="Unique ID", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
         uid_entry = ttk.Entry(other_specs_frame, width=10)
@@ -309,53 +430,39 @@ class BasicSensorInputConfigure():
         numdetcols_entry.bind("<FocusIn>", lambda args: numdetcols_entry.delete('0', 'end'))
         numdetcols_entry.grid(row=8, column=1, sticky='w', padx=10, pady=10)
 
-        # define the widgets in syndata_frame
-        def click_sel_envdata_src_btn(): 
-            self.envdata_fp = None               
-            self.envdata_fp = tkinter.filedialog.askopenfilenames(initialdir=os.getcwd(), title="Please select the environment data file:", filetypes=(("All files","*.*"),("NetCDF files","*.nc")))
-            self.envdata_fp = list(self.envdata_fp)
-            if self.envdata_fp[0] != '':                    
-                envdata = netCDF4Dataset(self.envdata_fp[0], "r", format="NETCDF4")                    
-                for key, value in envdata.variables.items():
-                    self.env_vars.append(key)
-                self.env_vars_combobox['values'] = self.env_vars
-                self.env_vars_combobox.current(0)
-        
-        self.envdata_fp = None
-        self.env_vars = []
-        ttk.Button(syndata_frame, text="Select science data file", command=click_sel_envdata_src_btn).grid(row=0,column=0, padx=10, pady=10)
-        self.env_vars_combobox = ttk.Combobox(syndata_frame, values=self.env_vars)
-        self.env_vars_combobox.grid(row=1, column=0)
+        ############### Synthetic Data Configuration ###############
+        # define the widgets in syndataconfig_frame
+        self.sdc_fr = SyntheticDataConfigurationFrame(parent=syndataconfig_frame, controller=self)
+        self.sdc_fr.grid(row=0, column=0, sticky="nsew")
 
-        ttk.Label(syndata_frame, text="Select interpolation method").grid(row=2,column=0, padx=10, pady=10)
-        self.interpl_method_combobox = ttk.Combobox(syndata_frame, values=['scipy Linear', 'metpy Linear', 'metpy Nearest Neighbor', 'mepy Cubic', 'metpy Radial Basis', 'metpy Natural Newighbour 2D', 'metpy Barnes 2D', 'metpy Cressman 2D'])
-        self.interpl_method_combobox.grid(row=3, column=0)
-        self.interpl_method_combobox.current(0)
+        ############### Pointing Options ###############
+        # define the widgets in popts_frame
+        self.po_fr = PointingOptionsFrame(parent=popts_frame, controller=self)
+        self.po_fr.grid(row=0, column=0, sticky="nsew")
 
-        # define the widgets inside the child frames
-        
-        # constellation types child frame
-        # define the widgets in fov frame
+        ############### FOV ###############
+        # define the widgets in fov_specs_container frame
         fov_specs_container_frames = {}
-        for F in (ConicalFOV, RectangularFOV):
+        for F in (CircularFOVGeometry, RectangularFOVGeometry):
             page_name = F.__name__
             fov_sc_frame = F(parent=fov_specs_container, controller=self)
             fov_specs_container_frames[page_name] = fov_sc_frame
             fov_sc_frame.grid(row=0, column=0, sticky="nsew")
         
         FOV_MODES = [
-            ("Conical FOV", "ConicalFOV"),
-            ("Rectangular FOV", "RectangularFOV")
+            ("Circular FOV", "CircularFOVGeometry"),
+            ("Rectangular FOV", "RectangularFOVGeometry")
         ]
 
+        # define the widgets in fov_type_frame frame
         self._sen_fov_type = tk.StringVar() # using self so that the variable is retained even after exit from the function
-        self._sen_fov_type.set("ConicalFOV") # initialize
+        self._sen_fov_type.set("CircularFOVGeometry") # initialize
 
         def senfov_type_rbtn_click():
-            if self._sen_fov_type.get() == "ConicalFOV":
-                self.fov_sc_frame = fov_specs_container_frames["ConicalFOV"]
-            elif self._sen_fov_type.get() == "RectangularFOV":
-                self.fov_sc_frame = fov_specs_container_frames["RectangularFOV"]
+            if self._sen_fov_type.get() == "CircularFOVGeometry":
+                self.fov_sc_frame = fov_specs_container_frames["CircularFOVGeometry"]
+            elif self._sen_fov_type.get() == "RectangularFOVGeometry":
+                self.fov_sc_frame = fov_specs_container_frames["RectangularFOVGeometry"]
             self.fov_sc_frame.tkraise()
 
         for text, mode in FOV_MODES:
@@ -366,54 +473,60 @@ class BasicSensorInputConfigure():
         self.fov_sc_frame = fov_specs_container_frames[self._sen_fov_type.get()]
         self.fov_sc_frame.tkraise()      
 
-        # define the widgets in maneuver_frame
+        ############### Maneuver ###############
+        # define the widgets in maneuver_specs_container
         manuv_specs_container_frames = {}
-        for F in (FixedManeuver, ConeManeuver, RollOnlyManeuver):
+        for F in (FixedManeuver, CircularManeuver, RollOnlyManeuver, DoubleRollOnlyManeuver):
             page_name = F.__name__
             manuv_sc_frame = F(parent=maneuver_specs_container, controller=self)
             manuv_specs_container_frames[page_name] = manuv_sc_frame
             manuv_sc_frame.grid(row=0, column=0, sticky="nsew")
                         
-        # constellation types child frame
+        # maneuver types child frame
         MANUV_MODES = [
             ("Fixed", "FixedManeuver"),
-            ("Cone", "ConeManeuver"),
-            ("Roll-only", "RollOnlyManeuver")
+            ("Circular", "CircularManeuver"),
+            ("Roll-only", "RollOnlyManeuver"),
+            ("Double Roll-only", "DoubleRollOnlyManeuver")
         ]
 
+        # define the widgets in maneuver_type_frame
         self._sen_manuv_type = tk.StringVar() # using self so that the variable is retained even after exit from the function
         self._sen_manuv_type.set("FixedManeuver") # initialize
 
         def senmanuv_type_rbtn_click():
             if self._sen_manuv_type.get() == "FixedManeuver":
                 self.manuv_sc_frame = manuv_specs_container_frames["FixedManeuver"]
-            elif self._sen_manuv_type.get() == "ConeManeuver":
-                self.manuv_sc_frame = manuv_specs_container_frames["ConeManeuver"]
+            elif self._sen_manuv_type.get() == "CircularManeuver":
+                self.manuv_sc_frame = manuv_specs_container_frames["CircularManeuver"]
             elif self._sen_manuv_type.get() == "RollOnlyManeuver":
                 self.manuv_sc_frame = manuv_specs_container_frames["RollOnlyManeuver"]
+            elif self._sen_manuv_type.get() == "DoubleRollOnlyManeuver":
+                self.manuv_sc_frame = manuv_specs_container_frames["DoubleRollOnlyManeuver"]
             self.manuv_sc_frame.tkraise()
+
+        ttk.Label(maneuver_type_frame, text="(All maneuvers specified in NADIR_POINTING frame.)", wraplength=250).pack(anchor='w')
 
         for text, mode in MANUV_MODES:
             senmanuv_type_rbtn = ttk.Radiobutton(maneuver_type_frame, text=text, command=senmanuv_type_rbtn_click,
                             variable=self._sen_manuv_type, value=mode)
-            senmanuv_type_rbtn.pack(anchor='w')
+            senmanuv_type_rbtn.pack(anchor='w')        
 
         self.manuv_sc_frame = manuv_specs_container_frames[self._sen_manuv_type.get()]
         self.manuv_sc_frame.tkraise()    
 
-        # define the widgets in orien_frame
+        ############### Orientation ###############
+        # define the widgets in orien_specs_container frame
         orien_specs_container_frames = {}
         for F in (NadirOrientation, SideLookOrientation, XYZOrientation):
             page_name = F.__name__
             orien_sc_frame = F(parent=orien_specs_container, controller=self)
             orien_specs_container_frames[page_name] = orien_sc_frame
             orien_sc_frame.grid(row=0, column=0, sticky="nsew")
-            
-        # define the widgets inside the child frames
-        
-        # constellation types child frame
+                    
+        # define widgets in orien_type_frame 
         ORIEN_MODES = [
-            ("Nadir", "NadirOrientation"),
+            ("Nadir-pointing", "NadirOrientation"),
             ("Side-look", "SideLookOrientation"),
             ("X->Y->Z rotations", "XYZOrientation")
         ]
@@ -438,6 +551,7 @@ class BasicSensorInputConfigure():
         self.orien_sc_frame = orien_specs_container_frames[self._sen_orien_type.get()]
         self.orien_sc_frame.tkraise()      
 
+        ############### OK-CANCEL ###############
         # define the widgets in okcancel_frame
         # okcancel frame
         def add_sensor_click():  
@@ -448,7 +562,7 @@ class BasicSensorInputConfigure():
             okcancel_frame_2 = ttk.Label(select_sat_win)
             okcancel_frame_2.grid(row=1, column=0, columnspan=2, padx=10, pady=10) 
 
-            orb_specs = config.miss_specs.get_satellite_kepl_specs()  # get all available sats in the configuration              
+            orb_specs = config.mission_specs.get_spacecraft_orbit_specs()  # get all available sats in the configuration              
 
             sat_tree_scroll = ttk.Scrollbar(select_sat_win_frame)
             sat_tree_scroll.grid(row=0, column=1, sticky='nsw')
@@ -480,66 +594,27 @@ class BasicSensorInputConfigure():
                 """ Actions upon the click add Sensor followed by selection of satellites. The mission configuration file is updated with the sensors
                     attached to the respective satellites.
                 """
-                data = {} 
-                data['name'] = name_entry.get() 
-                data['@id'] = uid_entry.get()
-                data['@type'] = "Basic Sensor"
-                data['volume'] = vol_entry.get()
-                data['mass'] = mass_entry.get()
-                data['power'] = pow_entry.get()
-                data['bitsPerPixel'] = bpp_entry.get()                    
-                data['dataRate'] = dr_entry.get()  
-                data['numberDetectorRows'] = numdetrows_entry.get() 
-                data['numberDetectorCols'] = numdetcols_entry.get() 
+                specs = {} 
+                specs['name'] = name_entry.get() 
+                specs['@id'] = uid_entry.get()
+                specs['@type'] = "Basic Sensor"
+                specs['volume'] = vol_entry.get()
+                specs['mass'] = mass_entry.get()
+                specs['power'] = pow_entry.get()
+                specs['bitsPerPixel'] = bpp_entry.get()                    
+                specs['dataRate'] = dr_entry.get()  
+                specs['numberDetectorRows'] = numdetrows_entry.get() 
+                specs['numberDetectorCols'] = numdetcols_entry.get()                 
+                specs['fieldOfViewGeometry'] = self.fov_sc_frame.get_specs() 
+                specs['maneuver'] = self.manuv_sc_frame.get_specs()                
+                specs['orientation'] = self.orien_sc_frame.get_specs()
+                specs['syntheticDataConfig'] = self.sdc_fr.get_specs() 
+                specs['pointingOptions'] = self.po_fr.get_specs() 
 
-                data['fieldOfView'] = {}
-                specs = self.fov_sc_frame.get_specs() 
-                if self._sen_fov_type.get() == "ConicalFOV":                                       
-                    data['fieldOfView']['sensorGeometry'] = 'Conical'
-                    data['fieldOfView']['fullConeAngle'] = specs     
-                elif self._sen_fov_type.get() == 'RectangularFOV':
-                    data['fieldOfView']['sensorGeometry'] = 'Rectangular'
-                    data['fieldOfView']['alongTrackFieldOfView'] = specs[0] 
-                    data['fieldOfView']['crossTrackFieldOfView'] = specs[1]
-
-                data['maneuverability'] = {}
-                specs = self.manuv_sc_frame.get_specs()
-                if self._sen_manuv_type.get() == "FixedManeuver":                                        
-                    data['maneuverability']['@type'] = 'Fixed'
-                elif self._sen_manuv_type.get() == 'ConeManeuver':
-                    data['maneuverability']['@type'] = 'Cone'
-                    data['maneuverability']['fullConeAngle'] = specs
-                elif self._sen_manuv_type.get() == 'RollOnlyManeuver':
-                    if specs[2] == 0:
-                        data['maneuverability']['@type'] = 'RollOnly'
-                        data['maneuverability']['rollMin'] = specs[0] 
-                        data['maneuverability']['rollMax'] = specs[1]
-                    else: # yaw 180 manuver indicated
-                        data['maneuverability']['@type'] = 'Yaw180Roll'
-                        data['maneuverability']['rollMin'] = specs[0] 
-                        data['maneuverability']['rollMax'] = specs[1]
+                sensor = Instrument.from_dict(specs)
                 
-                data['orientation'] = {}
-                specs = self.orien_sc_frame.get_specs()
-                if self._sen_orien_type.get() == "NadirOrientation":                                        
-                    data['orientation']['convention'] = 'NADIR'
-                elif self._sen_orien_type.get() == 'SideLookOrientation':
-                    data['orientation']['convention'] = 'SIDE_LOOK'
-                    data['orientation']['sideLookAngle'] = specs
-                elif self._sen_orien_type.get() == 'XYZOrientation':
-                    data['orientation']['convention'] = 'XYZ'
-                    data['orientation']['xRotation'] = specs[0] 
-                    data['orientation']['yRotation'] = specs[1]
-                    data['orientation']['zRotation'] = specs[1]
-
-                data['syntheticDataConfig'] = {}
-                data['syntheticDataConfig']['sourceFilePaths'] = self.envdata_fp
-                data['syntheticDataConfig']['environVar'] = self.env_vars_combobox.get()
-                data['syntheticDataConfig']['interplMethod'] = 'scipy.interpolate.linear' # self.interpl_method_combobox.get() TODO
-
-                _sen = Instrument.from_dict(data)
-                config.miss_specs.add_sensor(_sen, sat_tree.selection())
-                logger.info("Sensor added.")
+                config.mission_specs.add_instrument_to_spacecraft(new_instru=sensor, sensor_to_spc=sat_tree.selection())
+                logger.info("Sensor added to spacecraft(s).")
                 select_sat_win.destroy()
 
             ok_btn_2 = ttk.Button(okcancel_frame_2, text="Ok", command=ok_click_2, width=15)
@@ -766,7 +841,7 @@ class SyntheticApertureRadarInputConfigure():
 
          # define the widgets in maneuver_frame
         manuv_specs_container_frames = {}
-        for F in (FixedManeuver, ConeManeuver, RollOnlyManeuver):
+        for F in (FixedManeuver, CircularManeuver, RollOnlyManeuver, DoubleRollOnlyManeuver):
             page_name = F.__name__
             manuv_sc_frame = F(parent=maneuver_specs_container, controller=self)
             manuv_specs_container_frames[page_name] = manuv_sc_frame
@@ -775,8 +850,9 @@ class SyntheticApertureRadarInputConfigure():
         # constellation types child frame
         MANUV_MODES = [
             ("Fixed", "FixedManeuver"),
-            ("Cone", "ConeManeuver"),
-            ("Roll-only", "RollOnlyManeuver")
+            ("Circular", "CircularManeuver"),
+            ("Roll-only", "RollOnlyManeuver"),
+            ("Double Roll-only", "DoubleRollOnlyManeuver")
         ]
 
         self._sen_manuv_type = tk.StringVar() # using self so that the variable is retained even after exit from the function
@@ -785,10 +861,12 @@ class SyntheticApertureRadarInputConfigure():
         def senmanuv_type_rbtn_click():
             if self._sen_manuv_type.get() == "FixedManeuver":
                 self.manuv_sc_frame = manuv_specs_container_frames["FixedManeuver"]
-            elif self._sen_manuv_type.get() == "ConeManeuver":
-                self.manuv_sc_frame = manuv_specs_container_frames["ConeManeuver"]
+            elif self._sen_manuv_type.get() == "CircularManeuver":
+                self.manuv_sc_frame = manuv_specs_container_frames["CircularManeuver"]
             elif self._sen_manuv_type.get() == "RollOnlyManeuver":
                 self.manuv_sc_frame = manuv_specs_container_frames["RollOnlyManeuver"]
+            elif self._sen_manuv_type.get() == "DoubleRollOnlyManeuver":
+                self.manuv_sc_frame = manuv_specs_container_frames["DoubleRollOnlyManeuver"]
             self.manuv_sc_frame.tkraise()
 
         for text, mode in MANUV_MODES:
@@ -850,7 +928,7 @@ class SyntheticApertureRadarInputConfigure():
 
 
 
-class PassiveOptSensorInputConfigure():
+class PassiveOpticalScanner():
 
     def __init__(self, win, tab):
         ttk.Label(tab,  text ="Under dev").grid(column = 0, row = 0, padx = 30, pady = 30)   
