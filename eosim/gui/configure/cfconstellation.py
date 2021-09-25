@@ -158,7 +158,7 @@ class CfConstellation():
         # okcancel frame
         def ok_click():               
             try:
-                date_dict = orbitpy.util.OrbitState.date_to_dict(config.mission_specs.epoch)
+                date_dict = orbitpy.util.OrbitState.date_to_dict(config.mission.epoch)
             except:
                 logger.info("Please set the mission date before adding satellite.")
                 return
@@ -177,7 +177,7 @@ class CfConstellation():
                 data['inc'] = specs[6]
                 data['aop'] = specs[7]                
 
-                config.mission_specs.add_constellation_from_dict(data, spc_bus_dict=None, instru_dict=None)
+                config.mission.add_constellation_from_dict(data, spc_bus_dict=None, instru_dict=None)
                 logger.info("Homogenous Walker constellation added.")
             
             

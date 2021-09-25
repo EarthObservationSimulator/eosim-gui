@@ -125,7 +125,7 @@ class CfPropagate():
         def ok_click():               
             if self._prop_type.get() == "OrbitPyJ2AnalyticalPropagator":
                 specs = frames[self._prop_type.get()].get_specs()          
-                config.mission_specs.update_propagator_settings(specs, propTimeResFactor=specs["propTimeResFactor"])
+                config.mission.update_propagator_settings(specs, propTimeResFactor=specs["propTimeResFactor"])
                 logger.info('Updated propagator settings. If you have relied upon the auto-generated (time) step-size,note that it has been generated using the current list of spacecraft.')
                 prop_win.destroy()
             

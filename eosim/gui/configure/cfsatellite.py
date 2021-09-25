@@ -109,7 +109,7 @@ class CfSatellite():
                 logger.info("Inclination of the SSO orbit is: " + str(inc) + "deg")
 
             try:
-                date_dict = orbitpy.util.OrbitState.date_to_dict(config.mission_specs.epoch)
+                date_dict = orbitpy.util.OrbitState.date_to_dict(config.mission.epoch)
             except:
                 logger.info("Please set the mission date before adding satellite.")
                 return
@@ -126,7 +126,7 @@ class CfSatellite():
             satellite_dict = {'name': None, '@id':uid_entry.get(), 'orbitState': orbitState_dict,
                               'spacecraftBus': None, 'instrument': None}
 
-            config.mission_specs.add_spacecraft_from_dict(satellite_dict)
+            config.mission.add_spacecraft_from_dict(satellite_dict)
             logger.info("Satellite added.")
             
 

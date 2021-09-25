@@ -40,7 +40,7 @@ class CfInterSatelliteComm():
 
         # okcancel frame
         def ok_click():
-            config.mission_specs.update_settings(opaque_atmos_height = float(opaque_atmos_height_entry.get()))
+            config.mission.update_settings(opaque_atmos_height = float(opaque_atmos_height_entry.get()))
             logger.info("Updated opaque atmospheric height")
             intersatcomm_settings_win.destroy()
 

@@ -5,7 +5,6 @@ import random
 import tkinter.filedialog, tkinter.messagebox
 import os
 import eosim.gui.helpwindow as helpwindow
-from collections import namedtuple
 import logging
 
 logger = logging.getLogger(__name__)
@@ -273,19 +272,19 @@ class CfCoverage():
         def ok_click():               
             if self._cov_type.get() == "GridPointsCoverageCalculatorFrame":
                 specs = frames[self._cov_type.get()].get_specs()              
-                config.mission_specs.update_coverage_settings_from_dict(specs[0]) # SETTINGS MUST BE UPDATED PRIOR TO ADDITION OF GRID!
-                config.mission_specs.add_coverage_grid_from_dict(specs[1])
+                config.mission.update_coverage_settings_from_dict(specs[0]) # SETTINGS MUST BE UPDATED PRIOR TO ADDITION OF GRID!
+                config.mission.add_coverage_grid_from_dict(specs[1])
                 logger.info("Coverage grid coverage calculation chosen with the input grid.")
                 cov_win.destroy()
             if self._cov_type.get() == "PointingOptionsCoverageCalculatorFrame":
                 specs = frames[self._cov_type.get()].get_specs()
                 logger.info("Pointing options coverage calculation chosen.")
-                config.mission_specs.update_coverage_settings_from_dict(specs[0])
+                config.mission.update_coverage_settings_from_dict(specs[0])
                 cov_win.destroy()  
             if self._cov_type.get() == "PointingOptionsWithGridPointsCoverageCalculatorFrame":
                 specs = frames[self._cov_type.get()].get_specs()
-                config.mission_specs.update_coverage_settings_from_dict(specs[0]) # SETTINGS MUST BE UPDATED PRIOR TO ADDITION OF GRID!
-                config.mission_specs.add_coverage_grid_from_dict(specs[1])
+                config.mission.update_coverage_settings_from_dict(specs[0]) # SETTINGS MUST BE UPDATED PRIOR TO ADDITION OF GRID!
+                config.mission.add_coverage_grid_from_dict(specs[1])
                 logger.info("Pointing options with grid coverage calculation chosen with the input grid.")
                 cov_win.destroy()               
             

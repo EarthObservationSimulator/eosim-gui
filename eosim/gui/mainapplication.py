@@ -14,6 +14,7 @@ import os
 import sys
 import logging
 import time
+import json
 import logging
 
 logger = logging.getLogger(__name__)
@@ -138,10 +139,46 @@ class MainApplication:
 def donothing():
     pass
 
-def click_new_sim():      
+def click_new_sim():  
+    """ Configure the working directory where the MissionSpecs.json file, auxillary i/p files and the results are to be stored.
+
+    """    
     sim_dir_path = tkinter.filedialog.askdirectory(initialdir=os.getcwd(), title="Please select an empty folder:")  
-    config.mission_specs.update_settings(outDir=sim_dir_path+"/")
+    config.mission.update_settings(outDir=sim_dir_path+"/")
     logger.info("New workspace directory selected.")
+
+def open_sim():      
+    """ Load a previously run simulation.
+
+        .. todo:: Add checks to see if the any required auxillary files are present (grid files, ground-station i/p files, etc).
+    """
+    sim_dir_path = tkinter.filedialog.askdirectory(initialdir=os.getcwd(), title="Please select the simulation directory:")  
+    
+    try:
+        with open(sim_dir_path+'/MissionSpecs.json') as f:
+            mission_dict = json.load(f)
+    except:
+        logger.error('Selected directory does not contain the required MissionSpecs.json file.')
+        mission_dict = None
+
+    if mission_dict is not None:
+        config.mission = config.mission.from_dict(mission_dict)
+        config.mission.update_settings(outDir=sim_dir_path+"/") # as a precaution since the folder could be copied from elsewhere, update the output-directory specification.
+        logger.info("Simulation loaded.")
+        logger.warning("Incomplete mission specifications (e.g. missing propagator settings) shall be populated with default values.")
+    return
+
+def click_save():
+    """ Save the mission configuration as a JSON file."""
+    
+    wdir = config.mission.settings.outDir
+    if wdir is None:
+        logger.info("Please select the workspace directory in the menubar by going to Sim->New.")
+        return
+    
+    with open(wdir+'MissionSpecs.json', 'w', encoding='utf-8') as f:
+        json.dump(config.mission.to_dict(), f, ensure_ascii=False, indent=4)
+    logger.info("Mission configuration Saved.")
 class TopMenuBar:
     
     def __init__(self, parent):
@@ -149,8 +186,8 @@ class TopMenuBar:
         menubar = tk.Menu(self.parent)
         filemenu = tk.Menu(menubar, tearoff=0)
         filemenu.add_command(label="New", command=click_new_sim)
-        filemenu.add_command(label="Open", command=donothing)
-        filemenu.add_command(label="Save", command=donothing)
+        filemenu.add_command(label="Open", command=open_sim)
+        filemenu.add_command(label="Save", command=click_save)
         filemenu.add_command(label="Save as...", command=donothing)
 
         filemenu.add_separator()

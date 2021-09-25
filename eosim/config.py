@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
     object is imported and referenced over all the EOSim modules and hence
     acts as a sort of global variable for the entire EOSim software.
 """
-mission_specs = Mission() 
+mission = Mission() 
 class GuiStyle():
     main_win_width = 900
     main_win_height = int(main_win_width*9/21) # 21:9 aspect ratio

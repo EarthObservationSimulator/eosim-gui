@@ -96,14 +96,14 @@ class ConfigureFrame(ttk.Frame):
     def click_save_config(self):
         """ Save the mission configuration as a JSON file."""
         
-        wdir = config.mission_specs.settings.outDir
+        wdir = config.mission.settings.outDir
         if wdir is None:
             logger.info("Please select the workspace directory in the menubar by going to Sim->New.")
             return
         
         with open(wdir+'MissionSpecs.json', 'w', encoding='utf-8') as f:
-            json.dump(config.mission_specs.to_dict(), f, ensure_ascii=False, indent=4)
-        logger.info("Configuration Saved.")
+            json.dump(config.mission.to_dict(), f, ensure_ascii=False, indent=4)
+        logger.info("Mission configuration Saved.")
 
         ''' REV_TEST
         logger.info(".......Preprocessing configuration .......")
@@ -130,16 +130,16 @@ class ConfigureFrame(ttk.Frame):
         """ Clear the mission configuration (both in the local variable and in the MissionSpecs file written in the workspace directory).
             Only the working directory information is retained. 
         """
-        wdir = config.mission_specs.settings.outDir
-        config.mission_specs.clear()
-        config.mission_specs.settings.outDir = wdir # retain the working directory
+        wdir = config.mission.settings.outDir
+        config.mission.clear()
+        config.mission.settings.outDir = wdir # retain the working directory
         with open(wdir+'MissionSpecs.json', 'w', encoding='utf-8') as f:
-            json.dump(config.mission_specs.to_dict(), f, ensure_ascii=False, indent=4)
+            json.dump(config.mission.to_dict(), f, ensure_ascii=False, indent=4)
         logger.info("Configuration cleared.")
     
     def click_visualize_btn(self):
         """ This function simply diplays the mission configuration in json format in the pop-up window."""
         vis_win = tk.Toplevel()
-        ttk.Label(vis_win, text=(config.mission_specs.to_dict()), wraplength=150).pack(padx=5, pady=5)
+        ttk.Label(vis_win, text=(config.mission.to_dict()), wraplength=150).pack(padx=5, pady=5)
 
     

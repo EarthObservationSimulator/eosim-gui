@@ -2,30 +2,16 @@ from tkinter import ttk
 import tkinter as tk
 from eosim.config import GuiStyle, MissionConfig, OutputConfig
 from eosim import config
-import random
-from tkinter import messagebox
 import json
 import orbitpy
 import tkinter.filedialog, tkinter.messagebox
 from instrupy.util import *
-import os
-import shutil
-import sys
-import csv
-import glob
+
 #from orbitpy import orbitpropcov, communications, obsdatametrics, util REV_TEST
 import threading
 import time
-import pandas as pd
 import pickle
 import copy
-import matplotlib.pyplot as plt
-import matplotlib
-
-matplotlib.rc('font', family='sans-serif') 
-matplotlib.rc('font', serif='Times New Roman') 
-matplotlib.rc('text', usetex='false') 
-matplotlib.rcParams.update({'font.size': 12})
 
 import logging
 
@@ -261,7 +247,7 @@ class ExecuteFrame(ttk.Frame):
         # execute propagation
         threading.Thread(target=real_click_obsmetcalcexec_btn).start() 
              
-    def click_pexec_btn(self, progress_bar):
+    def click_pexec_btn_1(self, progress_bar):
 
         def real_click_pexec_btn():
             # Execute propagation
@@ -297,6 +283,20 @@ class ExecuteFrame(ttk.Frame):
             config.out_config.update_prop_out(sat_id=sat_id, sat_eci_state_fp=sat_eci_state_fp, sat_kep_state_fp=sat_kep_state_fp) 
             with open(user_dir + 'output.json', 'w', encoding='utf-8') as f:
                 json.dump(config.out_config.to_dict(), f, ensure_ascii=False, indent=4)
+
+            progress_bar.stop()            
+
+        # execute propagation
+        threading.Thread(target=real_click_pexec_btn).start()
+
+    def click_pexec_btn(self, progress_bar):
+
+        def real_click_pexec_btn():
+            logger.info(".......Running Orbit Propagation.......")
+            start_time = time.time()
+            config.mission.execute_propagation()
+            logger.info(".......Done.......")     
+            logger.info('TIme taken is %f secs.' %(time.time()-start_time))            
 
             progress_bar.stop()            
 

@@ -64,7 +64,7 @@ class CfGroundStation():
                             'altitude': float(gs_specs_alt_entry.get()),
                             'minimumElevation': float(gs_specs_minelv_entry.get())
                             }
-            config.mission_specs.add_groundstation_from_dict(gs_info_dict)
+            config.mission.add_groundstation_from_dict(gs_info_dict)
             logger.info("Ground station added.")
 
         ttk.Button(gs_add_by_entry_frame, text="Add GS", command=add_gs).grid(row=0, column=1, padx=10, pady=10)
@@ -127,7 +127,7 @@ class CfGroundStation():
             if self._gs_specs_type.get() == "DataFile":
                 with open(self.gs_data_fp, 'r') as f:
                     specs = json.load(f)            
-                config.mission_specs.add_groundstation_from_dict(specs)
+                config.mission.add_groundstation_from_dict(specs)
                 logger.info("Ground station(s) added from data-file.")
             gs_win.destroy()  
                             

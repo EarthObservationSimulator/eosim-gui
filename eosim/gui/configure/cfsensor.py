@@ -562,7 +562,7 @@ class BasicSensorInputConfigure():
             okcancel_frame_2 = ttk.Label(select_sat_win)
             okcancel_frame_2.grid(row=1, column=0, columnspan=2, padx=10, pady=10) 
 
-            orb_specs = config.mission_specs.get_spacecraft_orbit_specs()  # get all available sats in the configuration              
+            orb_specs = config.mission.get_spacecraft_orbit_specs()  # get all available sats in the configuration              
 
             sat_tree_scroll = ttk.Scrollbar(select_sat_win_frame)
             sat_tree_scroll.grid(row=0, column=1, sticky='nsw')
@@ -613,7 +613,7 @@ class BasicSensorInputConfigure():
 
                 sensor = Instrument.from_dict(specs)
                 
-                config.mission_specs.add_instrument_to_spacecraft(new_instru=sensor, sensor_to_spc=sat_tree.selection())
+                config.mission.add_instrument_to_spacecraft(new_instru=sensor, sensor_to_spc=sat_tree.selection())
                 logger.info("Sensor added to spacecraft(s).")
                 select_sat_win.destroy()
 
