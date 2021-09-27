@@ -89,110 +89,44 @@ class ExecuteFrame(ttk.Frame):
     def click_gndconexec_btn(self, progress_bar):
         
         def real_click_gndconexec_btn():
-            # Execute ground-station contact finder
-            user_dir = config.out_config.get_user_dir()
-           
-            # Gather the required inputs
-            with open(user_dir+ 'comm_param.p', 'rb') as f:
-                comm_dir = pickle.load(f)
-                gnd_stn_fl = pickle.load(f)
-                ground_stn_info = pickle.load(f)
+            logger.info(".......Running ground-station contact finder.......")
+            start_time = time.time()
+            config.mission.execute_groundstation_contact_finder()
+            logger.info(".......Done.......")     
+            logger.info('TIme taken is %f secs.' %(time.time()-start_time))            
 
-            prop_cov_param = pickle.load( open(user_dir+ "prop_cov_param.p", "rb" ) )              
-                   
-            sat_ids = [] # list of satellites (ids) 
-            sat_dirs = [] # list of directories where the ground station output is written
-            sat_state_fls = [] # list of the state files
-            for _indx in range(0,len(prop_cov_param)):
-                pcp = copy.deepcopy(prop_cov_param[_indx]) 
-                sat_ids.append(pcp.sat_id)               
-                sat_state_fls.append(pcp.sat_state_fl)
-                _dir = "/".join([str(x) for x in pcp.sat_state_fl.split("/")[0:-1]])+'/'
-                sat_dirs.append(_dir)
-            
-            ocf = user_dir + 'output.json'
-            try:
-                with open(ocf, 'r') as output_config_file:
-                        _out_config = util.FileUtilityFunctions.from_json(output_config_file)  
-                config.out_config = OutputConfig.from_dict(_out_config)    
-            except:
-                raise Exception("Output Configuration not found.")
+            progress_bar.stop()            
 
-            progress_bar.start(10)            
+        # execute propagation
+        threading.Thread(target=real_click_gndconexec_btn).start() 
 
-            if gnd_stn_fl is None and ground_stn_info is None:
-                logger.info("No ground-stations are specified")
-            else:
-                logger.info(".......Computing satellite-to-ground-station contact periods.......")      
-                # compute for 1 satellite at a time to keep track of which satellites (ids) the resulting files belong to
-                for k in range(0,len(sat_ids)):
-                    gnd_stn_comm = communications.GroundStationComm(sat_dirs=sat_dirs[k], sat_state_fls=sat_state_fls[k], gnd_stn_fl=gnd_stn_fl, ground_stn_info=ground_stn_info)
-                    [gnd_stn_i, gndstncomm_concise_fls, gndstncomm_detailed_fls] = gnd_stn_comm.compute_all_contacts() 
-                     # update output configuration file 
-                    config.out_config.update_ground_stns_comm(sat_id=sat_ids[k], gnd_stn_id = gnd_stn_i, gndstncomm_concise_fls=gndstncomm_concise_fls, gndstncomm_detailed_fls=gndstncomm_detailed_fls)
-                
-                logger.info(".......DONE.......") 
+    def click_gndconexec_btn(self, progress_bar):
+        
+        def real_click_gndconexec_btn():
+            logger.info(".......Running ground-station contact finder.......")
+            start_time = time.time()
+            config.mission.execute_groundstation_contact_finder()
+            logger.info(".......Done.......")     
+            logger.info('TIme taken is %f secs.' %(time.time()-start_time))            
 
-            with open(ocf, 'w', encoding='utf-8') as f:
-                json.dump(config.out_config.to_dict(), f, ensure_ascii=False, indent=4)
-
-            progress_bar.stop()
-            
+            progress_bar.stop()            
 
         # execute propagation
         threading.Thread(target=real_click_gndconexec_btn).start()
 
-    def click_sat2satconexec_btn(self, progress_bar):
+    def click_covexec_btn(self, progress_bar):
 
-        def real_click_sat2satconexec_btn():
-            # Execute sat-to-sat contact finder
-            user_dir = config.out_config.get_user_dir()
-           
-            # Gather the required inputs
-            with open(user_dir+ 'preprocess_data.p', 'rb') as f:
-                pi = pickle.load(f)
+        def real_click_covexec_btn():
+            logger.info(".......Running coverage calculator.......")
+            start_time = time.time()
+            config.mission.execute_coverage_calculator()
+            logger.info(".......Done.......")     
+            logger.info('TIme taken is %f secs.' %(time.time()-start_time))            
 
-            with open(user_dir+ 'comm_param.p', 'rb') as f:
-                comm_dir = pickle.load(f)
-                gnd_stn_fl = pickle.load(f)
-                ground_stn_info = pickle.load(f)
+            progress_bar.stop()            
 
-            prop_cov_param = pickle.load( open(user_dir+ "prop_cov_param.p", "rb" ) )              
-                   
-            sat_ids = [] # list of satellites (ids) 
-            sat_dirs = [] # list of directories where the ground station output is written
-            sat_state_fls = [] # list of the state files
-            for _indx in range(0,len(prop_cov_param)):
-                pcp = copy.deepcopy(prop_cov_param[_indx]) 
-                sat_ids.append(pcp.sat_id)               
-                sat_state_fls.append(pcp.sat_state_fl)
-                _dir = "/".join([str(x) for x in pcp.sat_state_fl.split("/")[0:-1]])+'/'
-                sat_dirs.append(_dir)
-            
-            ocf = user_dir + 'output.json'
-            try:
-                with open(ocf, 'r') as output_config_file:
-                        _out_config = util.FileUtilityFunctions.from_json(output_config_file)  
-                config.out_config = OutputConfig.from_dict(_out_config)    
-            except:
-                raise Exception("Output Configuration not found.")
-
-            logger.info(".......Computing satellite-to-satellite contact periods.......") 
-            progress_bar.start(10)            
-
-            opaque_atmos_height_km = pi.opaque_atmos_height_km
-            logger.info("Considering opaque atmospheric height to be : " + str(opaque_atmos_height_km) + "km") 
-            inter_sat_comm = communications.InterSatelliteComm(sat_ids, sat_state_fls, comm_dir, opaque_atmos_height_km)
-            [sat1_ids, sat2_ids, intersatcomm_concise_fls, intersatcomm_detailed_fls] = inter_sat_comm.compute_all_contacts()
-            config.out_config.update_intersatcomm(sat1_ids=sat1_ids, sat2_ids=sat2_ids, intersatcomm_concise_fls=intersatcomm_concise_fls, intersatcomm_detailed_fls=intersatcomm_detailed_fls)
-            logger.info(".......DONE.......") 
-
-            with open(ocf, 'w', encoding='utf-8') as f:
-                json.dump(config.out_config.to_dict(), f, ensure_ascii=False, indent=4)
-
-            progress_bar.stop()
         # execute propagation
-        threading.Thread(target=real_click_sat2satconexec_btn).start()
+        threading.Thread(target=real_click_covexec_btn).start()
 
     def click_obsmetcalcexec_btn(self, progress_bar):
 
@@ -246,48 +180,6 @@ class ExecuteFrame(ttk.Frame):
 
         # execute propagation
         threading.Thread(target=real_click_obsmetcalcexec_btn).start() 
-             
-    def click_pexec_btn_1(self, progress_bar):
-
-        def real_click_pexec_btn():
-            # Execute propagation
-            user_dir = config.out_config.get_user_dir()
-            usf = user_dir + 'MissionSpecs.json'
-            try:
-                with open(usf, 'r') as mission_specs_file:
-                        miss_specs = util.FileUtilityFunctions.from_json(mission_specs_file)      
-            except:
-                raise Exception("Configuration not found.")
-
-            progress_bar.start(10)
-            # read in the preprocessed propagation and coverage parameters
-            prop_cov_param = pickle.load(open(user_dir+"prop_cov_param.p", "rb"))
-
-            # Run orbit propagation for each of the satellties (orbits) in the constellation
-            sat_id = [] # list of propagated satellites (ids)
-            sat_eci_state_fp = [] # list of the eci-state files
-            sat_kep_state_fp = [] # list of the Keplerian-state files
-            for orb_indx in range(0,len(prop_cov_param)):
-                pcp = copy.deepcopy(prop_cov_param[orb_indx])
-                pcp.cov_calcs_app = util.CoverageCalculationsApproach.SKIP # force skip of coverage calculations
-                opc = orbitpropcov.OrbitPropCov(pcp)
-                logger.info(".......Running Orbit Propagation for satellite " + str(pcp.sat_id))
-                opc.run()
-                sat_id.append(pcp.sat_id)
-                sat_eci_state_fp.append(pcp.sat_state_fl)
-                sat_kep_state_fp.append(pcp.sat_state_fl + '_Keplerian')
-                logger.info(".......Done.......")
-
-            # save output configuration file (any previous configuration is re-written since propagation is the first step 
-            # to any of the future calculations such as coverage or communications, etc)
-            config.out_config.update_prop_out(sat_id=sat_id, sat_eci_state_fp=sat_eci_state_fp, sat_kep_state_fp=sat_kep_state_fp) 
-            with open(user_dir + 'output.json', 'w', encoding='utf-8') as f:
-                json.dump(config.out_config.to_dict(), f, ensure_ascii=False, indent=4)
-
-            progress_bar.stop()            
-
-        # execute propagation
-        threading.Thread(target=real_click_pexec_btn).start()
 
     def click_pexec_btn(self, progress_bar):
 
@@ -303,6 +195,7 @@ class ExecuteFrame(ttk.Frame):
         # execute propagation
         threading.Thread(target=real_click_pexec_btn).start()
 
+    '''
     def click_covexec_btn(self, progress_bar):
 
         def real_click_covexec_btn():
@@ -350,6 +243,7 @@ class ExecuteFrame(ttk.Frame):
 
         # execute propagation
         threading.Thread(target=real_click_covexec_btn).start()
+    '''
 
       
         

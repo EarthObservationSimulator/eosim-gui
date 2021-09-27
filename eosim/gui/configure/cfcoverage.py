@@ -56,7 +56,7 @@ class GridInfoFrame(ttk.Frame):
             customGridRes = self.gridpnts_specs_gridres_entry.get()
             customGridRes = float(customGridRes) if customGridRes != "" else None
             self.region_info.append({'@type': 'autoGrid',
-                                        '@id': float(gridpnts_specs_regid_entry.get()),                                              
+                                        '@id': str(gridpnts_specs_regid_entry.get()),                                              
                                         'latLower': float(gridpnts_specs_latlow_entry.get()), 
                                         'latUpper': float(gridpnts_specs_latup_entry.get()),                                              
                                         'lonLower': float(gridpnts_specs_lonlow_entry.get()),

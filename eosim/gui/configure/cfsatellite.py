@@ -42,7 +42,7 @@ class CfSatellite():
         # define the widgets inside the child frames
         ttk.Label(sat_kep_specs_frame, text="Unique ID", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
         uid_entry = ttk.Entry(sat_kep_specs_frame, width=10)
-        uid_entry.insert(0,'sat'+str(random.randint(0,1000)))
+        uid_entry.insert(0, random.randint(0,1000))
         uid_entry.bind("<FocusIn>", lambda args: uid_entry.delete('0', 'end'))
         uid_entry.grid(row=0, column=1, sticky='w')
 

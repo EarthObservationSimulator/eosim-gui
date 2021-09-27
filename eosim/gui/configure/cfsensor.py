@@ -378,7 +378,7 @@ class BasicSensorInputConfigure():
         # define the widgets in other_specs_frame
         ttk.Label(other_specs_frame, text="Unique ID", wraplength=150).grid(row=0, column=0, padx=10, pady=10, sticky='w')
         uid_entry = ttk.Entry(other_specs_frame, width=10)
-        uid_entry.insert(0,'sen'+str(random.randint(0,100)))
+        uid_entry.insert(0, random.randint(0,100))
         uid_entry.bind("<FocusIn>", lambda args: uid_entry.delete('0', 'end'))
         uid_entry.grid(row=0, column=1, sticky='w', padx=10, pady=10)
 
@@ -913,12 +913,6 @@ class SyntheticApertureRadarInputConfigure():
 
         self.orien_sc_frame = orien_specs_container_frames[self._sen_orien_type.get()]
         self.orien_sc_frame.tkraise()      
-
-        
-        
-        
-        
-        
         
         ok_btn = ttk.Button(okcancel_frame, text="Add",  width=15)
         ok_btn.grid(row=0, column=0)
