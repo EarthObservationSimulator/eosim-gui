@@ -58,6 +58,11 @@ class ExecuteFrame(ttk.Frame):
         obsmetcalcsexec_frame.columnconfigure(0,weight=1)
         obsmetcalcsexec_frame.rowconfigure(0,weight=1)
 
+        eclipsefinderexec_frame = ttk.Frame(self) 
+        eclipsefinderexec_frame.grid(row=1, column=2, ipadx=10, ipady=10, padx=10, pady=10, sticky='nswe')
+        eclipsefinderexec_frame.columnconfigure(0,weight=1)
+        eclipsefinderexec_frame.rowconfigure(0,weight=1)
+
         progressbar_frame = ttk.Frame(self) 
         progressbar_frame.grid(row=2, column=0, columnspan=3, ipadx=10, ipady=10, padx=10, pady=10, sticky='nswe')
         progressbar_frame.columnconfigure(0,weight=1)
@@ -83,108 +88,18 @@ class ExecuteFrame(ttk.Frame):
         sat2satconexec_btn.grid(row=0, column=0, padx=20, ipady=10, pady=5, sticky='s')
 
 
-        obsmetcalcexec_btn = tk.Button(obsmetcalcsexec_frame, text="Obs-metrics Calculator", width=40, wraplength=100, command=lambda:self.click_obsmetcalcexec_btn(progress_bar))
+        obsmetcalcexec_btn = tk.Button(obsmetcalcsexec_frame, text="Data-metrics Calculator", width=40, wraplength=100, command=lambda:self.click_datametricsexec_btn(progress_bar))
         obsmetcalcexec_btn.grid(row=0, column=0, padx=20, ipady=10, pady=5, sticky='s')
 
-    def click_gndconexec_btn(self, progress_bar):
-        
-        def real_click_gndconexec_btn():
-            logger.info(".......Running ground-station contact finder.......")
-            start_time = time.time()
-            config.mission.execute_groundstation_contact_finder()
-            logger.info(".......Done.......")     
-            logger.info('TIme taken is %f secs.' %(time.time()-start_time))            
+        eclipsefinderexec_btn = tk.Button(eclipsefinderexec_frame, text="Eclipse Finder", width=40, wraplength=100, command=lambda:self.click_eclipsefinderexec_btn(progress_bar))
+        eclipsefinderexec_btn.grid(row=0, column=0, padx=20, ipady=10, pady=5, sticky='s')
 
-            progress_bar.stop()            
-
-        # execute propagation
-        threading.Thread(target=real_click_gndconexec_btn).start() 
-
-    def click_gndconexec_btn(self, progress_bar):
-        
-        def real_click_gndconexec_btn():
-            logger.info(".......Running ground-station contact finder.......")
-            start_time = time.time()
-            config.mission.execute_groundstation_contact_finder()
-            logger.info(".......Done.......")     
-            logger.info('TIme taken is %f secs.' %(time.time()-start_time))            
-
-            progress_bar.stop()            
-
-        # execute propagation
-        threading.Thread(target=real_click_gndconexec_btn).start()
-
-    def click_covexec_btn(self, progress_bar):
-
-        def real_click_covexec_btn():
-            logger.info(".......Running coverage calculator.......")
-            start_time = time.time()
-            config.mission.execute_coverage_calculator()
-            logger.info(".......Done.......")     
-            logger.info('TIme taken is %f secs.' %(time.time()-start_time))            
-
-            progress_bar.stop()            
-
-        # execute propagation
-        threading.Thread(target=real_click_covexec_btn).start()
-
-    def click_obsmetcalcexec_btn(self, progress_bar):
-
-        def real_click_obsmetcalcexec_btn():
-            # Execute observation metrics calculations
-            user_dir = config.out_config.get_user_dir()
-            usf = user_dir + 'MissionSpecs.json'
-            try:
-                with open(usf, 'r') as mission_specs_file:
-                        miss_specs = util.FileUtilityFunctions.from_json(mission_specs_file)      
-            except:
-                raise Exception("Mission Configuration not found.")
-            
-            progress_bar.start(10)
-
-            # read in the preprocessed data
-            with open(user_dir+ 'preprocess_data.p', 'rb') as f:
-                pi = pickle.load(f)
-
-            if "instrument" in miss_specs:
-                instru_specs = miss_specs['instrument']
-            elif "satellite" in miss_specs:
-                instru_specs = []
-                for sat in miss_specs["satellite"]:
-                    if("instrument" in sat):
-                        instru_specs.extend(sat["instrument"])
-
-            if(instru_specs is not None):
-                logger.info("Started computation of observation metrics")
-                obs = obsdatametrics.ObsDataMetrics(pi.sats)
-                [sat_id, ssid, obsMetrics_fl] = obs.compute_all_obs_metrics()   
-                logger.info("Computed observation metrics")   
-            else:
-                logger.info("No instruments present, skinng computation of observation metrics")  
-                pass
-
-            # update output configuration file            
-            ocf = user_dir + 'output.json'
-            try:
-                with open(ocf, 'r') as output_config_file:
-                        _out_config = util.FileUtilityFunctions.from_json(output_config_file)  
-                config.out_config = OutputConfig.from_dict(_out_config)    
-            except:
-                raise Exception("Output Configuration not found.")
-            
-            config.out_config.update_calc_obsmetrics(sat_id=sat_id, ssid=ssid, obsMetrics_fl=obsMetrics_fl)
-            with open(ocf, 'w', encoding='utf-8') as f:
-                json.dump(config.out_config.to_dict(), f, ensure_ascii=False, indent=4)
-
-            progress_bar.stop()            
-
-        # execute propagation
-        threading.Thread(target=real_click_obsmetcalcexec_btn).start() 
 
     def click_pexec_btn(self, progress_bar):
 
         def real_click_pexec_btn():
-            logger.info(".......Running Orbit Propagation.......")
+            progress_bar.start(10)
+            logger.info(".......Running orbit propagation.......")
             start_time = time.time()
             config.mission.execute_propagation()
             logger.info(".......Done.......")     
@@ -195,55 +110,81 @@ class ExecuteFrame(ttk.Frame):
         # execute propagation
         threading.Thread(target=real_click_pexec_btn).start()
 
-    '''
-    def click_covexec_btn(self, progress_bar):
+    
+    def click_eclipsefinderexec_btn(self, progress_bar):
 
-        def real_click_covexec_btn():
-            # Execute coverage calculations
-            user_dir = config.out_config.get_user_dir()
-            usf = user_dir + 'MissionSpecs.json'
-            try:
-                with open(usf, 'r') as mission_specs_file:
-                        miss_specs = util.FileUtilityFunctions.from_json(mission_specs_file)      
-            except:
-                raise Exception("Mission Configuration not found.")
-            
+        def real_click_eclipsefinderexec_btn():
             progress_bar.start(10)
-            # read in the preprocessed propagation and coverage parameters
-            prop_cov_param = pickle.load( open(user_dir+ "prop_cov_param.p", "rb" ) )   
-
-            # Run coverage for each of the satellties (orbits) in the constellation
-            sat_id = [] # list of satellites (ids) for which coverage is calculated
-            sat_acc_fl = [] # list of the access files
-
-            for orb_indx in range(0,len(prop_cov_param)):
-                pcp = copy.deepcopy(prop_cov_param[orb_indx])
-                pcp.do_prop = False # force skip of propagation calculations
-                opc = orbitpropcov.OrbitPropCov(pcp)
-                logger.info(".......Running Coverage calculations for satellite " + str(pcp.sat_id) + "....")
-                opc.run()
-                sat_id.append(pcp.sat_id)
-                sat_acc_fl.append(pcp.sat_acc_fl)
-                logger.info(".......Done.......")
-
-            # update output configuration file            
-            ocf = user_dir + 'output.json'
-            try:
-                with open(ocf, 'r') as output_config_file:
-                        _out_config = util.FileUtilityFunctions.from_json(output_config_file)  
-                config.out_config = OutputConfig.from_dict(_out_config)    
-            except:
-                raise Exception("Output Configuration not found.")
-            
-            config.out_config.update_cov_out(sat_id=sat_id, sat_acc_fl=sat_acc_fl)
-            with open(ocf, 'w', encoding='utf-8') as f:
-                json.dump(config.out_config.to_dict(), f, ensure_ascii=False, indent=4)
+            logger.info(".......Running eclipse finder.......")
+            start_time = time.time()
+            config.mission.execute_eclipse_finder()
+            logger.info(".......Done.......")     
+            logger.info('TIme taken is %f secs.' %(time.time()-start_time))            
 
             progress_bar.stop()            
 
         # execute propagation
+        threading.Thread(target=real_click_eclipsefinderexec_btn).start()
+
+    def click_gndconexec_btn(self, progress_bar):
+        
+        def real_click_gndconexec_btn():
+            progress_bar.start(10)
+            logger.info(".......Running ground-station contact finder.......")
+            start_time = time.time()
+            config.mission.execute_groundstation_contact_finder()
+            logger.info(".......Done.......")     
+            logger.info('TIme taken is %f secs.' %(time.time()-start_time))            
+
+            progress_bar.stop()            
+
+        # execute ground-station contact finder
+        threading.Thread(target=real_click_gndconexec_btn).start()
+
+    def click_sat2satconexec_btn(self, progress_bar):
+        
+        def real_click_sat2satconexec_btn():
+            progress_bar.start(10)
+            logger.info(".......Running inter-satellite contact finder.......")
+            start_time = time.time()
+            config.mission.execute_intersatellite_contact_finder()
+            logger.info(".......Done.......")     
+            logger.info('TIme taken is %f secs.' %(time.time()-start_time))            
+
+            progress_bar.stop()            
+
+        # execute inter-satellite contact finder
+        threading.Thread(target=real_click_sat2satconexec_btn).start()
+
+    def click_covexec_btn(self, progress_bar):
+
+        def real_click_covexec_btn():
+            progress_bar.start(10)
+            logger.info(".......Running coverage calculator.......")
+            start_time = time.time()
+            config.mission.execute_coverage_calculator()
+            logger.info(".......Done.......")     
+            logger.info('TIme taken is %f secs.' %(time.time()-start_time))            
+
+            progress_bar.stop()            
+
+        # execute coverage calculations
         threading.Thread(target=real_click_covexec_btn).start()
-    '''
+
+    def click_datametricsexec_btn(self, progress_bar):
+
+        def real_click_datametricsexec_btn():
+            progress_bar.start(10)
+            logger.info(".......Running data metrics Calculator.......")
+            start_time = time.time()
+            config.mission.execute_datametrics_calculator()
+            logger.info(".......Done.......")     
+            logger.info('TIme taken is %f secs.' %(time.time()-start_time))            
+
+            progress_bar.stop()            
+
+        # execute datametrics calculation
+        threading.Thread(target=real_click_datametricsexec_btn).start()
 
       
         
