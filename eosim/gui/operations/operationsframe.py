@@ -7,7 +7,7 @@ import threading
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import eosim.gui.helpwindow as helpwindow
 from eosim import config
-from eosim.gui.visualizeframe.visglobeframe import VisGlobeFrame
+from eosim.gui.visualize.visglobeframe import VisGlobeFrame
 from eosim.gui.mapprojections import Mercator, EquidistantConic, LambertConformal, Robinson, LambertAzimuthalEqualArea, Gnomonic
 from orbitpy.util import EnumEntity
 # from orbitpy.sensorfovprojection import SensorFOVProjection, PixelShapelyPolygon REV_TEST
@@ -231,7 +231,7 @@ class CesiumGlobeOperationsVisualizationFrame:
     def click_launch_globe_visz(self):
 
         user_dir = config.out_config.get_user_dir()
-        czml_template_dir = os.path.dirname(__file__) + "/../visualizeframe/"
+        czml_template_dir = os.path.dirname(__file__) + "/../visualize/"
         
         [epoch, step_size, num_time_indices, czml_pkts] = VisGlobeFrame.build_czmlpkts_for_mission_background(user_dir, czml_template_dir)
 

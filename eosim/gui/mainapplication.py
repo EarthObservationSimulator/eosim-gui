@@ -3,7 +3,7 @@ from tkinter import ttk
 from .welcomeframe import WelcomeFrame
 from .configure.cfframe import ConfigureFrame
 from .executeframe import ExecuteFrame 
-from .visualizeframe.visualizeframe import VisualizeFrame
+from .visualize.visualizeframe import VisualizeFrame
 from .operations.operationsframe import OperationsFrame
 
 from eosim import config

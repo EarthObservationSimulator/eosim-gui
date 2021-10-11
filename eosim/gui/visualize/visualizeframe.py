@@ -2,10 +2,10 @@ from tkinter import ttk
 import tkinter as tk
 from eosim.config import GuiStyle, MissionConfig
 from eosim import config
-from eosim.gui.visualizeframe.insightsframe import InsightsFrame
-from eosim.gui.visualizeframe.vis2dframe import Vis2DFrame
-from eosim.gui.visualizeframe.vismapframe import VisMapFrame
-from eosim.gui.visualizeframe.visglobeframe import VisGlobeFrame
+from eosim.gui.visualize.insightsframe import InsightsFrame
+from eosim.gui.visualize.vis2dframe import Vis2DFrame
+from eosim.gui.visualize.vismapframe import VisMapFrame
+from eosim.gui.visualize.visglobeframe import VisGlobeFrame
 import random
 from tkinter import messagebox
 import json

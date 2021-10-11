@@ -8,6 +8,8 @@ docs/_templates/*
 test_sim/*
 output/*
 test1/*
+test2/*
+test3/*
 
 # objects, executables, core dumps
 *.o
