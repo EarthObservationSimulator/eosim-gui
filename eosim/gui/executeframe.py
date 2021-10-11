@@ -105,27 +105,110 @@ class ExecuteFrame(ttk.Frame):
         allexec_btn.grid(row=0, column=0, padx=20, ipady=10, pady=5, sticky='nsew')
 
 
-    def click_allexec_btn(self, progress_bar):
-
-        def real_click_allexec_btn():
-                        
-            progress_bar.start(10)
-            
-            logger.info(".......Running orbit propagation.......")
-            start_time = time.time()
-            config.mission.execute_propagation()
-            logger.info(".......Done.......")     
-            logger.info('Time taken is %f secs.' %(time.time()-start_time))
-
-        # execute propagation
-        threading.Thread(target=real_click_allexec_btn).start()
-
     def click_pexec_btn(self, progress_bar):
 
         def real_click_pexec_btn():
             
             progress_bar.start(10)
 
+            logger.info(".......Running orbit propagation.......")
+            start_time = time.time()
+            config.mission.execute_propagation()
+            logger.info(".......Done.......")     
+            logger.info('Time taken is %f secs.' %(time.time()-start_time))   
+
+            progress_bar.stop()            
+
+        # execute propagation
+        t = threading.Thread(target=real_click_pexec_btn).start()
+        return
+    
+    def click_eclipsefinderexec_btn(self, progress_bar):
+
+        def real_click_eclipsefinderexec_btn():
+            progress_bar.start(10)
+            logger.info(".......Running eclipse finder.......")
+            start_time = time.time()
+            config.mission.execute_eclipse_finder()
+            logger.info(".......Done.......")     
+            logger.info('Time taken is %f secs.' %(time.time()-start_time))            
+
+            progress_bar.stop()            
+
+        # execute eclipse finder
+        threading.Thread(target=real_click_eclipsefinderexec_btn).start()
+        return
+
+    def click_gndconexec_btn(self, progress_bar):
+        
+        def real_click_gndconexec_btn():
+            progress_bar.start(10)
+            logger.info(".......Running ground-station contact finder.......")
+            start_time = time.time()
+            config.mission.execute_groundstation_contact_finder()
+            logger.info(".......Done.......")     
+            logger.info('TIme taken is %f secs.' %(time.time()-start_time))            
+
+            progress_bar.stop()            
+
+        # execute ground-station contact finder
+        threading.Thread(target=real_click_gndconexec_btn).start()
+        return
+
+    def click_sat2satconexec_btn(self, progress_bar):
+        
+        def real_click_sat2satconexec_btn():
+            progress_bar.start(10)
+            logger.info(".......Running inter-satellite contact finder.......")
+            start_time = time.time()
+            config.mission.execute_intersatellite_contact_finder()
+            logger.info(".......Done.......")     
+            logger.info('TIme taken is %f secs.' %(time.time()-start_time))            
+
+            progress_bar.stop()            
+
+        # execute inter-satellite contact finder
+        threading.Thread(target=real_click_sat2satconexec_btn).start()
+        return
+
+    def click_covexec_btn(self, progress_bar):
+
+        def real_click_covexec_btn():
+            progress_bar.start(10)
+            logger.info(".......Running coverage calculator.......")
+            start_time = time.time()
+            config.mission.execute_coverage_calculator()
+            logger.info(".......Done.......")     
+            logger.info('TIme taken is %f secs.' %(time.time()-start_time))            
+
+            progress_bar.stop()            
+
+        # execute coverage calculations
+        threading.Thread(target=real_click_covexec_btn).start()
+        return
+
+    def click_datametricsexec_btn(self, progress_bar):
+
+        def real_click_datametricsexec_btn():
+            progress_bar.start(10)
+            logger.info(".......Running data metrics Calculator.......")
+            start_time = time.time()
+            config.mission.execute_datametrics_calculator()
+            logger.info(".......Done.......")     
+            logger.info('TIme taken is %f secs.' %(time.time()-start_time))            
+
+            progress_bar.stop()            
+
+        # execute datametrics calculation
+        threading.Thread(target=real_click_datametricsexec_btn).start()
+        return
+      
+    def click_allexec_btn(self, progress_bar):
+
+        def real_click_allexec_btn():
+                        
+            progress_bar.start(10)
+            
             logger.info(".......Running orbit propagation.......")
             start_time = time.time()
             config.mission.execute_propagation()
@@ -162,86 +245,9 @@ class ExecuteFrame(ttk.Frame):
             logger.info(".......Done.......")     
             logger.info('TIme taken is %f secs.' %(time.time()-start_time))
 
-            progress_bar.stop()            
+            progress_bar.stop() 
 
         # execute propagation
-        t = threading.Thread(target=real_click_pexec_btn).start()
-    
-    def click_eclipsefinderexec_btn(self, progress_bar):
-
-        def real_click_eclipsefinderexec_btn():
-            progress_bar.start(10)
-            logger.info(".......Running eclipse finder.......")
-            start_time = time.time()
-            config.mission.execute_eclipse_finder()
-            logger.info(".......Done.......")     
-            logger.info('Time taken is %f secs.' %(time.time()-start_time))            
-
-            progress_bar.stop()            
-
-        # execute eclipse finder
-        threading.Thread(target=real_click_eclipsefinderexec_btn).start()
-
-    def click_gndconexec_btn(self, progress_bar):
-        
-        def real_click_gndconexec_btn():
-            progress_bar.start(10)
-            logger.info(".......Running ground-station contact finder.......")
-            start_time = time.time()
-            config.mission.execute_groundstation_contact_finder()
-            logger.info(".......Done.......")     
-            logger.info('TIme taken is %f secs.' %(time.time()-start_time))            
-
-            progress_bar.stop()            
-
-        # execute ground-station contact finder
-        threading.Thread(target=real_click_gndconexec_btn).start()
-
-    def click_sat2satconexec_btn(self, progress_bar):
-        
-        def real_click_sat2satconexec_btn():
-            progress_bar.start(10)
-            logger.info(".......Running inter-satellite contact finder.......")
-            start_time = time.time()
-            config.mission.execute_intersatellite_contact_finder()
-            logger.info(".......Done.......")     
-            logger.info('TIme taken is %f secs.' %(time.time()-start_time))            
-
-            progress_bar.stop()            
-
-        # execute inter-satellite contact finder
-        threading.Thread(target=real_click_sat2satconexec_btn).start()
-
-    def click_covexec_btn(self, progress_bar):
-
-        def real_click_covexec_btn():
-            progress_bar.start(10)
-            logger.info(".......Running coverage calculator.......")
-            start_time = time.time()
-            config.mission.execute_coverage_calculator()
-            logger.info(".......Done.......")     
-            logger.info('TIme taken is %f secs.' %(time.time()-start_time))            
-
-            progress_bar.stop()            
-
-        # execute coverage calculations
-        threading.Thread(target=real_click_covexec_btn).start()
-
-    def click_datametricsexec_btn(self, progress_bar):
-
-        def real_click_datametricsexec_btn():
-            progress_bar.start(10)
-            logger.info(".......Running data metrics Calculator.......")
-            start_time = time.time()
-            config.mission.execute_datametrics_calculator()
-            logger.info(".......Done.......")     
-            logger.info('TIme taken is %f secs.' %(time.time()-start_time))            
-
-            progress_bar.stop()            
-
-        # execute datametrics calculation
-        threading.Thread(target=real_click_datametricsexec_btn).start()
-
-      
-        
+        threading.Thread(target=real_click_allexec_btn).start()   
+        return
 
