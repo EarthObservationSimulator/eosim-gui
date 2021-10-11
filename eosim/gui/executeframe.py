@@ -31,6 +31,7 @@ class ExecuteFrame(ttk.Frame):
         self.columnconfigure(0,weight=1)      
         self.columnconfigure(1,weight=1)    
         self.columnconfigure(2,weight=1) 
+        self.columnconfigure(3,weight=1) 
 
         # define propagation execution frame 
         pexec_frame = ttk.Frame(self) 
@@ -63,8 +64,14 @@ class ExecuteFrame(ttk.Frame):
         eclipsefinderexec_frame.columnconfigure(0,weight=1)
         eclipsefinderexec_frame.rowconfigure(0,weight=1)
 
+        allexec_frame = ttk.Frame(self) 
+        allexec_frame.grid(row=0, column=3, rowspan=2, ipadx=10, ipady=10, padx=10, pady=10, sticky='nswe')
+        allexec_frame.columnconfigure(0,weight=1)
+        allexec_frame.rowconfigure(0,weight=1)
+
+
         progressbar_frame = ttk.Frame(self) 
-        progressbar_frame.grid(row=2, column=0, columnspan=3, ipadx=10, ipady=10, padx=10, pady=10, sticky='nswe')
+        progressbar_frame.grid(row=2, column=0, columnspan=4, ipadx=10, ipady=10, padx=10, pady=10, sticky='nswe')
         progressbar_frame.columnconfigure(0,weight=1)
         progressbar_frame.rowconfigure(0,weight=1)
 
@@ -94,22 +101,71 @@ class ExecuteFrame(ttk.Frame):
         eclipsefinderexec_btn = tk.Button(eclipsefinderexec_frame, text="Eclipse Finder", width=40, wraplength=100, command=lambda:self.click_eclipsefinderexec_btn(progress_bar))
         eclipsefinderexec_btn.grid(row=0, column=0, padx=20, ipady=10, pady=5, sticky='s')
 
+        allexec_btn = tk.Button(allexec_frame, text="Execute All", width=40, wraplength=100, command=lambda:self.click_allexec_btn(progress_bar))
+        allexec_btn.grid(row=0, column=0, padx=20, ipady=10, pady=5, sticky='nsew')
 
-    def click_pexec_btn(self, progress_bar):
 
-        def real_click_pexec_btn():
+    def click_allexec_btn(self, progress_bar):
+
+        def real_click_allexec_btn():
+                        
             progress_bar.start(10)
+            
             logger.info(".......Running orbit propagation.......")
             start_time = time.time()
             config.mission.execute_propagation()
             logger.info(".......Done.......")     
-            logger.info('TIme taken is %f secs.' %(time.time()-start_time))            
+            logger.info('Time taken is %f secs.' %(time.time()-start_time))
+
+        # execute propagation
+        threading.Thread(target=real_click_allexec_btn).start()
+
+    def click_pexec_btn(self, progress_bar):
+
+        def real_click_pexec_btn():
+            
+            progress_bar.start(10)
+
+            logger.info(".......Running orbit propagation.......")
+            start_time = time.time()
+            config.mission.execute_propagation()
+            logger.info(".......Done.......")     
+            logger.info('Time taken is %f secs.' %(time.time()-start_time))   
+
+            logger.info(".......Running eclipse finder.......")
+            start_time = time.time()
+            config.mission.execute_eclipse_finder()
+            logger.info(".......Done.......")     
+            logger.info('Time taken is %f secs.' %(time.time()-start_time))      
+
+            logger.info(".......Running ground-station contact finder.......")
+            start_time = time.time()
+            config.mission.execute_groundstation_contact_finder()
+            logger.info(".......Done.......")     
+            logger.info('TIme taken is %f secs.' %(time.time()-start_time))  
+
+            logger.info(".......Running inter-satellite contact finder.......")
+            start_time = time.time()
+            config.mission.execute_intersatellite_contact_finder()
+            logger.info(".......Done.......")     
+            logger.info('TIme taken is %f secs.' %(time.time()-start_time)) 
+
+            logger.info(".......Running coverage calculator.......")
+            start_time = time.time()
+            config.mission.execute_coverage_calculator()
+            logger.info(".......Done.......")     
+            logger.info('TIme taken is %f secs.' %(time.time()-start_time))
+
+            logger.info(".......Running data metrics Calculator.......")
+            start_time = time.time()
+            config.mission.execute_datametrics_calculator()
+            logger.info(".......Done.......")     
+            logger.info('TIme taken is %f secs.' %(time.time()-start_time))
 
             progress_bar.stop()            
 
         # execute propagation
-        threading.Thread(target=real_click_pexec_btn).start()
-
+        t = threading.Thread(target=real_click_pexec_btn).start()
     
     def click_eclipsefinderexec_btn(self, progress_bar):
 
@@ -119,11 +175,11 @@ class ExecuteFrame(ttk.Frame):
             start_time = time.time()
             config.mission.execute_eclipse_finder()
             logger.info(".......Done.......")     
-            logger.info('TIme taken is %f secs.' %(time.time()-start_time))            
+            logger.info('Time taken is %f secs.' %(time.time()-start_time))            
 
             progress_bar.stop()            
 
-        # execute propagation
+        # execute eclipse finder
         threading.Thread(target=real_click_eclipsefinderexec_btn).start()
 
     def click_gndconexec_btn(self, progress_bar):

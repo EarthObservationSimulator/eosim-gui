@@ -129,7 +129,7 @@ class GridInfoFrame(ttk.Frame):
             customGridResFactor = float(customGridResFactor) if customGridResFactor != "" else None
             return ("autoGrid", self.region_info, customGridResFactor)
         elif(self._gridpnts_specs_type.get() == "CustomGrid"):
-            specs = {"grid": {"@type": "customGrid", "covGridFilePath": self.grid_data_fp}}
+            specs = {"@type": "customGrid", "covGridFilePath": self.grid_data_fp}
             return ("customGrid", specs)
 
 class CfCoverage():
