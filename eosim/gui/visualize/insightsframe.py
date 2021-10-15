@@ -1,7 +1,5 @@
 from tkinter import ttk 
 import tkinter as tk
-from eosim.config import GuiStyle, MissionConfig
-from eosim import config
 import logging
 
 logger = logging.getLogger(__name__)
@@ -16,7 +14,7 @@ class InsightsFrame(ttk.Frame):
 
         insights = tk.scrolledtext.ScrolledText(insights_frame, wrap='word', height=10, width=50, background='#A7E8C5', selectbackground='yellow', selectforeground='black')
         insights.grid(row=0, column=0, sticky='nsew')
-        content = "Coverage percentage = \n average revisit period =\n, max revisit period =  \n Which ground-station received maximum contact times? \n Which region receives max coverage? \n Which satellite has maximum coverage? \n, etc."
+        content = " ------------------ TODO ------------------- \n Coverage percentage = \n average revisit period =\n, max revisit period =  \n Which ground-station received maximum contact times? \n Which region receives max coverage? \n Which satellite has maximum coverage? \n, etc."
         insights.insert("end", content)
         insights.configure(state ='disabled') # Making the text read only 
 

@@ -1,22 +1,9 @@
 from tkinter import ttk 
 import tkinter as tk
-from eosim.config import GuiStyle, MissionConfig
-from eosim import config
 from eosim.gui.visualize.insightsframe import InsightsFrame
 from eosim.gui.visualize.vis2dframe import Vis2DFrame
 from eosim.gui.visualize.vismapframe import VisMapFrame
 from eosim.gui.visualize.visglobeframe import VisGlobeFrame
-import random
-from tkinter import messagebox
-import json
-import orbitpy
-import tkinter.filedialog, tkinter.messagebox
-from instrupy.util import *
-import os
-import shutil
-import sys
-import csv
-import glob
 
 import matplotlib.pyplot as plt
 import matplotlib
@@ -45,15 +32,16 @@ class VisualizeFrame(ttk.Frame):
         vis_frame.columnconfigure(0,weight=1)
 
         tabControl = ttk.Notebook(vis_frame)
+        
         tab1 = ttk.Frame(tabControl)
         tab2 = ttk.Frame(tabControl)
         tab3 = ttk.Frame(tabControl)
         tab4 = ttk.Frame(tabControl)
-
-        tabControl.add(tab1, text='Insights')
+              
         tabControl.add(tab2, text='2D Plot visualization')
         tabControl.add(tab3, text='Map visualization')
         tabControl.add(tab4, text='Globe visualization')
+        tabControl.add(tab1, text='Insights')  # TODO: Shift to top when the functionality has been added.
 
         tabControl.pack(expand = True, fill ="both")   
 
