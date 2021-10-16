@@ -31,7 +31,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class Plot2DVisVars(instrupy.util.EnumEntity):
-    """ This class hold and handle the variables which can be plotted (either on x or y axis). 
+    """ This class holds and handles the variables which can be plotted (either on x or y axis). 
         The class-variables are all the variables make up all the possible variables which can be plotted. 
         The class also includes two functions which aid in the retrieval of the variable-data from the OrbitPy datafiles.
     
@@ -105,7 +105,6 @@ class Plot2DVisVars(instrupy.util.EnumEntity):
             :return: Tuple containing the variable plot-name (label) and the corresponding data to be plotted. 
             :rtype: tuple
 
-
         """
         _header = Plot2DVisVars.get_orbitpy_file_column_header(var)     
         if(_header is not False):                     
@@ -135,7 +134,7 @@ class Plot2DVisVars(instrupy.util.EnumEntity):
                 sat_df_y = list(sat_df["y [km]"])
                 sat_df_z = list(sat_df["z [km]"])
                 for k in range(0,len(sat_df["x [km]"])):
-                    time = epoch_JDUT1 + sat_df_index[k] * step_size 
+                    time = epoch_JDUT1 + sat_df_index[k] * step_size * 1/86400 
                     [lat[k], _x, _y] = instrupy.util.GeoUtilityFunctions.eci2geo([sat_df_x[k], sat_df_y[k], sat_df_z[k]], time)
                 data = lat
                 _header = 'latitude [deg]'
@@ -146,7 +145,7 @@ class Plot2DVisVars(instrupy.util.EnumEntity):
                 sat_df_y = list(sat_df["y [km]"])
                 sat_df_z = list(sat_df["z [km]"])
                 for k in range(0,len(sat_df["x [km]"])):
-                    time = epoch_JDUT1 + sat_df_index[k] * step_size 
+                    time = epoch_JDUT1 + sat_df_index[k] * step_size * 1/86400  
                     [lon[k], _x, _y] = instrupy.util.GeoUtilityFunctions.eci2geo([sat_df_x[k], sat_df_y[k], sat_df_z[k]], time)
                 data = lon
                 _header = 'longitude [deg]'
@@ -154,7 +153,7 @@ class Plot2DVisVars(instrupy.util.EnumEntity):
         return (str(sat_id)+'.'+_header, data)
 
 class TwoDimVisPlotAttributes():
-    """ Container class to hold and handle the plot attributes.
+    """ Container class to hold and handle the plot attributes which are specified by the user.
     """
     def __init__(self, x_sat_id=None, x_var=None, y_sat_id=None, y_var=None, time_start=None, time_end=None):
         self.x_sat_id = x_sat_id if x_sat_id is not None else None # x-variable satellite-identifier
@@ -190,7 +189,7 @@ class TwoDimVisPlotAttributes():
         return [self.time_start, self.time_end]
 
 class Vis2DFrame(ttk.Frame):
-
+    """ Primary class to create the frame and the widgets."""
     def __init__(self, win, tab):
         
         self.two_dim_vis_plt_attr = TwoDimVisPlotAttributes() # instance variable storing the 2D plot attributes
@@ -261,7 +260,7 @@ class Vis2DFrame(ttk.Frame):
         export_btn.grid(row=0, column=1, sticky='w', padx=20)
 
     def click_select_xvar_btn(self):
-        # create window to ask what should be the x-variable. Only 1 x-variable selection per plot is allowed (for obvious reasons).
+        """ Create window to ask what should be the x-variable. Only 1 x-variable selection per plot is allowed (for obvious reasons)."""
         select_xvar_win = tk.Toplevel()
         select_xvar_win.rowconfigure(0,weight=1)
         select_xvar_win.rowconfigure(1,weight=1)
@@ -317,7 +316,7 @@ class Vis2DFrame(ttk.Frame):
         cancel_btn.grid(row=0, column=1, sticky ='w') 
 
     def click_select_yvar_btn(self):
-        # create window to ask what should be the y-variable(s). Multiple variables can be configured.
+        """ Create window to ask what should be the y-variable(s). Multiple variables can be configured."""
 
         # reset any previously configured y-variables
         self.two_dim_vis_plt_attr.reset_y_variables()
@@ -397,7 +396,7 @@ class Vis2DFrame(ttk.Frame):
         self.two_dim_vis_plt_attr.update_time_interval(time_start_s, time_end_s)
         
     def click_plot_btn(self, export=False, plot=False):
-        """ Make X-Y scatter plots of the variables indicated in :code:`self.two_dim_vis_plt_attr` instance variable. 
+        """ Make X-Y scatter plots of the variables indicated in :code:`two_dim_vis_plt_attr` instance variable. 
         """
         # get the time-interval of interest
         self.update_time_interval_in_attributes_variable()
@@ -431,7 +430,7 @@ class Vis2DFrame(ttk.Frame):
         x_sat_kepstate_df = pd.read_csv(x_sat_kepstate_fp,skiprows = [0,1,2,3]) 
         x_sat_kepstate_df.set_index('time index', inplace=True)
 
-        # check if the time interval is within bounds
+        # check if the user-specified time interval is within bounds
         min_time_index = min(x_sat_state_df.index)
         max_time_index = max(x_sat_state_df.index)
         if(time_start_index < min_time_index or time_start_index > max_time_index or 
@@ -456,10 +455,10 @@ class Vis2DFrame(ttk.Frame):
         num_y_vars = len(y_var)
         for k in range(0,num_y_vars): 
             # extract the y-variable data from of the particular satellite
-            # search for the orbit-propagation data corresponding to the satellite with identifier = x_sat_id
+            # search for the orbit-propagation data corresponding to the satellite with identifier = y_sat_id[k]
             y_sat_prop_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=config.mission.outputInfo,
                                                                             out_info_type=orbitpy.util.OutputInfoUtility.OutputInfoType.PropagatorOutputInfo,
-                                                                            spacecraft_id=x_sat_id
+                                                                            spacecraft_id=y_sat_id[k]
                                                                             )
             y_sat_state_fp = y_sat_prop_out_info.stateCartFile
             y_sat_kepstate_fp = y_sat_prop_out_info.stateKeplerianFile
