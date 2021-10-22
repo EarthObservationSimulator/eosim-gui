@@ -17,7 +17,7 @@ if __name__ == "__main__":
         '-loglevel',
         default="INFO",
         type=str,
-        help="Logging level: Specifiy CRITICAL or ERROR or WARNING or INFO or DEBUG."
+        help="Logging level: Specify CRITICAL or ERROR or WARNING or INFO or DEBUG."
     )   
 
     args = parser.parse_args()

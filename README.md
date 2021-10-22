@@ -9,6 +9,24 @@ Run the application using the following command from terminal:
 python bin/eosimapp.py
 ```
 
+## Cesium App 
+The Cesium JavaScript app is based on the showcased example of Cesium features in the *cesium-workshop* repository. It is contained in the `.\cesium_app\` folder. 
+
+The original `index.html` file has been modified, while the original cesium-workshop `index.html` file has been retained under the name 
+`workshop_index.html`.
+
+A new `eosimApp.js` javascript source file has been added (based on the available `App.js` source file). This source file is the one being executed. (Refer to `<script src="Source/eosimApp.js"></script>` in the `index.html` file.)
+
+The interface with this app is through CZML files. A new CZML file is produced based on the mission processed in EOSim. This file is saved in the
+location `cesium_app/Source/SampleData/`. 
+
+The `simple.czml` file in `cesium_app/Source/SampleData/` is a new addition which was not there in the cesium-workshop repo. 
+
+**Note:** The cesium-app needs to be updated each time a new version is released by updating the `<script src=>` and the `<link href=>` 
+tags in the 'cesium_app/index.html` file. 
+
+- [ ] TODO: Add facility to input user Access-token. Current version relies on the default Cesium token.
+
 ## License and Copyright
 
 Copyright 2021 Bay Area Environmental Research Institute

@@ -213,4 +213,3 @@ class TextRedirector(object):
         self.widget.see("end")
         self.widget.insert("end",'\n')
         self.widget.configure(state="disabled")
-
