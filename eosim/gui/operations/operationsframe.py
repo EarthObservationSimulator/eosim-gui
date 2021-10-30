@@ -1,3 +1,26 @@
+""" 
+.. module:: operationsframe
+
+:synopsis: *Module to execute building of synthetic observations (visualization with plots) and 
+            visualization of observation-locations in the CesiumJS globe.*
+
+The module is named as 'operationsframe' since it is used to initiate computation and visualization of 'operations' of a satellite 
+during the mission. Is consists of mainly two parts:
+*   Initiating synthesization of satellite imagery, corresponding to times during the mission at which the observations are made.
+*   Illustrating the operations on the CesiumJS globe. 
+
+    Operations visualized on the CesiumJS are:
+
+    *   TAKEIMAGE: Lights up the ground-location (a point) with a user-supplied color.
+    *   TRANSMITDATA: Draws line b/w the communicating entities (sat/ground-station or sat/sat) during the time of communication.
+
+The module differentiates between ‘commands’ and ‘operations’, in that commands are supplied by user, while operations are the ones 
+actually executed by the spacecraft after seeing the validity of the commands. 
+Currently though there are no validity checks performed and hence commands = operations.
+
+
+"""
+
 import tkinter as tk
 import tkinter.filedialog
 from tkinter import ttk 
@@ -5,12 +28,11 @@ import os
 import webbrowser
 import threading
 from http.server import HTTPServer, SimpleHTTPRequestHandler
-import eosim.gui.helpwindow as helpwindow
 from eosim import config
 from eosim.gui.visualize.visglobeframe import VisGlobeFrame
 from eosim.gui.mapprojections import Mercator, EquidistantConic, LambertConformal, Robinson, LambertAzimuthalEqualArea, Gnomonic
 from orbitpy.util import EnumEntity
-# from orbitpy.sensorfovprojection import SensorFOVProjection, PixelShapelyPolygon REV_TEST
+# from orbitpy.sensorfovprojection import SensorFOVProjection, PixelShapelyPolygon TODO REV_TEST
 import pandas as pd
 import json
 import datetime
@@ -34,22 +56,19 @@ import logging
 logger = logging.getLogger(__name__)
 
 class CommandType(EnumEntity):
-    """Enumeration of recoginized command types."""
+    """Enumeration of recognized command types."""
     TAKEIMAGE = "TAKEIMAGE",
-    TRANSMITDATA = "TRANSMITDATA",
-    SETTINGS = "SETTINGS"
-
+    TRANSMITDATA = "TRANSMITDATA"
 class MissionEntityType(EnumEntity):
-    """Enumeration of recoginized command types."""
-    SATELLITE = "SATELLITE",
+    """Enumeration of recognized mission-entities types."""
+    SPACECRAFT = "SPACECRAFT",
     GROUNDSTATION = "GROUNDSTATION"
 
 class OperationsFrame(ttk.Frame):
 
     def __init__(self, parent, controller):
         ttk.Frame.__init__(self, parent)
-        self.controller = controller
-        
+        self.controller = controller        
 
         self.rowconfigure(0,weight=1)
         self.columnconfigure(0,weight=1)
@@ -59,17 +78,17 @@ class OperationsFrame(ttk.Frame):
         self.operations = list() # initialize list of dictionaries to store mission-operations (processed user-supplied commands)
 
         # operations schedule frame
-        opschedule_frame = ttk.LabelFrame(self, text="Command", labelanchor='n') 
-        opschedule_frame.grid(row=0, column=0, ipadx=20, ipady=20, sticky='nsew')
-        opschedule_frame.rowconfigure(0,weight=1)
-        opschedule_frame.rowconfigure(1,weight=6)
-        opschedule_frame.rowconfigure(2,weight=1)
-        opschedule_frame.columnconfigure(0,weight=1)
+        command_frame = ttk.LabelFrame(self, text="Command", labelanchor='n') 
+        command_frame.grid(row=0, column=0, ipadx=20, ipady=20, sticky='nsew')
+        command_frame.rowconfigure(0,weight=1)
+        command_frame.rowconfigure(1,weight=6)
+        command_frame.rowconfigure(2,weight=1)
+        command_frame.columnconfigure(0,weight=1)
 
-        obssyn_frame = ttk.LabelFrame(opschedule_frame, text="Synthesize Observations", labelanchor='n') 
+        obssyn_frame = ttk.LabelFrame(command_frame, text="Synthesize Observations", labelanchor='n') 
         obssyn_frame.grid(row=1, column=0, padx=20, pady=20)
 
-        progress_bar = ttk.Progressbar(opschedule_frame, orient='horizontal', length=300, mode='indeterminate')
+        progress_bar = ttk.Progressbar(command_frame, orient='horizontal', length=300, mode='indeterminate')
         progress_bar.grid(row=2, column=0, padx=20, pady=20, sticky='s')
 
         # operations visualization frame
@@ -78,10 +97,10 @@ class OperationsFrame(ttk.Frame):
         opvisz_frame.rowconfigure(0,weight=1)
         opvisz_frame.columnconfigure(0,weight=1)
         
-        # define the widgets in the opschedule_frame
-        tk.Button(opschedule_frame, text="Upload Command File", wraplength=100, width=15, command=self.click_select_command_file).grid(row=0, column=0, pady=20)
+        # define the widgets in the command_frame
+        tk.Button(command_frame, text="Upload Command File", wraplength=100, width=15, command=self.click_select_command_file).grid(row=0, column=0, pady=20)
         
-        # define the widgets in the opexec_frame
+        # define the widgets in the obssyn_frame
         ttk.Button(obssyn_frame, text="Select", state='disabled').grid(row=0, column=0, padx=10, pady=10)
         ttk.Button(obssyn_frame, text="Execute", command=lambda:self.click_synobsexec_btn(progress_bar)).grid(row=0, column=1, padx=10, pady=10)
         
@@ -98,6 +117,36 @@ class OperationsFrame(ttk.Frame):
 
         CesiumGlobeOperationsVisualizationFrame(opvisz_frame, tab1)
         SyntheticObservationsVisualizationFrame(opvisz_frame, tab2)
+
+    def click_select_command_file(self):
+        """ Read in the user-supplied command-file which is a list of json packets, where each packet indicates a single satellite command."""
+        # reinitialize operations
+        self.operations = list()
+        # read in command data
+        cmdfile_fp = None
+        cmdfile_fp = tkinter.filedialog.askopenfilename(initialdir=os.getcwd(), title="Please select the command file:", filetypes=(("All files","*.*"),("json files","*.json")))
+        if cmdfile_fp != '':
+            with open(cmdfile_fp) as f:
+                self.commands = json.load(f)  
+            logger.info("Command file successfully is read.")
+        
+        # build the operations.json file
+        #       
+        # iterate through the command packets
+        for cmd in self.commands:
+            cmd_typ = CommandType.get(cmd['@type'])  
+            if(cmd_typ==CommandType.TRANSMITDATA):
+                # TODO: validate that contact is indeed possible
+                self.operations.append(cmd)
+            elif(cmd_typ==CommandType.TAKEIMAGE):
+                # TODO: validate that observation is indeed possible
+                self.operations.append(cmd)
+
+        # write the operations.json file
+        user_dir = config.mission.settings.outDir
+        with open(user_dir+'operations.json', 'w', encoding='utf-8') as f:
+            json.dump(self.operations, f, ensure_ascii=False, indent=4)
+        logger.info("Operations updated.")
 
     def click_synobsexec_btn(self, progress_bar):
         """ Synthesize the observations indicated in the operation file."""
@@ -122,7 +171,7 @@ class OperationsFrame(ttk.Frame):
                     logger.info('Observation corresponding to command id ' + str(cmd_id))
 
                     # get the satellite state file and state corresponding to the middle to the imaging interval
-                    sat_id = oper["satelliteId"]
+                    sat_id = oper["spacecraftId"]
                     sat_state_fp = config.out_config.get_satellite_state_fp()[config.out_config.get_satellite_ids().index(sat_id)]
 
                     epoch_JDUT1 = pd.read_csv(sat_state_fp, skiprows = [0], nrows=1, header=None).astype(str) # 2nd row contains the epoch
@@ -154,12 +203,12 @@ class OperationsFrame(ttk.Frame):
 
                     # compute the pixel position data (center, edges, poles)
                     logger.info("...start computation of pixel positions...")
-                    # REV_TEST
+                    # TODO REV_TEST
                     # pixel_pos_data = SensorFOVProjection.get_pixel_position_data(user_dir, date_JDUt1, state_eci, sat_orien, sen_orien, angleWidth, angleHeight, heightDetectors, widthDetectors)
                     logger.info("...stop computation of pixel positions...")
 
                     # compute the pixel polygons
-                    # REV_TEST
+                    # TODO REV_TEST
                     # pixels = PixelShapelyPolygon(pixel_pos_data)
                     logger.info("...start computation of pixel polygons...")
                     [pixel_poly, pixel_center_pos] = pixels.make_all_pixel_polygon()
@@ -187,37 +236,7 @@ class OperationsFrame(ttk.Frame):
         
         logger.info('Start synthesize observations.')
         threading.Thread(target=real_click_sat2satconexec_btn).start()
-        logger.info('Finished synthesizing observations.')
-
-    def click_select_command_file(self):
-        # reinitialize operations
-        self.operations = list()
-        # read in command data
-        cmdfile_fp = None
-        cmdfile_fp = tkinter.filedialog.askopenfilename(initialdir=os.getcwd(), title="Please select the command file:", filetypes=(("All files","*.*"),("json files","*.json")))
-        if cmdfile_fp != '':
-            with open(cmdfile_fp) as f:
-                self.commands = json.load(f)  
-            logger.info("Command file successfully is read.")
-        
-        # build the operations.json file
-        #       
-        # iterate through the command packets
-        for cmd in self.commands:
-            cmd_typ = CommandType.get(cmd['@type'])  
-            if(cmd_typ==CommandType.TRANSMITDATA):
-                # TODO: validate that contact is indeed possible
-                self.operations.append(cmd)
-            elif(cmd_typ==CommandType.TAKEIMAGE):
-                # TODO: validate that observation is indeed possible
-                self.operations.append(cmd)
-
-        # write the operations.json file
-        user_dir = config.out_config.get_user_dir()
-        with open(user_dir+'operations.json', 'w', encoding='utf-8') as f:
-            json.dump(self.operations, f, ensure_ascii=False, indent=4)
-        logger.info("Operations updated.")
-        
+        logger.info('Finished synthesizing observations.')        
 class CesiumGlobeOperationsVisualizationFrame:
     def __init__(self, win, tab):
 
@@ -226,32 +245,59 @@ class CesiumGlobeOperationsVisualizationFrame:
 
         self.http_server_started = False
 
-        tk.Button(globe_visz_frame, text="Launch \n (Cesium powered Globe visualization)", wraplength=150, width=20, command=self.click_launch_globe_visz).pack(padx=10, pady=10, ipadx=10, ipady=10, expand=True)
+        tk.Button(globe_visz_frame, text="Launch \n (CesiumJS powered Globe visualization)", wraplength=150, width=20, command=self.click_launch_globe_visz).pack(padx=10, pady=10, ipadx=10, ipady=10, expand=True)
 
     def click_launch_globe_visz(self):
 
-        user_dir = config.out_config.get_user_dir()
-        czml_template_dir = os.path.dirname(__file__) + "/../visualize/"
+        czml_template_dir = os.path.dirname(__file__) + '/../visualize/czml_templates/'
         
-        [epoch, step_size, num_time_indices, czml_pkts] = VisGlobeFrame.build_czmlpkts_for_mission_background(user_dir, czml_template_dir)
+        [epoch, step_size, num_time_indices, czml_pkts] = VisGlobeFrame.build_czmlpkts_for_mission_background(czml_template_dir)
 
-        _czml_pkts = CesiumGlobeOperationsVisualizationFrame.build_czmlpkts_for_operational_contacts(user_dir, czml_template_dir, epoch, step_size, num_time_indices)
-        czml_pkts.extend(_czml_pkts)
-
-        cesium_data_dir = os.path.dirname(__file__) + "/../../../cesium_app/Source/SampleData/"        
-        self.execute_cesium_engine(cesium_data_dir, czml_pkts)       
-
-    @staticmethod
-    def build_czmlpkts_for_operational_contacts(user_dir, czml_template_dir, epoch, step_size, num_time_indices):
-        
+        user_dir = config.mission.settings.outDir
         with open(user_dir+"operations.json", 'r') as f:
             operations = json.load(f)
 
+        _czml_pkts = self.build_czmlpkts_for_operational_contacts(operations, czml_template_dir, epoch, step_size, num_time_indices)
+        czml_pkts.extend(_czml_pkts)
+
+        cesium_data_dir = os.path.dirname(__file__) + "/../../../cesium_app/Source/SampleData/"
+         # write the CZML data file        
+        with open(cesium_data_dir+"eosim_data.czml", 'w') as f:
+            json.dump(czml_pkts, f, indent=4)
+        # rename file to czml extension
+        #os.rename(cesium_data_dir+'eosim_data.json', cesium_data_dir+'eosim_data.czml')
+
+        self.execute_cesium_app()       
+        
+    def execute_cesium_app(self):
+        """ Execute the Cesium application by starting web server in the cesium_app directory (which contains the `index.html` file
+            which then references the eosimApp.js script).
+        """        
+        # Execute the cesium app
+        def start_webserver():
+            if(self.http_server_started is False):
+                web_dir = os.path.join(os.path.dirname(__file__), '../../../cesium_app/')
+                os.chdir(web_dir)          
+                self.httpd = HTTPServer(('localhost', 8080), SimpleHTTPRequestHandler)
+                self.http_server_started = True
+                self.httpd.serve_forever()
+            else:
+                pass
+        # start webserver
+        threading.Thread(target=start_webserver).start() # creating a thread so that the GUI doesn't freeze.
+
+        time.sleep(1) # allow enough time for the server to start
+
+        webbrowser.open('http://localhost:8080/', new=2) # open webbrowser       
+
+    @staticmethod
+    def build_czmlpkts_for_operational_contacts(operations, czml_template_dir, epoch, step_size, num_time_indices):
+        
         czml_pkts = []
 
         # observed position packet
         with open(czml_template_dir+"observed_gp_template.json", 'r') as f:
-            oberv_pkt = json.load(f)
+            observ_pkt = json.load(f)
 
         # ground-station, inter-satellite comm packets
         with open(czml_template_dir+"contacts_template.json", 'r') as f:
@@ -260,58 +306,63 @@ class CesiumGlobeOperationsVisualizationFrame:
         contacts_pkt[0]["id"] = str(uuid.uuid4()) # TODO: Not sure if this parent packet is required
         czml_pkts.append(contacts_pkt[0])
 
-        # initialize communication between every pair of entities to "no-contact". Note that these packets have to appear strictly before the packets showing the contacts.
-        # between satellite and ground-station
-        sat_out = config.out_config.get_satout()  
-        miss_time_from = epoch.isoformat() + 'Z' #TODO: check Z
-        miss_time_to = (epoch + datetime.timedelta(0,int(num_time_indices* step_size))).isoformat() + 'Z' #TODO: check Z
+        miss_time_from = epoch.isoformat() + 'Z'
+        miss_time_to = (epoch + datetime.timedelta(0,int(num_time_indices* step_size))).isoformat() + 'Z'
         mission_interval = miss_time_from + "/" + miss_time_to
 
-        # satellite with ground-station
+        # initialize communication between every pair of entities to "no-contact". 
+        # Note that these packets have to appear strictly before the packets showing the contacts.
+        
+        # satellite with ground-station        
+        satellites = config.mission.spacecraft # list of orbitpy.util.Spacecraft objects in the mission
+        ground_station = config.mission.groundStation # list of orbitpy.util.GroundStation objects in the mission
+
         sat_with_gs_comm_ids = []
-        for _sat in sat_out: 
-            sat_id = _sat["@id"]
-            if _sat.get("GroundStationComm", None) is not None:
-                for _gs in _sat["GroundStationComm"]:
-                    groundstn_id = _gs["@id"]
-                    _pkt = copy.deepcopy(contacts_pkt[1])
-                    _pkt["id"] = str(sat_id) + "-with-" + str(groundstn_id) 
-                    sat_with_gs_comm_ids.append(_pkt["id"])
-                    _pkt["name"] = _pkt["id"]
-                    _pkt["polyline"]["show"] =  {"interval":mission_interval, "boolean":False} # initialization of no contacts throughout the mission case
-                    _pkt["polyline"]["positions"]["references"] = [str(sat_id)+"#position",str(groundstn_id)+"#position"]                    
-                    czml_pkts.append(_pkt)
+        if satellites:
+            if ground_station:
+                for sat in satellites: 
+                    sat_id = sat._id
+                    for gndstn in ground_station:
+                        gndstn_id = gndstn._id
+                        _pkt = copy.deepcopy(contacts_pkt[1])
+                        _pkt["id"] = str(sat_id) + "-with-" + str(gndstn_id) # record the ids stored. the order (i.e. sat_id-to-gndstn_id or gndstn_id-to-sat_id) is important
+                        sat_with_gs_comm_ids.append(_pkt["id"])
+                        _pkt["name"] = _pkt["id"]
+                        _pkt["polyline"]["show"] =  {"interval":mission_interval, "boolean":False} # initialization of no-contacts throughout the mission-interval
+                        _pkt["polyline"]["positions"]["references"] = [str(sat_id)+"#position",str(gndstn_id)+"#position"]                    
+                        czml_pkts.append(_pkt)
 
         # between satellite and satellite
         intersatcomm_ids = []
-        for j in range(0,len(sat_out)):
-            sat1_id = sat_out[j]["@id"]
-            for k in range(j+1,len(sat_out)):                
-                sat2_id = sat_out[k]["@id"]
-                _pkt = copy.deepcopy(contacts_pkt[1])
-                _pkt["id"] = str(sat1_id) + "-with-" + str(sat2_id) 
-                intersatcomm_ids.append(_pkt["id"]) # record the ids stored. the order is important to reference the subsequent packets
-                _pkt["name"] = _pkt["id"]
-                _pkt["polyline"]["show"] =  {"interval":mission_interval, "boolean":False}  # initialization of no contacts throughout the mission case
-                _pkt["polyline"]["positions"]["references"] = [str(sat1_id)+"#position",str(sat2_id)+"#position"]
-                czml_pkts.append(_pkt)
+        if satellites:
+            for j in range(0,len(satellites)):
+                sat1_id = satellites[j]._id
+                for k in range(j+1,len(satellites)):                
+                    sat2_id = satellites[k]._id
+                    _pkt = copy.deepcopy(contacts_pkt[1])
+                    _pkt["id"] = str(sat1_id) + "-with-" + str(sat2_id) 
+                    intersatcomm_ids.append(_pkt["id"]) # record the ids stored. the order (i.e. sat1_id-to-sat2_id or sat2_id-to-sat1_id) is important
+                    _pkt["name"] = _pkt["id"]
+                    _pkt["polyline"]["show"] =  {"interval":mission_interval, "boolean":False}  # initialization of no contacts throughout the mission case
+                    _pkt["polyline"]["positions"]["references"] = [str(sat1_id)+"#position",str(sat2_id)+"#position"]
+                    czml_pkts.append(_pkt)
 
         # iterate over each operation in the list of operations. If they correspond to ground-station communications or intersatellite communications,
-        # make the corresponding czml packet
+        # or taking images, make the corresponding czml packet
         for oper in operations:            
             if(CommandType.get(oper['@type']) == CommandType.TRANSMITDATA):                
                 
                 tx_entity_id = oper["txEntityId"]
                 rx_entity_id = oper["rxEntityId"]
 
-                time_from = (epoch + datetime.timedelta(0,int(oper['timeIndexStart'] * step_size))).isoformat() + 'Z' #TODO: check Z
-                time_to = (epoch + datetime.timedelta(0,int(oper['timeIndexEnd'] * step_size))).isoformat() + 'Z' #TODO: check Z
+                time_from = (epoch + datetime.timedelta(0, oper['startTime'])).isoformat() + 'Z'
+                time_to = (epoch + datetime.timedelta(0, oper['endTime'])).isoformat() + 'Z'
                 interval = time_from + "/" + time_to
                 contact = {"interval":interval, "boolean":True}
 
                 _pkt = copy.deepcopy(contacts_pkt[1])
                 
-                if(MissionEntityType.get(oper["txEntityType"])==MissionEntityType.SATELLITE and MissionEntityType.get(oper["rxEntityType"])==MissionEntityType.SATELLITE):
+                if(MissionEntityType.get(oper["txEntityType"])==MissionEntityType.SPACECRAFT and MissionEntityType.get(oper["rxEntityType"])==MissionEntityType.SPACECRAFT):
                     if(str(tx_entity_id) + "-with-" + str(rx_entity_id) in intersatcomm_ids):                
                         _pkt["id"] = str(tx_entity_id) + "-with-" + str(rx_entity_id) 
                         _pkt["polyline"]["positions"]= [str(tx_entity_id)+"#position",str(rx_entity_id)+"#position"]   
@@ -327,64 +378,34 @@ class CesiumGlobeOperationsVisualizationFrame:
                         _pkt["polyline"]["positions"]= [str(rx_entity_id)+"#position",str(tx_entity_id)+"#position"]   
                     
                 _pkt["name"] = _pkt["id"]
-                _pkt["polyline"]["show"] = contact if bool(contact) else False # no (valid) contacts throughout the mission case
+                _pkt["polyline"]["show"] = contact if bool(contact) else False
                              
                 czml_pkts.append(_pkt)
                             
             elif(CommandType.get(oper['@type']) == CommandType.TAKEIMAGE):
 
-                offset = 0 # TODO: Need to Revise
-                time_from = (epoch + datetime.timedelta(0,offset+int(oper['timeIndexStart'] * step_size))).isoformat() + 'Z' #TODO: check Z
-                #time_to = (epoch + datetime.timedelta(0,offset+int(oper['timeIndexEnd'] * step_size))).isoformat() + 'Z' #TODO: check Z
-                time_to = miss_time_to# TODO: Undo this
+                offset = 0 # TODO: Need to remove. If there is a difference in the understanding of absolute-time of the CesiumJS engine and OrbitPy then this is needed. Ideally it should be 0.
+                time_from = (epoch + datetime.timedelta(0, offset + oper['startTime'])).isoformat() + 'Z'
+                #time_to = (epoch + datetime.timedelta(0,offset + oper['endTime'])).isoformat() + 'Z'
+                time_to = miss_time_to # TODO:  This make the imaged-locations be highlighted until the end of the animation.
                 interval = time_from + "/" + time_to
-                initialize_interval = {"interval":mission_interval, "boolean":False} # this is necessary, else the point is shown over entire mission interval 
+                initialize_interval = {"interval": mission_interval, "boolean":False} # this is necessary, else the point is shown over entire mission interval 
                 obs_interval = {"interval":interval, "boolean":True} 
 
-                if(not isinstance(oper["observedPosition"]["cartographicDegrees"][0],list)):
+                if(not isinstance(oper["observedPosition"]["cartographicDegrees"][0],list)): 
                     oper["observedPosition"]["cartographicDegrees"] = [oper["observedPosition"]["cartographicDegrees"]]
                 k = 0
                 for obs_pos in oper["observedPosition"]["cartographicDegrees"]: # iterate over possibly multiple points seen over the same time-interval
-                    _pkt = copy.deepcopy(oberv_pkt)
-                    _pkt["id"] = "ObservedGroundPointSat" + str(oper["satelliteId"]) + "Instru" + str(oper["instrumentId"]) + str(time_from) + "_"+str(k) # only one czml packet per (sat, instru, time-start)
+                    _pkt = copy.deepcopy(observ_pkt)
+                    _pkt["id"] = "ObservedGroundPointSat" + str(oper["spacecraftId"]) + str(time_from) + "_" + str(k) # only one czml packet per (sat, instru, time-start). multiple ground-points encoded in the single packet.
                     _pkt["point"]["show"] = [initialize_interval, obs_interval]
-                    _pkt["position"]["cartographicDegrees"]= obs_pos
-
-                    if(oper["observationValue"] <= 0.3333):
-                        _pkt["point"]["color"] = {"rgba": [255,0,0,255]}
-                    elif(oper["observationValue"] > 0.333 and oper["observationValue"] <= 0.66666):
-                        _pkt["point"]["color"] = {"rgba": [255,255,0,255]}
-                    elif(oper["observationValue"] > 0.66666):
-                        _pkt["point"]["color"] = {"rgba": [0,255,17,255]}
+                    _pkt["position"]["cartographicDegrees"]= obs_pos # [longitude[deg], latitude[deg], height[m]]
+                    _pkt["point"]["color"] = oper["color"]
 
                     czml_pkts.append(_pkt)
                     k = k + 1
 
         return czml_pkts
-
-    def execute_cesium_engine(self, cesium_data_dir, czml_pkts):
-        # write the CZML data file        
-        with open(cesium_data_dir+"eosim_data.json", 'w') as f: # TODO change the directory where the CZML file is stored
-            json.dump(czml_pkts, f, indent=4)
-        # rename file to czml extension
-        os.rename(cesium_data_dir+'eosim_data.json', cesium_data_dir+'eosim_data.czml')
-        
-        # Execute the cesium app
-        def start_webserver():
-            if(self.http_server_started is False):
-                web_dir = os.path.join(os.path.dirname(__file__), '../../../cesium_app/')
-                os.chdir(web_dir)          
-                self.httpd = HTTPServer(('localhost', 8080), SimpleHTTPRequestHandler)
-                self.http_server_started = True
-                self.httpd.serve_forever()
-            else:
-                pass
-        # start webserver
-        threading.Thread(target=start_webserver).start()
-
-        time.sleep(1) # allow enough time for the server to start
-
-        webbrowser.open('http://localhost:8080/', new=2) # open webbrowser
 
 class SyntheticObservationsVisualizationFrame:
     def __init__(self, win, tab):

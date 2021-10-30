@@ -54,10 +54,8 @@ class VisGlobeFrame(ttk.Frame):
 
         cesium_data_dir = os.path.dirname(__file__) + "/../../../cesium_app/Source/SampleData/"
         # write the CZML data file        
-        with open(cesium_data_dir+"eosim_data.json", 'w') as f:
+        with open(cesium_data_dir+"eosim_data.czml", 'w') as f:
             json.dump(czml_pkts, f, indent=4)
-        # rename file to czml extension
-        os.rename(cesium_data_dir+'eosim_data.json', cesium_data_dir+'eosim_data.czml')
 
         self.execute_cesium_app()       
         
