@@ -253,6 +253,14 @@ class CesiumGlobeOperationsVisualizationFrame:
         
         [epoch, step_size, num_time_indices, czml_pkts] = VisGlobeFrame.build_czmlpkts_for_mission_background(czml_template_dir)
 
+        # TODO REV NOS DEMO
+        #_czml_pkts = VisGlobeFrame.build_czmlpkts_for_ground_stn_contact_opportunities(czml_template_dir, epoch, step_size, num_time_indices)
+        #czml_pkts.extend(_czml_pkts)
+       
+        # TODO REV NOS DEMO
+        #_czml_pkts = VisGlobeFrame.build_czmlpkts_for_intersat_contact_opportunities(czml_template_dir, epoch, step_size, num_time_indices)
+        #czml_pkts.extend(_czml_pkts)
+
         user_dir = config.mission.settings.outDir
         with open(user_dir+"operations.json", 'r') as f:
             operations = json.load(f)
@@ -385,7 +393,8 @@ class CesiumGlobeOperationsVisualizationFrame:
             elif(CommandType.get(oper['@type']) == CommandType.TAKEIMAGE):
 
                 offset = 0 # TODO: Need to remove. If there is a difference in the understanding of absolute-time of the CesiumJS engine and OrbitPy then this is needed. Ideally it should be 0.
-                time_from = (epoch + datetime.timedelta(0, offset + oper['startTime'])).isoformat() + 'Z'
+                time_from = oper['startTime'] # TODO REV NOS DEMO
+                # time_from = (epoch + datetime.timedelta(0, offset + 5*oper['startTime'])).isoformat() + 'Z' # TODO REV NOS DEMO
                 #time_to = (epoch + datetime.timedelta(0,offset + oper['endTime'])).isoformat() + 'Z'
                 time_to = miss_time_to # TODO:  This make the imaged-locations be highlighted until the end of the animation.
                 interval = time_from + "/" + time_to

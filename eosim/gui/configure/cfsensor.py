@@ -68,7 +68,7 @@ class SideLookOrientation(ttk.Frame):
     
     def get_specs(self):
         """ Return the orientation specifications as dictionary."""
-        return { 'referenceFrame': str(self.ref_frame_combobox.get()), 'convention': float(self.sla_entry.get())}
+        return { 'referenceFrame': str(self.ref_frame_combobox.get()), 'convention': 'SIDE_LOOK', 'sideLookAngle':float(self.sla_entry.get())}
 
 class SyntheticDataConfigurationFrame(ttk.Frame):
     """ Class to handle the synthetic data configuration."""

@@ -157,7 +157,7 @@ class VisGlobeFrame(ttk.Frame):
 
                 _sat_pkt = copy.deepcopy(sat_pkt_template)
                 _sat_pkt["id"] = sat_id
-                _sat_pkt["name"] = "Sat"+_sat_pkt["id"]
+                _sat_pkt["name"] = _sat_pkt["id"]#"Sat"+_sat_pkt["id"]
                 _sat_pkt["label"]["text"] = _sat_pkt["name"]
                 _sat_pkt["position"]["epoch"] = epoch.isoformat() + 'Z'
                 _sat_pkt["position"]["cartesian"] = sat_state_df.values.flatten().tolist()
@@ -168,15 +168,16 @@ class VisGlobeFrame(ttk.Frame):
         with open(czml_template_dir+"covgrid_pkt_template.json", 'r') as f:
             covgrid_pkt_template = json.load(f)
         # iterate over list of grids in the mission
-        for grid in config.mission.grid:
-            (lat, lon) = grid.get_lat_lon() # the latitudes and longitudes (in degrees) are returned in lists
-            # each grid-point in the grid is encoded in a separate packet
-            for index, val in enumerate(lat):
-                _pkt = copy.deepcopy(covgrid_pkt_template)
-                _pkt["id"] = "Gridpoint/"+ str(grid._id) + "/"+ str(index)
-                _pkt["position"] = {}
-                _pkt["position"]["cartographicDegrees"] = [lon[index], lat[index], 0]
-                czml_pkts.append(_pkt)
+        if config.mission.grid:
+            for grid in config.mission.grid:
+                (lat, lon) = grid.get_lat_lon() # the latitudes and longitudes (in degrees) are returned in lists
+                # each grid-point in the grid is encoded in a separate packet
+                for index, val in enumerate(lat):
+                    _pkt = copy.deepcopy(covgrid_pkt_template)
+                    _pkt["id"] = "Gridpoint/"+ str(grid._id) + "/"+ str(index)
+                    _pkt["position"] = {}
+                    _pkt["position"]["cartographicDegrees"] = [lon[index], lat[index], 0]
+                    # czml_pkts.append(_pkt) # TODO NOS OCEANS 
 
         return [epoch, step_size, num_time_indices, czml_pkts]
 

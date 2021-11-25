@@ -15,6 +15,7 @@ test3/*
 *.o
 *.exe
 core
+*.csv
 
 # compiled Python
 *.pyc
