@@ -13,5 +13,5 @@ setup(
     packages=['eosim'],
     scripts=[ 
     ],
-    install_requires=['numpy', 'pandas', 'scipy', 'lowtran', 'nose', 'sphinx', 'sphinx_rtd_theme', 'cartopy'] 
+    install_requires=['numpy', 'pandas', 'scipy', 'lowtran', 'astropy', 'cartopy'] 
 )

@@ -9,6 +9,109 @@ Run the application using the following command from terminal:
 python bin/eosimapp.py
 ```
 
+## Documentation 
+
+Documentation about the code base is available in the `docs/codebase_description.pptx` presentation.
+
+The file structure is as below:
+
+```
+│   .gitignore
+│   debug.log
+│   LICENSE
+│   Makefile
+│   README.md
+│   setup.py
+│
+│
+├───bin
+│        eosimapp.py
+│
+├───cesium_app
+│   │   .gitignore
+│   │   index.css
+│   │   index.html
+│   │   LICENSE.md
+│   │   package-lock.json
+│   │   package.json
+│   │   README.md
+│   │   server.js
+│   │   workshop_index.html
+│   │
+│   └───Source
+│       │   App.js
+│       │   AppSkeleton.js
+│       │   eosimApp.js
+│       │
+│       ├───Images
+│       │       ajax-loader.gif
+│       │
+│       └───SampleData
+│           │   eosim_data.czml
+│           │   sampleFlight.czml
+│           │   sampleGeocacheLocations.kml
+│           │   sampleNeighborhoods.geojson
+│           │   simple.czml
+│           │   testdata.czml
+│           │
+│           └───Models
+│                   CesiumDrone.gltf
+│
+├───docs
+│      codebase_description.pptx
+│
+├───eosim
+    │   config.py
+    │   __init__.py
+    │
+    ├───gui
+	    │   executeframe.py
+	    │   helpwindow.py
+	    │   mainapplication.py
+	    │   mapprojections.py
+	    │   welcomeframe.py
+	    │   __init__.py
+	    │
+	    ├───configure
+	    │   │   cfconstellation.py
+	    │   │   cfcoverage.py
+	    │   │   cfframe.py
+	    │   │   cfgroundstation.py
+	    │   │   cfintersatellitecomm.py
+	    │   │   cfmission.py
+	    │   │   cfpropagate.py
+	    │   │   cfsatellite.py
+	    │   │   cfsensor.py
+	    │   │   __init__.py
+	    │
+	    ├───help
+	    │       cone_maneuver.png
+	    │       help_database.json
+	    │       mercator_proj.png
+	    │       rollonly_maneuver.png
+	    │
+	    ├───operations
+	    │   │   operationsframe.py
+	    │   │   __init__.py
+	    │   
+	    │
+	    ├───visualize
+	        │   insightsframe.py
+	        │   vis2dframe.py
+	        │   visglobeframe.py
+	        │   vismapframe.py
+	        │   visualizeframe.py
+	        │   __init__.py
+	        │
+	        ├───czml_templates
+	        │       clock_template.json
+	        │       contacts_template.json
+	        │       covgrid_pkt_template.json
+	        │       ground_station_template.json
+	        │ 		observed_gp_template.json
+	        │       satellite_template.json
+```
+
 ## Cesium App 
 The Cesium JavaScript app is based on the showcased example of Cesium features in the *cesium-workshop* repository. It is contained in the `.\cesium_app\` folder. 
 

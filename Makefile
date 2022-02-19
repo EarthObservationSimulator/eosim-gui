@@ -16,27 +16,10 @@ help:
 	@echo "  clean      to remove *.pyc files and __pycache__ directories"
 	@echo "  bare       to uninstall the package and remove *egg*"
 
-all: bare install docs
-
-docs: docs_clean #Build the documentation
-	-X=`pwd`; \
-	echo '<<<' $$DOC '>>>'; cd $$X; cd $(DOC); make html;
-
-docs_clean: 
-	-X=`pwd`; \
-	echo '<<<' $$DOC '>>>'; cd $$X; cd $(DOC); make clean;
+all: bare install
 
 install:
 	pip install -e .
-
-runtest:
-	@nosetests --exe
-
-testlog:
-	@nosetests --nologcapture --exe
-
-fulltest:
-	@nosetests --nologcapture -v --exe
 
 clean: docs_clean
 	@echo "Cleaning up..."
