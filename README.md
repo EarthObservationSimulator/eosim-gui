@@ -4,10 +4,40 @@
 
 Requires: Unix-like operating system (requirement of `orbitpy`), `python 3.8`, `pip`, `orbitpy`, `instrupy`, `cartopy`, `metpy`, `scipy` and `astropy`.
 
+CartoPy must be first installed separately. Note that CartoPy has several dependencies whose installation procedure may be different depending on the underlying operating system. Please check [here](https://scitools.org.uk/cartopy/docs/latest/installing.html)
+
+If `conda` is being utilized, then CartoPy installation is simple and can be done using the command:
+```
+conda install -c conda-forge cartopy
+```
+
+After CartoPy installation, run the following command in the main repo directory:
+```
+make
+```
+
 Run the application using the following command from terminal:
 ```
 python bin/eosimapp.py
 ```
+
+## Cesium App 
+The Cesium JavaScript app is based on the showcased example of Cesium features in the *cesium-workshop* repository. It is contained in the `.\cesium_app\` folder. 
+
+The original `index.html` file has been modified, while the original cesium-workshop `index.html` file has been retained under the name 
+`workshop_index.html`.
+
+A new `eosimApp.js` javascript source file has been added (based on the available `App.js` source file). This source file is the one being executed. (Refer to `<script src="Source/eosimApp.js"></script>` in the `index.html` file.)
+
+The interface with this app is through CZML files. A new CZML file is produced based on the mission processed in EOSim. This file is saved in the
+location `cesium_app/Source/SampleData/`. 
+
+The `simple.czml` file in `cesium_app/Source/SampleData/` is a new addition which was not there in the cesium-workshop repo. 
+
+**Note:** The cesium-app needs to be updated each time a new version is released by updating the `<script src=>` and the `<link href=>` 
+tags in the 'cesium_app/index.html` file. 
+
+- [ ] TODO: Add facility to input user Access-token. Current version relies on the default Cesium token.
 
 ## Documentation 
 
@@ -111,24 +141,6 @@ The file structure is as below:
 	        │ 		observed_gp_template.json
 	        │       satellite_template.json
 ```
-
-## Cesium App 
-The Cesium JavaScript app is based on the showcased example of Cesium features in the *cesium-workshop* repository. It is contained in the `.\cesium_app\` folder. 
-
-The original `index.html` file has been modified, while the original cesium-workshop `index.html` file has been retained under the name 
-`workshop_index.html`.
-
-A new `eosimApp.js` javascript source file has been added (based on the available `App.js` source file). This source file is the one being executed. (Refer to `<script src="Source/eosimApp.js"></script>` in the `index.html` file.)
-
-The interface with this app is through CZML files. A new CZML file is produced based on the mission processed in EOSim. This file is saved in the
-location `cesium_app/Source/SampleData/`. 
-
-The `simple.czml` file in `cesium_app/Source/SampleData/` is a new addition which was not there in the cesium-workshop repo. 
-
-**Note:** The cesium-app needs to be updated each time a new version is released by updating the `<script src=>` and the `<link href=>` 
-tags in the 'cesium_app/index.html` file. 
-
-- [ ] TODO: Add facility to input user Access-token. Current version relies on the default Cesium token.
 
 ## License and Copyright
 
