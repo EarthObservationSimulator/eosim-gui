@@ -5,11 +5,8 @@ docs/_build/*
 !docs/_static/.gitkeep
 docs/_templates/*
 !docs/_templates/.gitkeep
-test_sim/*
-output/*
-test1/*
-test2/*
-test3/*
+
+cesium_app/Source/SampleData/eosim_data.czml
 
 # objects, executables, core dumps
 *.o
