@@ -3,7 +3,7 @@
     "name":"GPx",
     "point": {
       "scale":1.5,
-      "pixelSize": 10,
+      "pixelSize": 2,
       "show":{
           "interval":"0000-01-01T00:00:00Z/2012-03-15T10:16:06.97400000000198Z",
           "boolean":true

@@ -177,7 +177,7 @@ class VisGlobeFrame(ttk.Frame):
                     _pkt["id"] = "Gridpoint/"+ str(grid._id) + "/"+ str(index)
                     _pkt["position"] = {}
                     _pkt["position"]["cartographicDegrees"] = [lon[index], lat[index], 0]
-                    # czml_pkts.append(_pkt) # TODO NOS OCEANS 
+                    czml_pkts.append(_pkt) 
 
         return [epoch, step_size, num_time_indices, czml_pkts]
 

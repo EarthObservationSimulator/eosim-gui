@@ -393,15 +393,37 @@ class CesiumGlobeOperationsVisualizationFrame:
             elif(CommandType.get(oper['@type']) == CommandType.TAKEIMAGE):
 
                 offset = 0 # TODO: Need to remove. If there is a difference in the understanding of absolute-time of the CesiumJS engine and OrbitPy then this is needed. Ideally it should be 0.
-                time_from = oper['startTime'] # TODO REV NOS DEMO
-                # time_from = (epoch + datetime.timedelta(0, offset + 5*oper['startTime'])).isoformat() + 'Z' # TODO REV NOS DEMO
+                #time_from = oper['startTime'] # TODO REV NOS DEMO
+                time_from = (epoch + datetime.timedelta(0, offset + oper['timeIndexStart'])).isoformat() + 'Z' # TODO Rich version
                 #time_to = (epoch + datetime.timedelta(0,offset + oper['endTime'])).isoformat() + 'Z'
                 time_to = miss_time_to # TODO:  This make the imaged-locations be highlighted until the end of the animation.
                 interval = time_from + "/" + time_to
                 initialize_interval = {"interval": mission_interval, "boolean":False} # this is necessary, else the point is shown over entire mission interval 
                 obs_interval = {"interval":interval, "boolean":True} 
 
+                # TODO Rich version
                 if(not isinstance(oper["observedPosition"]["cartographicDegrees"][0],list)): 
+                    oper["observedPosition"]["cartographicDegrees"] = [oper["observedPosition"]["cartographicDegrees"]]
+                k = 0
+                for obs_pos in oper["observedPosition"]["cartographicDegrees"]: # iterate over possibly multiple points seen over the same time-interval
+                    _pkt = copy.deepcopy(observ_pkt)
+                    _pkt["id"] = "ObservedGroundPointSat" + str(oper["satelliteId"]) + str(time_from) + "_" + str(k) # only one czml packet per (sat, instru, time-start). multiple ground-points encoded in the single packet.
+                    _pkt["point"]["show"] = [initialize_interval, obs_interval]
+                    _pkt["position"]["cartographicDegrees"]= obs_pos # [longitude[deg], latitude[deg], height[m]]
+                    
+                    if(oper["observationValue"] <= 0.3333):
+                        _pkt["point"]["color"] = {"rgba": [255,0,0,255]}
+                    elif(oper["observationValue"] > 0.333 and oper["observationValue"] <= 0.66666):
+                        _pkt["point"]["color"] = {"rgba": [255,255,0,255]}
+                    elif(oper["observationValue"] > 0.66666):
+                        _pkt["point"]["color"] = {"rgba": [0,255,17,255]}
+
+                    czml_pkts.append(_pkt)
+                    k = k + 1
+
+                '''
+                # TODO Correct version
+                if(not isinstance(oper["observedPosition"]["cartographicDegrees"][0],list)):
                     oper["observedPosition"]["cartographicDegrees"] = [oper["observedPosition"]["cartographicDegrees"]]
                 k = 0
                 for obs_pos in oper["observedPosition"]["cartographicDegrees"]: # iterate over possibly multiple points seen over the same time-interval
@@ -413,6 +435,8 @@ class CesiumGlobeOperationsVisualizationFrame:
 
                     czml_pkts.append(_pkt)
                     k = k + 1
+                ''' 
+                
 
         return czml_pkts
 
