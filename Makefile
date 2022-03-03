@@ -18,7 +18,9 @@ help:
 
 all: bare install
 
-install:
+install: 
+# cartopy installation to be done prior to this. If using conda, can be done using the command `conda install -c conda-forge cartopy`
+# In case of Runtime errors involving numpy (after installation), try the following command: `pip install numpy --upgrade --ignore-installed`
 	pip install -e .
 
 clean: docs_clean

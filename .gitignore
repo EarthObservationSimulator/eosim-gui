@@ -14,6 +14,9 @@ cesium_app/Source/SampleData/eosim_data.czml
 core
 *.csv
 
+# files
+debug.log
+
 # compiled Python
 *.pyc
 

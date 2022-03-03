@@ -21,6 +21,19 @@ Run the application using the following command from terminal:
 python bin/eosimapp.py
 ```
 
+### Known Issues
+In some cases, *runtime* errors involving the numpy package such as the one below may ensue:
+```
+module compiled against API version 0xf but this version of numpy is 0xe
+```
+
+This may be due to incompatile numpy package installation.
+Please run the below command to fix it:
+```
+pip install numpy --upgrade --ignore-installed
+```
+
+
 ## Cesium App 
 The Cesium JavaScript app is based on the showcased example of Cesium features in the *cesium-workshop* repository. It is contained in the `.\cesium_app\` folder. 
 
