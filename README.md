@@ -21,7 +21,7 @@ Run the application using the following command from terminal:
 python bin/eosimapp.py
 ```
 
-### Known Issues
+### Troubleshooting
 In some cases, *runtime* errors involving the numpy package such as the one below may ensue:
 ```
 module compiled against API version 0xf but this version of numpy is 0xe
@@ -33,6 +33,21 @@ Please run the below command to fix it:
 pip install numpy --upgrade --ignore-installed
 ```
 
+### Known Issues
+If Windows Subsystem for Linux 2 (WSL2) is being used, the animation display using CesiumJs does not work properly. The following error is displayed:
+```
+tcgetpgrp failed: Not a tty
+```
+
+Running the following command removes the error (atleast from display) (See [here](https://pythonshowcase.com/question/using-plotly-in-wsl-changes-the-font-console-window-changes-to-raster-and-wont-work-at-all-in-vscode)).
+```
+export BROWSER="/mnt/c/path/to/browser.exe"
+```
+
+Example:
+```
+export BROWSER="/mnt/c/Program Files/Google/Chrome/Application/chrome.exe"
+```
 
 ## Cesium App 
 The Cesium JavaScript app is based on the showcased example of Cesium features in the *cesium-workshop* repository. It is contained in the `.\cesium_app\` folder. 
