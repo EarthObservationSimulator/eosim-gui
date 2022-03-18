@@ -166,6 +166,9 @@ def open_sim():
         config.mission.update_settings(outDir=sim_dir_path+"/") # as a precaution since the folder could be copied from elsewhere, update the output-directory specification.
         logger.info("Simulation loaded.")
         logger.warning("Incomplete mission specifications (e.g. missing propagator settings) shall be populated with default values.")
+    else:
+        config.mission.update_settings(outDir=sim_dir_path+"/")
+        logger.info("Directory is treated as a new workspace.")
     return
 
 def click_save():
