@@ -2,6 +2,7 @@ from tkinter import ttk
 import tkinter as tk
 from eosim import config
 import random
+import numpy as np
 import tkinter.filedialog, tkinter.messagebox
 from instrupy.base import Instrument
 import os
@@ -555,7 +556,7 @@ class BasicSensorInputConfigure():
         # define the widgets in okcancel_frame
         # okcancel frame
         def add_sensor_click():  
-            # create window to ask which satellites to attach the sensor to
+            # create window to ask which satellites to attach the sensor
             select_sat_win = tk.Toplevel()
             select_sat_win_frame = ttk.LabelFrame(select_sat_win, text='Select Satellite(s)')
             select_sat_win_frame.grid(row=0, column=0, columnspan=2, padx=10, pady=10) 
@@ -570,25 +571,27 @@ class BasicSensorInputConfigure():
             sat_tree.grid(row=0, column=0, sticky='e')
             sat_tree_scroll.config(command=sat_tree.yview)
 
-            sat_tree['columns'] = ("ID", "Alt", "Inc", "RAAN", "AOP", "TA")
+            sat_tree['columns'] = ("ID", "SMA", "ECC", "INC", "RAAN", "AOP", "TA")
             sat_tree.column('#0', width=0, stretch="no")
             sat_tree.column("ID", width = 80)        
-            sat_tree.column("Alt",  width = 80)     
-            sat_tree.column("Inc", width = 80)     
+            sat_tree.column("SMA",  width = 80)
+            sat_tree.column("ECC",  width = 80)
+            sat_tree.column("INC", width = 80)     
             sat_tree.column("RAAN", width = 80)     
             sat_tree.column("AOP",  width = 80)     
             sat_tree.column("TA", width = 80)            
 
             sat_tree.heading("#0", text="", anchor="w")
             sat_tree.heading("ID", text="ID", anchor="w")
-            sat_tree.heading("Alt", text="Altitude [km]", anchor="w")
-            sat_tree.heading("Inc", text="Inclination [deg]", anchor="w")
+            sat_tree.heading("SMA", text="SMA [km]", anchor="w")
+            sat_tree.heading("ECC", text="ECC", anchor="w")
+            sat_tree.heading("INC", text="INC [deg]", anchor="w")
             sat_tree.heading("RAAN", text="RAAN [deg]", anchor="w")
             sat_tree.heading("AOP", text="AOP [deg]", anchor="w")
             sat_tree.heading("TA", text="TA [deg]", anchor="w")
 
             for k in range(0,len(orb_specs)):
-                sat_tree.insert(parent='', index='end', iid=orb_specs[k][0], text="", values=(orb_specs[k][0], orb_specs[k][1], orb_specs[k][2], orb_specs[k][3], orb_specs[k][4], orb_specs[k][5], orb_specs[k][6]))
+                sat_tree.insert(parent='', index='end', iid=orb_specs[k][0], text="", values=(orb_specs[k][0], orb_specs[k][1], np.round(orb_specs[k][2],4), np.round(np.rad2deg(orb_specs[k][3]),4), np.round(np.rad2deg(orb_specs[k][4]),4), np.round(np.rad2deg(orb_specs[k][5]),4), np.round(np.rad2deg(orb_specs[k][6]),4)))
 
             def ok_click_2():
                 """ Actions upon the click add Sensor followed by selection of satellites. The mission configuration file is updated with the sensors

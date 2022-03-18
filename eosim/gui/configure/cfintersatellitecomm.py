@@ -1,6 +1,6 @@
 from tkinter import ttk 
 import tkinter as tk
-from eosim.config import GuiStyle, MissionConfig
+from eosim.config import GuiStyle
 from eosim import config
 from eosim.gui.configure import cfmission
 import orbitpy
