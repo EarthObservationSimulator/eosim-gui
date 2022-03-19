@@ -1,12 +1,9 @@
 import json
 import os
 import webbrowser
-import threading
-from http.server import HTTPServer, SimpleHTTPRequestHandler
 import time
 import copy
 import datetime
-import pandas as pd
 from eosim import config
 import pandas as pd
 import numpy as np
@@ -18,18 +15,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
 class VisGlobeFrame(ttk.Frame):    
 
     def __init__(self, win, tab):
-
-        self.http_server_started = False        
 
         vis_globe_frame = ttk.Frame(tab)
         vis_globe_frame.pack(expand = True, fill ="both", padx=10, pady=10)
         vis_globe_frame.rowconfigure(0,weight=1)
         vis_globe_frame.columnconfigure(0,weight=1)
-
 
         vis_globe_plot_frame = ttk.LabelFrame(vis_globe_frame, text='CesiumJS powered animated visualization', labelanchor='n')
         vis_globe_plot_frame.grid(row=0, column=0, sticky='nswe', padx=(10,10))
@@ -59,25 +52,8 @@ class VisGlobeFrame(ttk.Frame):
 
         self.execute_cesium_app()       
         
-    def execute_cesium_app(self):
-        """ Execute the Cesium application by starting web server in the cesium_app directory (which contains the `index.html` file
-            which then references the eosimApp.js script).
-        """        
-        # Execute the cesium app
-        def start_webserver():
-            if(self.http_server_started is False):
-                web_dir = os.path.join(os.path.dirname(__file__), '../../../cesium_app/')
-                os.chdir(web_dir)          
-                self.httpd = HTTPServer(('localhost', 8080), SimpleHTTPRequestHandler)
-                self.http_server_started = True
-                self.httpd.serve_forever()
-            else:
-                pass
-        # start webserver
-        threading.Thread(target=start_webserver).start() # creating a thread so that the GUI doesn't freeze.
-
-        time.sleep(1) # allow enough time for the server to start
-
+    def execute_cesium_app(self):      
+        # Server already started in the `bin/eosimapp.py` script
         webbrowser.open('http://localhost:8080/', new=2) # open webbrowser
 
     @staticmethod

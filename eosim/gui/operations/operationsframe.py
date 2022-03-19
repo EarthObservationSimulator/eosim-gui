@@ -104,7 +104,6 @@ class OperationsFrame(ttk.Frame):
         ttk.Button(obssyn_frame, text="Select", state='disabled').grid(row=0, column=0, padx=10, pady=10)
         ttk.Button(obssyn_frame, text="Execute", command=lambda:self.click_synobsexec_btn(progress_bar)).grid(row=0, column=1, padx=10, pady=10)
         
-
         # define widgets for the opvisz_frame
         tabControl = ttk.Notebook(opvisz_frame)
         tab1 = ttk.Frame(tabControl)
@@ -243,8 +242,6 @@ class CesiumGlobeOperationsVisualizationFrame:
         globe_visz_frame = ttk.Frame(tab)
         globe_visz_frame.pack( expand=True) 
 
-        self.http_server_started = False
-
         tk.Button(globe_visz_frame, text="Launch \n (CesiumJS powered Globe visualization)", wraplength=150, width=20, command=self.click_launch_globe_visz).pack(padx=10, pady=10, ipadx=10, ipady=10, expand=True)
 
     def click_launch_globe_visz(self):
@@ -277,25 +274,8 @@ class CesiumGlobeOperationsVisualizationFrame:
 
         self.execute_cesium_app()       
         
-    def execute_cesium_app(self):
-        """ Execute the Cesium application by starting web server in the cesium_app directory (which contains the `index.html` file
-            which then references the eosimApp.js script).
-        """        
-        # Execute the cesium app
-        def start_webserver():
-            if(self.http_server_started is False):
-                web_dir = os.path.join(os.path.dirname(__file__), '../../../cesium_app/')
-                os.chdir(web_dir)          
-                self.httpd = HTTPServer(('localhost', 8080), SimpleHTTPRequestHandler)
-                self.http_server_started = True
-                self.httpd.serve_forever()
-            else:
-                pass
-        # start webserver
-        threading.Thread(target=start_webserver).start() # creating a thread so that the GUI doesn't freeze.
-
-        time.sleep(1) # allow enough time for the server to start
-
+    def execute_cesium_app(self):      
+        # Server already started  in the cesium_app directory by the `bin/eosimapp.py` script
         webbrowser.open('http://localhost:8080/', new=2) # open webbrowser       
 
     @staticmethod
