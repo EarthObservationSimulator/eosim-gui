@@ -54,6 +54,7 @@ class VisGlobeFrame(ttk.Frame):
         
     def execute_cesium_app(self):      
         # Server already started in the `bin/eosimapp.py` script
+        os.chdir(os.path.join(os.path.dirname(__file__), '../../../cesium_app')) # change directory to examples
         webbrowser.open('http://localhost:8080/', new=2) # open webbrowser
 
     @staticmethod

@@ -1,0 +1,958 @@
+{
+    "@type": "Mission",
+    "epoch": {
+        "@type": "JULIAN_DATE_UT1",
+        "jd": 2458316.75
+    },
+    "duration": 1.0,
+    "spacecraft": [
+        {
+            "name": "Landsat-8",
+            "orbitState": {
+                "date": {
+                    "@type": "JULIAN_DATE_UT1",
+                    "jd": 2458300.28058811
+                },
+                "state": {
+                    "@type": "CARTESIAN_EARTH_CENTERED_INERTIAL",
+                    "x": -2237.1553718631026,
+                    "y": -6717.969089097079,
+                    "z": 16.340715338283896,
+                    "vx": -1.0124560986914446,
+                    "vy": 0.35618208244151217,
+                    "vz": 7.42575321028418
+                },
+                "@id": null
+            },
+            "spacecraftBus": {
+                "name": null,
+                "mass": null,
+                "volume": null,
+                "solarPanelConfig": null,
+                "orientation": {
+                    "referenceFrame": "NADIR_POINTING",
+                    "convention": "EULER",
+                    "eulerAngle1": 0.0,
+                    "eulerAngle2": 0.0,
+                    "eulerAngle3": 0.0,
+                    "eulerSeq1": 1,
+                    "eulerSeq2": 2,
+                    "eulerSeq3": 3,
+                    "@id": null
+                },
+                "@id": null
+            },
+            "instrument": [
+                {
+                    "@type": "Passive Optical Scanner",
+                    "name": "Landsat 8 TIRS Band1",
+                    "@id": "tirs",
+                    "mode": [
+                        {
+                            "@type": "Passive Optical Scanner",
+                            "name": null,
+                            "mass": null,
+                            "volume": null,
+                            "power": null,
+                            "fieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 0.0081,
+                                "angleWidth": 15.000000000000416,
+                                "@id": null
+                            },
+                            "sceneFieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 14.999999999999998,
+                                "angleWidth": 15.000000000000316,
+                                "@id": null
+                            },
+                            "orientation": {
+                                "referenceFrame": "SC_BODY_FIXED",
+                                "convention": "EULER",
+                                "eulerAngle1": 0.0,
+                                "eulerAngle2": 0.0,
+                                "eulerAngle3": 0.0,
+                                "eulerSeq1": 1,
+                                "eulerSeq2": 2,
+                                "eulerSeq3": 3,
+                                "@id": null
+                            },
+                            "maneuver": null,
+                            "pointingOption": [
+                                {
+                                    "referenceFrame": "NADIR_POINTING",
+                                    "convention": "EULER",
+                                    "eulerAngle1": 0.0,
+                                    "eulerAngle2": 0.0,
+                                    "eulerAngle3": 0.0,
+                                    "eulerSeq1": 1,
+                                    "eulerSeq2": 2,
+                                    "eulerSeq3": 3,
+                                    "@id": null
+                                }
+                            ],
+                            "dataRate": null,
+                            "bitsPerPixel": 12,
+                            "operatingWavelength": 1.09e-05,
+                            "bandwidth": 6e-07,
+                            "quantumEff": 0.025,
+                            "targetBlackBodyTemp": 290.0,
+                            "scanTechnique": "PUSHBROOM",
+                            "opticsSysEff": 0.6,
+                            "numOfReadOutE": 20.0,
+                            "numberDetectorRows": 1,
+                            "numberDetectorCols": 1850,
+                            "detectorWidth": 2.5e-05,
+                            "focalLength": 0.178,
+                            "apertureDia": 0.1085366,
+                            "Fnum": 1.64,
+                            "maxDetectorExposureTime": 0.00349,
+                            "atmosLossModel": "LOWTRAN7",
+                            "@id": "0"
+                        }
+                    ]
+                },
+                {
+                    "@type": "Passive Optical Scanner",
+                    "name": "Landsat 8 OLI Blue band",
+                    "@id": "17280d64-ee06-4fd8-8e09-d842fb3c3cec",
+                    "mode": [
+                        {
+                            "@type": "Passive Optical Scanner",
+                            "name": null,
+                            "mass": null,
+                            "volume": null,
+                            "power": null,
+                            "fieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 0.00244080020725731,
+                                "angleWidth": 15.000000000000606,
+                                "@id": null
+                            },
+                            "sceneFieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 14.999999999999998,
+                                "angleWidth": 15.000000000000316,
+                                "@id": null
+                            },
+                            "orientation": {
+                                "referenceFrame": "SC_BODY_FIXED",
+                                "convention": "EULER",
+                                "eulerAngle1": 0.0,
+                                "eulerAngle2": 0.0,
+                                "eulerAngle3": 0.0,
+                                "eulerSeq1": 1,
+                                "eulerSeq2": 2,
+                                "eulerSeq3": 3,
+                                "@id": null
+                            },
+                            "maneuver": null,
+                            "pointingOption": [
+                                {
+                                    "referenceFrame": "NADIR_POINTING",
+                                    "convention": "EULER",
+                                    "eulerAngle1": 0.0,
+                                    "eulerAngle2": 0.0,
+                                    "eulerAngle3": 0.0,
+                                    "eulerSeq1": 1,
+                                    "eulerSeq2": 2,
+                                    "eulerSeq3": 3,
+                                    "@id": null
+                                }
+                            ],
+                            "dataRate": 384.0,
+                            "bitsPerPixel": 12,
+                            "operatingWavelength": 4.82e-07,
+                            "bandwidth": 6.5e-08,
+                            "quantumEff": 0.85,
+                            "targetBlackBodyTemp": 290.0,
+                            "scanTechnique": "PUSHBROOM",
+                            "opticsSysEff": 0.9,
+                            "numOfReadOutE": 20.0,
+                            "numberDetectorRows": 1,
+                            "numberDetectorCols": 6146,
+                            "detectorWidth": 3.6e-05,
+                            "focalLength": 0.8451,
+                            "apertureDia": 0.132,
+                            "Fnum": 6.4,
+                            "maxDetectorExposureTime": 0.0036,
+                            "atmosLossModel": "LOWTRAN7",
+                            "@id": "0"
+                        }
+                    ]
+                }
+            ],
+            "@id": "landsat"
+        },
+        {
+            "name": "SeaHawk1",
+            "orbitState": {
+                "date": {
+                    "@type": "JULIAN_DATE_UT1",
+                    "jd": 2458300.364443
+                },
+                "state": {
+                    "@type": "CARTESIAN_EARTH_CENTERED_INERTIAL",
+                    "x": -1960.1639563265808,
+                    "y": -6676.016210963623,
+                    "z": -0.4331916417635843,
+                    "vx": -0.9805201506734487,
+                    "vy": 0.27875878689973677,
+                    "vz": 7.500728348185442
+                },
+                "@id": null
+            },
+            "spacecraftBus": {
+                "name": null,
+                "mass": null,
+                "volume": null,
+                "solarPanelConfig": null,
+                "orientation": {
+                    "referenceFrame": "NADIR_POINTING",
+                    "convention": "EULER",
+                    "eulerAngle1": 0.0,
+                    "eulerAngle2": 0.0,
+                    "eulerAngle3": 0.0,
+                    "eulerSeq1": 1,
+                    "eulerSeq2": 2,
+                    "eulerSeq3": 3,
+                    "@id": null
+                },
+                "@id": null
+            },
+            "instrument": [
+                {
+                    "@type": "Passive Optical Scanner",
+                    "name": "HawkEye 510nm band",
+                    "@id": "hawkeye",
+                    "mode": [
+                        {
+                            "@type": "Passive Optical Scanner",
+                            "name": "HawkEye 510nm band",
+                            "mass": null,
+                            "volume": null,
+                            "power": null,
+                            "fieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 0.012732395447352001,
+                                "angleWidth": 22.600000000000012,
+                                "@id": null
+                            },
+                            "sceneFieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 14.999999999999993,
+                                "angleWidth": 22.599999999999948,
+                                "@id": null
+                            },
+                            "orientation": {
+                                "referenceFrame": "SC_BODY_FIXED",
+                                "convention": "EULER",
+                                "eulerAngle1": 0.0,
+                                "eulerAngle2": 0.0,
+                                "eulerAngle3": 0.0,
+                                "eulerSeq1": 1,
+                                "eulerSeq2": 2,
+                                "eulerSeq3": 3,
+                                "@id": null
+                            },
+                            "maneuver": null,
+                            "pointingOption": [
+                                {
+                                    "referenceFrame": "NADIR_POINTING",
+                                    "convention": "EULER",
+                                    "eulerAngle1": 0.0,
+                                    "eulerAngle2": 0.0,
+                                    "eulerAngle3": 0.0,
+                                    "eulerSeq1": 1,
+                                    "eulerSeq2": 2,
+                                    "eulerSeq3": 3,
+                                    "@id": null
+                                }
+                            ],
+                            "dataRate": null,
+                            "bitsPerPixel": 12,
+                            "operatingWavelength": 5.1e-07,
+                            "bandwidth": 2e-08,
+                            "quantumEff": 0.75,
+                            "targetBlackBodyTemp": 290.0,
+                            "scanTechnique": "PUSHBROOM",
+                            "opticsSysEff": 0.55,
+                            "numOfReadOutE": 12.0,
+                            "numberDetectorRows": 1,
+                            "numberDetectorCols": 1800,
+                            "detectorWidth": 1e-05,
+                            "focalLength": 0.045,
+                            "apertureDia": 0.009,
+                            "Fnum": 5.0,
+                            "maxDetectorExposureTime": 0.016,
+                            "atmosLossModel": "LOWTRAN7",
+                            "@id": 0
+                        },
+                        {
+                            "@type": "Passive Optical Scanner",
+                            "name": "HawkEye 510nm band",
+                            "mass": null,
+                            "volume": null,
+                            "power": null,
+                            "fieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 0.012732395447352001,
+                                "angleWidth": 22.600000000000012,
+                                "@id": null
+                            },
+                            "sceneFieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 14.999999999999993,
+                                "angleWidth": 22.599999999999948,
+                                "@id": null
+                            },
+                            "orientation": {
+                                "referenceFrame": "SC_BODY_FIXED",
+                                "convention": "EULER",
+                                "eulerAngle1": 0.0,
+                                "eulerAngle2": 0.0,
+                                "eulerAngle3": 0.0,
+                                "eulerSeq1": 1,
+                                "eulerSeq2": 2,
+                                "eulerSeq3": 3,
+                                "@id": null
+                            },
+                            "maneuver": null,
+                            "pointingOption": [
+                                {
+                                    "referenceFrame": "NADIR_POINTING",
+                                    "convention": "EULER",
+                                    "eulerAngle1": 0.0,
+                                    "eulerAngle2": 22.6,
+                                    "eulerAngle3": 0.0,
+                                    "eulerSeq1": 1,
+                                    "eulerSeq2": 2,
+                                    "eulerSeq3": 3,
+                                    "@id": null
+                                }
+                            ],
+                            "dataRate": null,
+                            "bitsPerPixel": 12,
+                            "operatingWavelength": 5.1e-07,
+                            "bandwidth": 2e-08,
+                            "quantumEff": 0.75,
+                            "targetBlackBodyTemp": 290.0,
+                            "scanTechnique": "PUSHBROOM",
+                            "opticsSysEff": 0.55,
+                            "numOfReadOutE": 12.0,
+                            "numberDetectorRows": 1,
+                            "numberDetectorCols": 1800,
+                            "detectorWidth": 1e-05,
+                            "focalLength": 0.045,
+                            "apertureDia": 0.009,
+                            "Fnum": 5.0,
+                            "maxDetectorExposureTime": 0.016,
+                            "atmosLossModel": "LOWTRAN7",
+                            "@id": 1
+                        },
+                        {
+                            "@type": "Passive Optical Scanner",
+                            "name": "HawkEye 510nm band",
+                            "mass": null,
+                            "volume": null,
+                            "power": null,
+                            "fieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 0.012732395447352001,
+                                "angleWidth": 22.600000000000012,
+                                "@id": null
+                            },
+                            "sceneFieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 14.999999999999993,
+                                "angleWidth": 22.599999999999948,
+                                "@id": null
+                            },
+                            "orientation": {
+                                "referenceFrame": "SC_BODY_FIXED",
+                                "convention": "EULER",
+                                "eulerAngle1": 0.0,
+                                "eulerAngle2": 0.0,
+                                "eulerAngle3": 0.0,
+                                "eulerSeq1": 1,
+                                "eulerSeq2": 2,
+                                "eulerSeq3": 3,
+                                "@id": null
+                            },
+                            "maneuver": null,
+                            "pointingOption": [
+                                {
+                                    "referenceFrame": "NADIR_POINTING",
+                                    "convention": "EULER",
+                                    "eulerAngle1": 0.0,
+                                    "eulerAngle2": 337.4,
+                                    "eulerAngle3": 0.0,
+                                    "eulerSeq1": 1,
+                                    "eulerSeq2": 2,
+                                    "eulerSeq3": 3,
+                                    "@id": null
+                                }
+                            ],
+                            "dataRate": null,
+                            "bitsPerPixel": 12,
+                            "operatingWavelength": 5.1e-07,
+                            "bandwidth": 2e-08,
+                            "quantumEff": 0.75,
+                            "targetBlackBodyTemp": 290.0,
+                            "scanTechnique": "PUSHBROOM",
+                            "opticsSysEff": 0.55,
+                            "numOfReadOutE": 12.0,
+                            "numberDetectorRows": 1,
+                            "numberDetectorCols": 1800,
+                            "detectorWidth": 1e-05,
+                            "focalLength": 0.045,
+                            "apertureDia": 0.009,
+                            "Fnum": 5.0,
+                            "maxDetectorExposureTime": 0.016,
+                            "atmosLossModel": "LOWTRAN7",
+                            "@id": 2
+                        },
+                        {
+                            "@type": "Passive Optical Scanner",
+                            "name": "HawkEye 510nm band",
+                            "mass": null,
+                            "volume": null,
+                            "power": null,
+                            "fieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 0.012732395447352001,
+                                "angleWidth": 22.600000000000012,
+                                "@id": null
+                            },
+                            "sceneFieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 14.999999999999993,
+                                "angleWidth": 22.599999999999948,
+                                "@id": null
+                            },
+                            "orientation": {
+                                "referenceFrame": "SC_BODY_FIXED",
+                                "convention": "EULER",
+                                "eulerAngle1": 0.0,
+                                "eulerAngle2": 0.0,
+                                "eulerAngle3": 0.0,
+                                "eulerSeq1": 1,
+                                "eulerSeq2": 2,
+                                "eulerSeq3": 3,
+                                "@id": null
+                            },
+                            "maneuver": null,
+                            "pointingOption": [
+                                {
+                                    "referenceFrame": "NADIR_POINTING",
+                                    "convention": "EULER",
+                                    "eulerAngle1": 0.0,
+                                    "eulerAngle2": 45.2,
+                                    "eulerAngle3": 0.0,
+                                    "eulerSeq1": 1,
+                                    "eulerSeq2": 2,
+                                    "eulerSeq3": 3,
+                                    "@id": null
+                                }
+                            ],
+                            "dataRate": null,
+                            "bitsPerPixel": 12,
+                            "operatingWavelength": 5.1e-07,
+                            "bandwidth": 2e-08,
+                            "quantumEff": 0.75,
+                            "targetBlackBodyTemp": 290.0,
+                            "scanTechnique": "PUSHBROOM",
+                            "opticsSysEff": 0.55,
+                            "numOfReadOutE": 12.0,
+                            "numberDetectorRows": 1,
+                            "numberDetectorCols": 1800,
+                            "detectorWidth": 1e-05,
+                            "focalLength": 0.045,
+                            "apertureDia": 0.009,
+                            "Fnum": 5.0,
+                            "maxDetectorExposureTime": 0.016,
+                            "atmosLossModel": "LOWTRAN7",
+                            "@id": 3
+                        },
+                        {
+                            "@type": "Passive Optical Scanner",
+                            "name": "HawkEye 510nm band",
+                            "mass": null,
+                            "volume": null,
+                            "power": null,
+                            "fieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 0.012732395447352001,
+                                "angleWidth": 22.600000000000012,
+                                "@id": null
+                            },
+                            "sceneFieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 14.999999999999993,
+                                "angleWidth": 22.599999999999948,
+                                "@id": null
+                            },
+                            "orientation": {
+                                "referenceFrame": "SC_BODY_FIXED",
+                                "convention": "EULER",
+                                "eulerAngle1": 0.0,
+                                "eulerAngle2": 0.0,
+                                "eulerAngle3": 0.0,
+                                "eulerSeq1": 1,
+                                "eulerSeq2": 2,
+                                "eulerSeq3": 3,
+                                "@id": null
+                            },
+                            "maneuver": null,
+                            "pointingOption": [
+                                {
+                                    "referenceFrame": "NADIR_POINTING",
+                                    "convention": "EULER",
+                                    "eulerAngle1": 0.0,
+                                    "eulerAngle2": 314.8,
+                                    "eulerAngle3": 0.0,
+                                    "eulerSeq1": 1,
+                                    "eulerSeq2": 2,
+                                    "eulerSeq3": 3,
+                                    "@id": null
+                                }
+                            ],
+                            "dataRate": null,
+                            "bitsPerPixel": 12,
+                            "operatingWavelength": 5.1e-07,
+                            "bandwidth": 2e-08,
+                            "quantumEff": 0.75,
+                            "targetBlackBodyTemp": 290.0,
+                            "scanTechnique": "PUSHBROOM",
+                            "opticsSysEff": 0.55,
+                            "numOfReadOutE": 12.0,
+                            "numberDetectorRows": 1,
+                            "numberDetectorCols": 1800,
+                            "detectorWidth": 1e-05,
+                            "focalLength": 0.045,
+                            "apertureDia": 0.009,
+                            "Fnum": 5.0,
+                            "maxDetectorExposureTime": 0.016,
+                            "atmosLossModel": "LOWTRAN7",
+                            "@id": 4
+                        }
+                    ]
+                }
+            ],
+            "@id": "seahawk1"
+        },
+        {
+            "name": "SeaHawk2",
+            "orbitState": {
+                "date": {
+                    "@type": "JULIAN_DATE_UT1",
+                    "jd": 2458300.364443
+                },
+                "state": {
+                    "@type": "CARTESIAN_EARTH_CENTERED_INERTIAL",
+                    "x": 1960.982937474224,
+                    "y": 6678.805534479388,
+                    "z": 0.4333726346792186,
+                    "vx": 0.9754364561662461,
+                    "vy": -0.29456194373140954,
+                    "vz": -7.497596791389857
+                },
+                "@id": null
+            },
+            "spacecraftBus": {
+                "name": null,
+                "mass": null,
+                "volume": null,
+                "solarPanelConfig": null,
+                "orientation": {
+                    "referenceFrame": "NADIR_POINTING",
+                    "convention": "EULER",
+                    "eulerAngle1": 0.0,
+                    "eulerAngle2": 0.0,
+                    "eulerAngle3": 0.0,
+                    "eulerSeq1": 1,
+                    "eulerSeq2": 2,
+                    "eulerSeq3": 3,
+                    "@id": null
+                },
+                "@id": null
+            },
+            "instrument": [
+                {
+                    "@type": "Passive Optical Scanner",
+                    "name": "HawkEye 510nm band",
+                    "@id": "hawkeye",
+                    "mode": [
+                        {
+                            "@type": "Passive Optical Scanner",
+                            "name": "HawkEye 510nm band",
+                            "mass": null,
+                            "volume": null,
+                            "power": null,
+                            "fieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 0.012732395447352001,
+                                "angleWidth": 22.600000000000012,
+                                "@id": null
+                            },
+                            "sceneFieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 14.999999999999993,
+                                "angleWidth": 22.599999999999948,
+                                "@id": null
+                            },
+                            "orientation": {
+                                "referenceFrame": "SC_BODY_FIXED",
+                                "convention": "EULER",
+                                "eulerAngle1": 0.0,
+                                "eulerAngle2": 0.0,
+                                "eulerAngle3": 0.0,
+                                "eulerSeq1": 1,
+                                "eulerSeq2": 2,
+                                "eulerSeq3": 3,
+                                "@id": null
+                            },
+                            "maneuver": null,
+                            "pointingOption": [
+                                {
+                                    "referenceFrame": "NADIR_POINTING",
+                                    "convention": "EULER",
+                                    "eulerAngle1": 0.0,
+                                    "eulerAngle2": 0.0,
+                                    "eulerAngle3": 0.0,
+                                    "eulerSeq1": 1,
+                                    "eulerSeq2": 2,
+                                    "eulerSeq3": 3,
+                                    "@id": null
+                                }
+                            ],
+                            "dataRate": null,
+                            "bitsPerPixel": 12,
+                            "operatingWavelength": 5.1e-07,
+                            "bandwidth": 2e-08,
+                            "quantumEff": 0.75,
+                            "targetBlackBodyTemp": 290.0,
+                            "scanTechnique": "PUSHBROOM",
+                            "opticsSysEff": 0.55,
+                            "numOfReadOutE": 12.0,
+                            "numberDetectorRows": 1,
+                            "numberDetectorCols": 1800,
+                            "detectorWidth": 1e-05,
+                            "focalLength": 0.045,
+                            "apertureDia": 0.009,
+                            "Fnum": 5.0,
+                            "maxDetectorExposureTime": 0.016,
+                            "atmosLossModel": "LOWTRAN7",
+                            "@id": 0
+                        },
+                        {
+                            "@type": "Passive Optical Scanner",
+                            "name": "HawkEye 510nm band",
+                            "mass": null,
+                            "volume": null,
+                            "power": null,
+                            "fieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 0.012732395447352001,
+                                "angleWidth": 22.600000000000012,
+                                "@id": null
+                            },
+                            "sceneFieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 14.999999999999993,
+                                "angleWidth": 22.599999999999948,
+                                "@id": null
+                            },
+                            "orientation": {
+                                "referenceFrame": "SC_BODY_FIXED",
+                                "convention": "EULER",
+                                "eulerAngle1": 0.0,
+                                "eulerAngle2": 0.0,
+                                "eulerAngle3": 0.0,
+                                "eulerSeq1": 1,
+                                "eulerSeq2": 2,
+                                "eulerSeq3": 3,
+                                "@id": null
+                            },
+                            "maneuver": null,
+                            "pointingOption": [
+                                {
+                                    "referenceFrame": "NADIR_POINTING",
+                                    "convention": "EULER",
+                                    "eulerAngle1": 0.0,
+                                    "eulerAngle2": 22.6,
+                                    "eulerAngle3": 0.0,
+                                    "eulerSeq1": 1,
+                                    "eulerSeq2": 2,
+                                    "eulerSeq3": 3,
+                                    "@id": null
+                                }
+                            ],
+                            "dataRate": null,
+                            "bitsPerPixel": 12,
+                            "operatingWavelength": 5.1e-07,
+                            "bandwidth": 2e-08,
+                            "quantumEff": 0.75,
+                            "targetBlackBodyTemp": 290.0,
+                            "scanTechnique": "PUSHBROOM",
+                            "opticsSysEff": 0.55,
+                            "numOfReadOutE": 12.0,
+                            "numberDetectorRows": 1,
+                            "numberDetectorCols": 1800,
+                            "detectorWidth": 1e-05,
+                            "focalLength": 0.045,
+                            "apertureDia": 0.009,
+                            "Fnum": 5.0,
+                            "maxDetectorExposureTime": 0.016,
+                            "atmosLossModel": "LOWTRAN7",
+                            "@id": 1
+                        },
+                        {
+                            "@type": "Passive Optical Scanner",
+                            "name": "HawkEye 510nm band",
+                            "mass": null,
+                            "volume": null,
+                            "power": null,
+                            "fieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 0.012732395447352001,
+                                "angleWidth": 22.600000000000012,
+                                "@id": null
+                            },
+                            "sceneFieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 14.999999999999993,
+                                "angleWidth": 22.599999999999948,
+                                "@id": null
+                            },
+                            "orientation": {
+                                "referenceFrame": "SC_BODY_FIXED",
+                                "convention": "EULER",
+                                "eulerAngle1": 0.0,
+                                "eulerAngle2": 0.0,
+                                "eulerAngle3": 0.0,
+                                "eulerSeq1": 1,
+                                "eulerSeq2": 2,
+                                "eulerSeq3": 3,
+                                "@id": null
+                            },
+                            "maneuver": null,
+                            "pointingOption": [
+                                {
+                                    "referenceFrame": "NADIR_POINTING",
+                                    "convention": "EULER",
+                                    "eulerAngle1": 0.0,
+                                    "eulerAngle2": 337.4,
+                                    "eulerAngle3": 0.0,
+                                    "eulerSeq1": 1,
+                                    "eulerSeq2": 2,
+                                    "eulerSeq3": 3,
+                                    "@id": null
+                                }
+                            ],
+                            "dataRate": null,
+                            "bitsPerPixel": 12,
+                            "operatingWavelength": 5.1e-07,
+                            "bandwidth": 2e-08,
+                            "quantumEff": 0.75,
+                            "targetBlackBodyTemp": 290.0,
+                            "scanTechnique": "PUSHBROOM",
+                            "opticsSysEff": 0.55,
+                            "numOfReadOutE": 12.0,
+                            "numberDetectorRows": 1,
+                            "numberDetectorCols": 1800,
+                            "detectorWidth": 1e-05,
+                            "focalLength": 0.045,
+                            "apertureDia": 0.009,
+                            "Fnum": 5.0,
+                            "maxDetectorExposureTime": 0.016,
+                            "atmosLossModel": "LOWTRAN7",
+                            "@id": 2
+                        },
+                        {
+                            "@type": "Passive Optical Scanner",
+                            "name": "HawkEye 510nm band",
+                            "mass": null,
+                            "volume": null,
+                            "power": null,
+                            "fieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 0.012732395447352001,
+                                "angleWidth": 22.600000000000012,
+                                "@id": null
+                            },
+                            "sceneFieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 14.999999999999993,
+                                "angleWidth": 22.599999999999948,
+                                "@id": null
+                            },
+                            "orientation": {
+                                "referenceFrame": "SC_BODY_FIXED",
+                                "convention": "EULER",
+                                "eulerAngle1": 0.0,
+                                "eulerAngle2": 0.0,
+                                "eulerAngle3": 0.0,
+                                "eulerSeq1": 1,
+                                "eulerSeq2": 2,
+                                "eulerSeq3": 3,
+                                "@id": null
+                            },
+                            "maneuver": null,
+                            "pointingOption": [
+                                {
+                                    "referenceFrame": "NADIR_POINTING",
+                                    "convention": "EULER",
+                                    "eulerAngle1": 0.0,
+                                    "eulerAngle2": 45.2,
+                                    "eulerAngle3": 0.0,
+                                    "eulerSeq1": 1,
+                                    "eulerSeq2": 2,
+                                    "eulerSeq3": 3,
+                                    "@id": null
+                                }
+                            ],
+                            "dataRate": null,
+                            "bitsPerPixel": 12,
+                            "operatingWavelength": 5.1e-07,
+                            "bandwidth": 2e-08,
+                            "quantumEff": 0.75,
+                            "targetBlackBodyTemp": 290.0,
+                            "scanTechnique": "PUSHBROOM",
+                            "opticsSysEff": 0.55,
+                            "numOfReadOutE": 12.0,
+                            "numberDetectorRows": 1,
+                            "numberDetectorCols": 1800,
+                            "detectorWidth": 1e-05,
+                            "focalLength": 0.045,
+                            "apertureDia": 0.009,
+                            "Fnum": 5.0,
+                            "maxDetectorExposureTime": 0.016,
+                            "atmosLossModel": "LOWTRAN7",
+                            "@id": 3
+                        },
+                        {
+                            "@type": "Passive Optical Scanner",
+                            "name": "HawkEye 510nm band",
+                            "mass": null,
+                            "volume": null,
+                            "power": null,
+                            "fieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 0.012732395447352001,
+                                "angleWidth": 22.600000000000012,
+                                "@id": null
+                            },
+                            "sceneFieldOfViewGeometry": {
+                                "shape": "RECTANGULAR",
+                                "angleHeight": 14.999999999999993,
+                                "angleWidth": 22.599999999999948,
+                                "@id": null
+                            },
+                            "orientation": {
+                                "referenceFrame": "SC_BODY_FIXED",
+                                "convention": "EULER",
+                                "eulerAngle1": 0.0,
+                                "eulerAngle2": 0.0,
+                                "eulerAngle3": 0.0,
+                                "eulerSeq1": 1,
+                                "eulerSeq2": 2,
+                                "eulerSeq3": 3,
+                                "@id": null
+                            },
+                            "maneuver": null,
+                            "pointingOption": [
+                                {
+                                    "referenceFrame": "NADIR_POINTING",
+                                    "convention": "EULER",
+                                    "eulerAngle1": 0.0,
+                                    "eulerAngle2": 314.8,
+                                    "eulerAngle3": 0.0,
+                                    "eulerSeq1": 1,
+                                    "eulerSeq2": 2,
+                                    "eulerSeq3": 3,
+                                    "@id": null
+                                }
+                            ],
+                            "dataRate": null,
+                            "bitsPerPixel": 12,
+                            "operatingWavelength": 5.1e-07,
+                            "bandwidth": 2e-08,
+                            "quantumEff": 0.75,
+                            "targetBlackBodyTemp": 290.0,
+                            "scanTechnique": "PUSHBROOM",
+                            "opticsSysEff": 0.55,
+                            "numOfReadOutE": 12.0,
+                            "numberDetectorRows": 1,
+                            "numberDetectorCols": 1800,
+                            "detectorWidth": 1e-05,
+                            "focalLength": 0.045,
+                            "apertureDia": 0.009,
+                            "Fnum": 5.0,
+                            "maxDetectorExposureTime": 0.016,
+                            "atmosLossModel": "LOWTRAN7",
+                            "@id": 4
+                        }
+                    ]
+                }
+            ],
+            "@id": "seahawk2"
+        }
+    ],
+    "propagator": {
+        "@type": "J2 ANALYTICAL PROPAGATOR",
+        "stepSize": 1.0,
+        "@id": null
+    },
+    "grid": [
+        {
+            "@type": "CUSTOMGRID",
+            "covGridFilePath": "/mnt/c/workspace/eosim-gui/examples/mission2/grid.csv",
+            "@id": 1
+        }
+    ],
+    "groundStation": null,
+    "outputInfo": [
+        {
+            "@type": "PROPAGATOR OUTPUT INFO",
+            "propagatorType": "J2 ANALYTICAL PROPAGATOR",
+            "spacecraftId": "landsat",
+            "stateCartFile": "/mnt/c/workspace/eosim-gui/examples/mission2//sat0/state_cartesian.csv",
+            "stateKeplerianFile": "/mnt/c/workspace/eosim-gui/examples/mission2//sat0/state_keplerian.csv",
+            "startDate": 2458316.75,
+            "duration": 1.0,
+            "@id": null
+        },
+        {
+            "@type": "PROPAGATOR OUTPUT INFO",
+            "propagatorType": "J2 ANALYTICAL PROPAGATOR",
+            "spacecraftId": "seahawk1",
+            "stateCartFile": "/mnt/c/workspace/eosim-gui/examples/mission2//sat1/state_cartesian.csv",
+            "stateKeplerianFile": "/mnt/c/workspace/eosim-gui/examples/mission2//sat1/state_keplerian.csv",
+            "startDate": 2458316.75,
+            "duration": 1.0,
+            "@id": null
+        },
+        {
+            "@type": "PROPAGATOR OUTPUT INFO",
+            "propagatorType": "J2 ANALYTICAL PROPAGATOR",
+            "spacecraftId": "seahawk2",
+            "stateCartFile": "/mnt/c/workspace/eosim-gui/examples/mission2//sat2/state_cartesian.csv",
+            "stateKeplerianFile": "/mnt/c/workspace/eosim-gui/examples/mission2//sat2/state_keplerian.csv",
+            "startDate": 2458316.75,
+            "duration": 1.0,
+            "@id": null
+        }
+    ],
+    "settings": {
+        "@type": "Settings",
+        "outDir": "/mnt/c/workspace/eosim-gui/examples/mission2/",
+        "coverageType": "POINTING OPTIONS WITH GRID COVERAGE",
+        "propTimeResFactor": 0.5,
+        "gridResFactor": 0.5,
+        "opaqueAtmosHeight": 0.0,
+        "midAccessOnly": false,
+        "@id": null
+    },
+    "@id": null
+}

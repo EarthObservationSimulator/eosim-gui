@@ -276,7 +276,8 @@ class CesiumGlobeOperationsVisualizationFrame:
         
     def execute_cesium_app(self):      
         # Server already started  in the cesium_app directory by the `bin/eosimapp.py` script
-        webbrowser.open('http://localhost:8080/', new=2) # open webbrowser       
+        os.chdir(os.path.join(os.path.dirname(__file__), '../../../cesium_app')) # change directory to examples
+        webbrowser.open('http://localhost:8080/', new=2) # open webbrowser
 
     @staticmethod
     def build_czmlpkts_for_operational_contacts(operations, czml_template_dir, epoch, step_size, num_time_indices):
@@ -343,8 +344,10 @@ class CesiumGlobeOperationsVisualizationFrame:
                 tx_entity_id = oper["txEntityId"]
                 rx_entity_id = oper["rxEntityId"]
 
-                time_from = (epoch + datetime.timedelta(0, oper['startTime'])).isoformat() + 'Z'
-                time_to = (epoch + datetime.timedelta(0, oper['endTime'])).isoformat() + 'Z'
+                #time_from = (epoch + datetime.timedelta(0, oper['startTime'])).isoformat() + 'Z'# old version
+                #time_to = (epoch + datetime.timedelta(0, oper['endTime'])).isoformat() + 'Z' # old version
+                time_from = oper['startTime']
+                time_to = oper['endTime']
                 interval = time_from + "/" + time_to
                 contact = {"interval":interval, "boolean":True}
 
@@ -372,15 +375,15 @@ class CesiumGlobeOperationsVisualizationFrame:
                             
             elif(CommandType.get(oper['@type']) == CommandType.TAKEIMAGE):
 
-                offset = 0 # TODO: Need to remove. If there is a difference in the understanding of absolute-time of the CesiumJS engine and OrbitPy then this is needed. Ideally it should be 0.
-                #time_from = oper['startTime'] # TODO REV NOS DEMO
-                time_from = (epoch + datetime.timedelta(0, offset + oper['timeIndexStart'])).isoformat() + 'Z' # TODO Rich version
+                time_from = oper['startTime']
+                #time_from = (epoch + datetime.timedelta(0, offset + oper['timeIndexStart'])).isoformat() + 'Z' # TODO Rich version
                 #time_to = (epoch + datetime.timedelta(0,offset + oper['endTime'])).isoformat() + 'Z'
                 time_to = miss_time_to # TODO:  This make the imaged-locations be highlighted until the end of the animation.
                 interval = time_from + "/" + time_to
                 initialize_interval = {"interval": mission_interval, "boolean":False} # this is necessary, else the point is shown over entire mission interval 
                 obs_interval = {"interval":interval, "boolean":True} 
 
+                '''
                 # TODO Rich version
                 if(not isinstance(oper["observedPosition"]["cartographicDegrees"][0],list)): 
                     oper["observedPosition"]["cartographicDegrees"] = [oper["observedPosition"]["cartographicDegrees"]]
@@ -414,10 +417,8 @@ class CesiumGlobeOperationsVisualizationFrame:
                     _pkt["point"]["color"] = oper["color"]
 
                     czml_pkts.append(_pkt)
-                    k = k + 1
-                ''' 
+                    k = k + 1              
                 
-
         return czml_pkts
 
 class SyntheticObservationsVisualizationFrame:

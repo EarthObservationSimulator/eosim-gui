@@ -69,7 +69,9 @@ tags in the 'cesium_app/index.html` file.
 
 ## Documentation 
 
-Documentation about the code base is available in the `docs/codebase_description.pptx` presentation.
+Documentation about the code base is available in the `docs/eosim-gui_codebase.pptx` presentation.
+
+The `Commands File Schema.docx` contains the schema definition for the commands file which can be used to animate spacecraft operations.
 
 The file structure is as below:
 
@@ -117,6 +119,7 @@ The file structure is as below:
 │
 ├───docs
 │      codebase_description.pptx
+│	   Commands File Schema.docx
 │
 ├───eosim
     │   config.py
