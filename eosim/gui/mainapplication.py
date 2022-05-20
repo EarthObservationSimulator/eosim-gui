@@ -182,6 +182,7 @@ def click_save():
     with open(wdir+'MissionSpecs.json', 'w', encoding='utf-8') as f:
         json.dump(config.mission.to_dict(), f, ensure_ascii=False, indent=4)
     logger.info("Mission configuration Saved.")
+    
 class TopMenuBar:
     
     def __init__(self, parent):
