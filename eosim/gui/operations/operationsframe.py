@@ -148,7 +148,9 @@ class OperationsFrame(ttk.Frame):
         logger.info("Operations updated.")
 
     def click_synobsexec_btn(self, progress_bar):
-        """ Synthesize the observations indicated in the operation file."""
+        """ Synthesize the observations indicated in the operation file.
+            NOT ACTIVE, NEEDS REVISION
+        """
 
         def real_click_sat2satconexec_btn():
             user_dir = config.out_config.get_user_dir()

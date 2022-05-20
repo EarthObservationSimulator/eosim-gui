@@ -89,7 +89,9 @@ class CfMission():
 
         # okcancel frame
         def ok_click():
-            epoch_dict = {'@type': 'GREGORIAN_UTC', 'year': int(epoch_year_entry.get()), 'month': int(epoch_month_entry.get()), 'day': int(epoch_day_entry.get()),
+            # While the input data/time is in UTC, an approximation is made that it is equal to the data/time in UT1.
+            # Since UTC is always kept within 1second of UT1, the maximum possible error is 1 second.
+            epoch_dict = {'@type': 'GREGORIAN_UT1', 'year': int(epoch_year_entry.get()), 'month': int(epoch_month_entry.get()), 'day': int(epoch_day_entry.get()),
                           'hour': int(epoch_hour_entry.get()), 'minute': int(epoch_min_entry.get()), 'second': float(epoch_sec_entry.get())}
             config.mission.update_epoch_from_dict(epoch_dict)
             config.mission.update_duration(float(duration_entry.get()))
