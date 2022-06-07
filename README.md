@@ -1,4 +1,6 @@
-# Earth Observation Simulator (EOSim)
+# Earth Observation Simulator Graphical User Interface (EOSim-GUI)
+
+A Graphical User Interface to the OrbitPy and InstruPy packages.
 
 ## Install
 
