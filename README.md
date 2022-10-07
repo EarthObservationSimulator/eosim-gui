@@ -35,6 +35,14 @@ Please run the below command to fix it:
 pip install numpy --upgrade --ignore-installed
 ```
 
+The following error is also related to the `numpy` error described above:
+```
+ImportError: you must compile the Fortran code first. f2py -m lowtran7 -c lowtran7.f  numpy.core.multiarray failed to import
+```
+It occurs when `eosim-gui` tries to import the `instrupy` package. 
+Further the `instrupy` package tests also fail after the `eosim-gui` package installation.
+The error can be fixed by re-installing `numpy` with the command given above.
+
 ### Known Issues
 If Windows Subsystem for Linux 2 (WSL2) is being used, the animation display using CesiumJs does not work properly. The following error is displayed:
 ```
