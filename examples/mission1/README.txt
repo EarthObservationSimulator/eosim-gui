@@ -1,0 +1,1 @@
+Please follow the instructions in 'docs/Simulation a mission.docx' for creating the mission.
