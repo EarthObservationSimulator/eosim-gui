@@ -23,6 +23,7 @@ Run the application using the following command from terminal:
 python bin/eosimapp.py
 ```
 
+CesiumJs is used for producing 3D animations. Please see the 'Cesium App' for details on updating access token and the link to the Cesium script.
 ### Troubleshooting
 In some cases, *runtime* errors involving the numpy package such as the one below may ensue:
 ```
@@ -60,7 +61,7 @@ export BROWSER="/mnt/c/Program Files/Google/Chrome/Application/chrome.exe"
 ```
 
 ## Cesium App 
-The Cesium JavaScript app is based on the showcased example of Cesium features in the *cesium-workshop* repository. It is contained in the `.\cesium_app\` folder. 
+The Cesium JavaScript app is based on the showcased example of Cesium features in the [cesium-workshop repository](https://github.com/CesiumGS/cesium-workshop). It is contained in the `.\cesium_app\` folder. 
 
 The original `index.html` file has been modified, while the original cesium-workshop `index.html` file has been retained under the name 
 `workshop_index.html`.
@@ -74,6 +75,8 @@ The `simple.czml` file in `cesium_app/Source/SampleData/` is a new addition whic
 
 **Note:** The cesium-app needs to be updated each time a new version is released by updating the `<script src=>` and the `<link href=>` 
 tags in the 'cesium_app/index.html` file. 
+
+**Note:** A access token must be specified in the `eosimApp.js` file. A free token can be obtained by registering at https://cesium.com
 
 - [ ] TODO: Add facility to input user Access-token. Current version relies on the default Cesium token.
 
