@@ -386,7 +386,7 @@ class CesiumGlobeOperationsVisualizationFrame:
                 obs_interval = {"interval":interval, "boolean":True} 
 
                 '''
-                # TODO Rich version
+                # TODO Rich version, can be removed
                 if(not isinstance(oper["observedPosition"]["cartographicDegrees"][0],list)): 
                     oper["observedPosition"]["cartographicDegrees"] = [oper["observedPosition"]["cartographicDegrees"]]
                 k = 0

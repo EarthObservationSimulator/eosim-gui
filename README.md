@@ -4,7 +4,7 @@ A Graphical User Interface to the OrbitPy and InstruPy packages.
 
 ## Install
 
-Requires: Unix-like operating system (requirement of `orbitpy`), `python 3.8`, `pip`, `orbitpy`, `instrupy`, `cartopy`, `metpy`, `scipy` and `astropy`.
+Requires: Unix-like operating system (requirement of `orbitpy`), `python 3.8`, `pip`, `orbitpy`, `instrupy`, `cartopy`, `metpy` and `scipy`.
 
 CartoPy must be first installed separately. Note that CartoPy has several dependencies whose installation procedure may be different depending on the underlying operating system. Please check [here](https://scitools.org.uk/cartopy/docs/latest/installing.html)
 
