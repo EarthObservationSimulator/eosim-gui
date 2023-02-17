@@ -6,8 +6,11 @@ import tkinter.filedialog, tkinter.messagebox
 import os
 import eosim.gui.helpwindow as helpwindow
 import logging
+import orbitpy.grid
 
 logger = logging.getLogger(__name__)
+
+
 
 class GridInfoFrame(ttk.Frame):
     """ Class to handle the Grid-info frame, which is used by the GridPointsCoverageCalculatorFrame and PointingOptionsWithGridPointsCoverageCalculatorFrame."""
@@ -183,12 +186,12 @@ class CfCoverage():
                 grid_info_specs =   self.grid_info_frame.get_specs()
                 grid_type = grid_info_specs[0]
                 
-                if(grid_type == "autoGrid"):  
+                if(grid_type == orbitpy.grid.Grid.Type.AUTOGRID):  
                     grid_info =  grid_info_specs[1]
                     customGridResFactor =  grid_info_specs[2]                 
                     coverage_settings = {"coverageType": "GRID COVERAGE", "gridResFactor":customGridResFactor}
                     return (coverage_settings, grid_info)
-                elif(grid_type == "customGrid"):
+                elif(grid_type == orbitpy.grid.Grid.Type.CUSTOMGRID):
                     coverage_settings = {"coverageType": "GRID COVERAGE"}
                     grid_info =  grid_info_specs[1]
                     return (coverage_settings, grid_info)    
@@ -222,12 +225,12 @@ class CfCoverage():
                 grid_info_specs =   self.grid_info_frame.get_specs()
                 grid_type = grid_info_specs[0]
                 
-                if(grid_type == "autoGrid"):  
+                if(grid_type == orbitpy.grid.Grid.Type.AUTOGRID):  
                     region_info =  grid_info_specs[1]
                     customGridResFactor =  grid_info_specs[2]                 
                     coverage_settings = {"coverageType": "POINTING OPTIONS WITH GRID COVERAGE", "gridResFactor":customGridResFactor}
                     return (coverage_settings, region_info)
-                elif(grid_type == "customGrid"):
+                elif(grid_type == orbitpy.grid.Grid.Type.CUSTOMGRID):
                     coverage_settings = {"coverageType": "POINTING OPTIONS WITH GRID COVERAGE"}
                     grid_info =  grid_info_specs[1]
                     return (coverage_settings, grid_info)   
