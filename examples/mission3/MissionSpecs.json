@@ -1,0 +1,177 @@
+{
+    "@type": "Mission",
+    "epoch": {
+        "@type": "JULIAN_DATE_UT1",
+        "jd": 2458852.5625
+    },
+    "duration": 3.0,
+    "spacecraft": [
+        {
+            "name": null,
+            "orbitState": {
+                "date": {
+                    "@type": "JULIAN_DATE_UT1",
+                    "jd": 2458852.5625
+                },
+                "state": {
+                    "@type": "CARTESIAN_EARTH_CENTERED_INERTIAL",
+                    "x": 6878.137,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "vx": -0.0,
+                    "vy": 0.1328583318368932,
+                    "vz": 7.611448733262277
+                },
+                "@id": null
+            },
+            "spacecraftBus": {
+                "name": null,
+                "mass": null,
+                "volume": null,
+                "solarPanelConfig": null,
+                "orientation": {
+                    "referenceFrame": "NADIR_POINTING",
+                    "convention": "EULER",
+                    "eulerAngle1": 0.0,
+                    "eulerAngle2": 0.0,
+                    "eulerAngle3": 0.0,
+                    "eulerSeq1": 1,
+                    "eulerSeq2": 2,
+                    "eulerSeq3": 3,
+                    "@id": null
+                },
+                "@id": null
+            },
+            "instrument": null,
+            "@id": "sat1"
+        },
+        {
+            "name": null,
+            "orbitState": {
+                "date": {
+                    "@type": "JULIAN_DATE_UT1",
+                    "jd": 2458852.5625
+                },
+                "state": {
+                    "@type": "CARTESIAN_EARTH_CENTERED_INERTIAL",
+                    "x": -3439.0684999999985,
+                    "y": 103.95772623766837,
+                    "z": 5955.734147376984,
+                    "vx": -6.592712064587972,
+                    "vy": -0.06642916591844657,
+                    "vz": -3.8057243666311367
+                },
+                "@id": null
+            },
+            "spacecraftBus": {
+                "name": null,
+                "mass": null,
+                "volume": null,
+                "solarPanelConfig": null,
+                "orientation": {
+                    "referenceFrame": "NADIR_POINTING",
+                    "convention": "EULER",
+                    "eulerAngle1": 0.0,
+                    "eulerAngle2": 0.0,
+                    "eulerAngle3": 0.0,
+                    "eulerSeq1": 1,
+                    "eulerSeq2": 2,
+                    "eulerSeq3": 3,
+                    "@id": null
+                },
+                "@id": null
+            },
+            "instrument": null,
+            "@id": "sat2"
+        },
+        {
+            "name": null,
+            "orbitState": {
+                "date": {
+                    "@type": "JULIAN_DATE_UT1",
+                    "jd": 2458852.5625
+                },
+                "state": {
+                    "@type": "CARTESIAN_EARTH_CENTERED_INERTIAL",
+                    "x": -3439.068500000003,
+                    "y": -103.95772623766833,
+                    "z": -5955.734147376981,
+                    "vx": 6.592712064587969,
+                    "vy": -0.06642916591844665,
+                    "vz": -3.8057243666311416
+                },
+                "@id": null
+            },
+            "spacecraftBus": {
+                "name": null,
+                "mass": null,
+                "volume": null,
+                "solarPanelConfig": null,
+                "orientation": {
+                    "referenceFrame": "NADIR_POINTING",
+                    "convention": "EULER",
+                    "eulerAngle1": 0.0,
+                    "eulerAngle2": 0.0,
+                    "eulerAngle3": 0.0,
+                    "eulerSeq1": 1,
+                    "eulerSeq2": 2,
+                    "eulerSeq3": 3,
+                    "@id": null
+                },
+                "@id": null
+            },
+            "instrument": null,
+            "@id": "sat3"
+        }
+    ],
+    "propagator": {
+        "@type": "J2 ANALYTICAL PROPAGATOR",
+        "stepSize": 1.0,
+        "@id": null
+    },
+    "grid": null,
+    "groundStation": null,
+    "outputInfo": [
+        {
+            "@type": "PROPAGATOR OUTPUT INFO",
+            "propagatorType": "J2 ANALYTICAL PROPAGATOR",
+            "spacecraftId": "sat1",
+            "stateCartFile": "/mnt/c/workspace/eosim-gui/examples/mission3//sat0/state_cartesian.csv",
+            "stateKeplerianFile": "/mnt/c/workspace/eosim-gui/examples/mission3//sat0/state_keplerian.csv",
+            "startDate": 2458849.5625,
+            "duration": 3.0,
+            "@id": null
+        },
+        {
+            "@type": "PROPAGATOR OUTPUT INFO",
+            "propagatorType": "J2 ANALYTICAL PROPAGATOR",
+            "spacecraftId": "sat2",
+            "stateCartFile": "/mnt/c/workspace/eosim-gui/examples/mission3//sat1/state_cartesian.csv",
+            "stateKeplerianFile": "/mnt/c/workspace/eosim-gui/examples/mission3//sat1/state_keplerian.csv",
+            "startDate": 2458849.5625,
+            "duration": 3.0,
+            "@id": null
+        },
+        {
+            "@type": "PROPAGATOR OUTPUT INFO",
+            "propagatorType": "J2 ANALYTICAL PROPAGATOR",
+            "spacecraftId": "sat3",
+            "stateCartFile": "/mnt/c/workspace/eosim-gui/examples/mission3//sat2/state_cartesian.csv",
+            "stateKeplerianFile": "/mnt/c/workspace/eosim-gui/examples/mission3//sat2/state_keplerian.csv",
+            "startDate": 2458849.5625,
+            "duration": 3.0,
+            "@id": null
+        }
+    ],
+    "settings": {
+        "@type": "Settings",
+        "outDir": "/mnt/c/workspace/eosim-gui/examples/mission3/",
+        "coverageType": null,
+        "propTimeResFactor": 0.25,
+        "gridResFactor": 0.9,
+        "opaqueAtmosHeight": 0.0,
+        "midAccessOnly": false,
+        "@id": null
+    },
+    "@id": null
+}
