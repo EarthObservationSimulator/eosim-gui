@@ -1,0 +1,149 @@
+{
+    "@type": "Mission",
+    "epoch": {
+        "@type": "JULIAN_DATE_UT1",
+        "jd": 2459062.5
+    },
+    "duration": 1.0,
+    "spacecraft": [
+        {
+            "name": null,
+            "orbitState": {
+                "date": {
+                    "@type": "JULIAN_DATE_UT1",
+                    "jd": 2459062.5
+                },
+                "state": {
+                    "@type": "CARTESIAN_EARTH_CENTERED_INERTIAL",
+                    "x": 5681.567140776551,
+                    "y": 1489.9830783351592,
+                    "z": -3654.3593464481205,
+                    "vx": -2.8790572974167996,
+                    "vy": 6.806920219435592,
+                    "vz": -1.7031407507481628
+                },
+                "@id": null
+            },
+            "spacecraftBus": {
+                "name": null,
+                "mass": null,
+                "volume": null,
+                "solarPanelConfig": null,
+                "orientation": {
+                    "referenceFrame": "NADIR_POINTING",
+                    "convention": "EULER",
+                    "eulerAngle1": 0.0,
+                    "eulerAngle2": 0.0,
+                    "eulerAngle3": 0.0,
+                    "eulerSeq1": 1,
+                    "eulerSeq2": 2,
+                    "eulerSeq3": 3,
+                    "@id": null
+                },
+                "@id": null
+            },
+            "instrument": null,
+            "@id": "CYG41886"
+        }
+    ],
+    "propagator": {
+        "@type": "J2 ANALYTICAL PROPAGATOR",
+        "stepSize": 1.0,
+        "@id": null
+    },
+    "grid": null,
+    "groundStation": [
+        {
+            "name": "HI",
+            "latitude": 19.0,
+            "longitude": 155.65,
+            "altitude": 0.367,
+            "minimumElevation": 7.0,
+            "@id": "HI"
+        },
+        {
+            "name": "CHI",
+            "latitude": -33.13,
+            "longitude": -70.67,
+            "altitude": 0.7234,
+            "minimumElevation": 7.0,
+            "@id": "CHI"
+        },
+        {
+            "name": "AUS",
+            "latitude": -29.08,
+            "longitude": 115.58,
+            "altitude": 0.25,
+            "minimumElevation": 7.0,
+            "@id": "AUS"
+        }
+    ],
+    "outputInfo": [
+        {
+            "@type": "PROPAGATOR OUTPUT INFO",
+            "propagatorType": "J2 ANALYTICAL PROPAGATOR",
+            "spacecraftId": "CYG41886",
+            "stateCartFile": "/mnt/c/workspace/eosim-gui/examples/cygnss//sat0/state_cartesian.csv",
+            "stateKeplerianFile": "/mnt/c/workspace/eosim-gui/examples/cygnss//sat0/state_keplerian.csv",
+            "startDate": 2459062.5,
+            "duration": 1.0,
+            "@id": null
+        },
+        {
+            "@type": "CONTACT FINDER OUTPUT INFO",
+            "entityAtype": "Spacecraft",
+            "entityAId": "CYG41886",
+            "entityBtype": "GroundStation",
+            "entityBId": "HI",
+            "entityAStateCartFile": "/mnt/c/workspace/eosim-gui/examples/cygnss//sat0/state_cartesian.csv",
+            "entityBStateCartFile": null,
+            "contactFile": "/mnt/c/workspace/eosim-gui/examples/cygnss//sat0/gndStn0_contacts.csv",
+            "outType": "INTERVAL",
+            "opaqueAtmosHeight": 0.0,
+            "startDate": 2459062.5,
+            "duration": 1.0,
+            "@id": null
+        },
+        {
+            "@type": "CONTACT FINDER OUTPUT INFO",
+            "entityAtype": "Spacecraft",
+            "entityAId": "CYG41886",
+            "entityBtype": "GroundStation",
+            "entityBId": "CHI",
+            "entityAStateCartFile": "/mnt/c/workspace/eosim-gui/examples/cygnss//sat0/state_cartesian.csv",
+            "entityBStateCartFile": null,
+            "contactFile": "/mnt/c/workspace/eosim-gui/examples/cygnss//sat0/gndStn1_contacts.csv",
+            "outType": "INTERVAL",
+            "opaqueAtmosHeight": 0.0,
+            "startDate": 2459062.5,
+            "duration": 1.0,
+            "@id": null
+        },
+        {
+            "@type": "CONTACT FINDER OUTPUT INFO",
+            "entityAtype": "Spacecraft",
+            "entityAId": "CYG41886",
+            "entityBtype": "GroundStation",
+            "entityBId": "AUS",
+            "entityAStateCartFile": "/mnt/c/workspace/eosim-gui/examples/cygnss//sat0/state_cartesian.csv",
+            "entityBStateCartFile": null,
+            "contactFile": "/mnt/c/workspace/eosim-gui/examples/cygnss//sat0/gndStn2_contacts.csv",
+            "outType": "INTERVAL",
+            "opaqueAtmosHeight": 0.0,
+            "startDate": 2459062.5,
+            "duration": 1.0,
+            "@id": null
+        }
+    ],
+    "settings": {
+        "@type": "Settings",
+        "outDir": "/mnt/c/workspace/eosim-gui/examples/cygnss/",
+        "coverageType": null,
+        "propTimeResFactor": 0.25,
+        "gridResFactor": 0.9,
+        "opaqueAtmosHeight": 0.0,
+        "midAccessOnly": false,
+        "@id": null
+    },
+    "@id": null
+}
