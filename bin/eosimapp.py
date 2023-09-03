@@ -9,16 +9,19 @@ import logging
 
 def main(loglevel):         
 
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    web_dir = os.path.join(current_directory, '../cesium_app/')
+    examples_dir = os.path.join(current_directory, '../examples')
+
     # Start web server in the cesium_app directory (which contains the `index.html` file which then references the eosimApp.js script).
     httpd = HTTPServer(('localhost', 8080), SimpleHTTPRequestHandler)
-    def start_webserver():
-        web_dir = os.path.join(os.path.dirname(__file__), '../cesium_app/')
+    def start_webserver():        
         os.chdir(web_dir)      
         print("server starting")
         httpd.serve_forever()
     threading.Thread(target=start_webserver).start() # creating a thread so that the GUI doesn't freeze.
-
-    os.chdir(os.path.join(os.path.dirname(__file__), '../examples')) # change directory to examples
+    
+    os.chdir(examples_dir) # change directory to examples
     root = tk.Tk()
     root.resizable(False, False)
     MainApplication(root, loglevel)
